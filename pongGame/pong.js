@@ -15,9 +15,7 @@ const ws = new WebSocket('ws://127.0.0.1:8080');
 const scaleX = canvas.width / 10;
 const scaleY = canvas.height / 10;
 
-
-
-
+var player_id = -1;
 
 function drawPaddle(position, paddleSide) {
     ctx.fillStyle = '#FFF';
@@ -36,7 +34,7 @@ function drawPaddle(position, paddleSide) {
     // Draw the bounding box for debugging
     ctx.strokeStyle = 'red';
     ctx.strokeRect(xPosition, yPosition, 10, paddleHeight);
-    console.log(`Drawing ${paddleSide} paddle at x: ${xPosition}, y: ${yPosition}, height: ${paddleHeight}`);
+    //console.log(`Drawing ${paddleSide} paddle at x: ${xPosition}, y: ${yPosition}, height: ${paddleHeight}`);
 }
 
 
@@ -60,8 +58,8 @@ function drawScore(score, x, y) {
 
 
   function updateGame(data) {
-    console.log("inside updateGame");
-    console.log("New data:", data);
+    //console.log("inside updateGame");
+    //console.log("New data:", data);
     
     // Assign the new data to the gameState variable
     gameState.ball_position = data.ball_position;
@@ -70,7 +68,7 @@ function drawScore(score, x, y) {
     gameState.score_left = data.score_left;
     gameState.score_right = data.score_right;
 
-    console.log("Updated game state:", gameState);
+    //console.log("Updated game state:", gameState);
 
     // Clear the canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -97,7 +95,13 @@ ws.onmessage = function(event) {
             updateGame(msg.data);
         } else if(msg.type === 'welcome') {
             console.log(msg.message);
-        }
+			ws.send(JSON.stringify({type: "find_pong"}));
+        } else if (msg.type === 'game_found')
+		{
+			console.log("game found");
+			player_id = msg.data.player_id;
+			console.log("player_id: ", player_id);
+		}
     } catch (e) {
         console.error('Error parsing message:', e);
     }
@@ -118,11 +122,15 @@ function movePaddle(paddle, direction) {
 
 // listen for key presses to control the paddle
 document.addEventListener('keydown', function(event) {
-	if (event.key === 'ArrowUp') movePaddle( 'right', 1) // Move up
-	if (event.key === 'ArrowDown') movePaddle('right', -1); // Move down
+	if (player_id < 0)
+		return;
+	if (event.key === 'ArrowUp' && player_id == 0) movePaddle('left', 1);
+	if (event.key === 'ArrowDown' && player_id == 0) movePaddle('left', -1);
+	if (event.key === 'ArrowUp' && player_id == 1) movePaddle( 'right', 1); // Move up
+	if (event.key === 'ArrowDown' && player_id == 1) movePaddle('right', -1); // Move down
 
-	if (event.key === 'w') movePaddle('left', 1); // Move up
-	if (event.key === 's') movePaddle('left', -1); // Move down
+	//if (event.key === 'w') movePaddle('left', 1); // Move up
+	//if (event.key === 's') movePaddle('left', -1); // Move down
 });
 
 function gameLoop() {
