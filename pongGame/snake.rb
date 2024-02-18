@@ -57,6 +57,7 @@ class SnakeGame
 		@snakes = [Snake.new(4, GAME_HEIGHT / 2), Snake.new(GAME_WIDTH - 4, GAME_HEIGHT / 2)]
 		@food = []
 		@rng = Random.new
+		@winner = -1
 		make_food
 	end
 	
@@ -94,6 +95,38 @@ class SnakeGame
 		return -1
 	end
 
+	def handle_collision(head1, head2, body1, body2)
+		player1 = @snakes.find_index(head1)
+		player2 = @snakes.find_index(head2)
+
+		if player1 == nil || player2 == nil
+			puts "snake collision error: could not locate head in @snakes"
+			return
+		end
+
+		if head1 == body1 && head2 != body2 #player 1's head hit player 2's body
+			@winner = player2
+		elsif head2 == body2 && head1 != body1 #player 2's head hit player 1's body
+			@winner = player1
+		else #head on collision award win to longest snake or random
+			s1_len = 0
+			s2_len = 0
+			while head1 != nil
+				s1_len++
+				head1 = head1.next
+			end
+			while head2 != nil
+				s2_len++
+				head2 = head2.next
+			end
+			if s1_len == s2_len
+				@winner = @rng.rand(2)
+			else
+				@winner = s1_len > s2_len ? player1 : player2
+			end
+		end
+	end
+
 	def update_game_state
 		for snake in @snakes
 			snake.last_dir = snake.dir
@@ -114,12 +147,36 @@ class SnakeGame
 				snake.add_segment_next_move = true
 			end
 		end
+		# O(n^2) i think oh well just dont add more snakes :P
+		# single headed snakes can also phase through each other
+		for snake in @snakes
+			snake_head = snake
+			for other_snake in @snakes
+				other_snake_head = other_snake
+				if snake == other_snake
+					next
+				end
+				while snake != nil
+					while other_snake != nil
+						if snake.x == other_snake.x && snake.y == other_snake.y
+							handle_collision(snake_head, other_snake_head, snake, other_snake)
+							return
+						end
+						other_snake = other_snake.next
+					end
+					snake = snake.next
+				end
+			end
+		end
 	end
 
 	def state_as_json
 		data = {}
 		data["snakes"] = []
 		data["food"] = @food
+		if (@winner != -1)
+			data["winner"] = @winner
+		end
 		for i in 0..@snakes.size() - 1
 			snake = @snakes[i]
 			data["snakes"] << []

@@ -71,7 +71,8 @@ def game_loop(player_ws, timer)
 	end
 
 	player = $clients[player_ws]
-	if $clients[player.partner] == nil
+	partner = $clients[player.partner]
+	if partner == nil
 		timer.cancel
 		puts "partner nil"
 		return
@@ -79,10 +80,15 @@ def game_loop(player_ws, timer)
 	
 	game.update_game_state
 	player_ws.send({type: "state", data: game.state_as_json}.to_json) 
-	player.partner.send({type: "state", data: game.state_as_json}.to_json) 
+	player.partner.send({type: "state", data: game.state_as_json}.to_json)
+	if game.state_as_json["winner"] != nil && game.state_as_json["winner"] > -1
+		player.in_game = false
+		player.game = nil
+		partner.in_game = false
+		partner.game = nil
+		timer.cancel
+	end
 end
-
-
 
 EM.run {
   # Periodic timer for game state updates
@@ -105,18 +111,26 @@ EM.run {
 
     ws.onmessage do |msg|
 		puts "Received message: #{msg}"
+		if $clients[ws] == nil
+			puts "Discarding message from disconnected client"
+			return
+		end
 		action = JSON.parse(msg)
         # ... handle actions
 		case action["type"]
 		when "move_left_paddle", "move_right_paddle" # Corrected to match client message types
-			direction = action["direction"].to_i
-			if action["type"] == "move_left_paddle"
-				$clients[ws].game.move_left_paddle(direction)
-			elsif action["type"] == "move_right_paddle"
-				$clients[ws].game.move_right_paddle(direction)
+			if $clients[ws].game != nil
+				direction = action["direction"].to_i
+				if action["type"] == "move_left_paddle"
+					$clients[ws].game.move_left_paddle(direction)
+				elsif action["type"] == "move_right_paddle"
+					$clients[ws].game.move_right_paddle(direction)
+				end
 			end
 		when "change_direction"
-			$clients[ws].game.change_direction($clients[ws].id, action["direction"].to_i)
+			if $clients[ws].game != nil
+				$clients[ws].game.change_direction($clients[ws].id, action["direction"].to_i)
+			end
 		when "find_pong"
 			if !$clients[ws].in_game
 				$clients[ws].game_selected = "pong"
@@ -150,7 +164,17 @@ EM.run {
 	end
 
     ws.onclose do |code, reason|
-      $clients.delete(ws)
+		client = $clients[ws]
+		if (client.in_game && client.partner != nil)
+			partner = $clients[client.partner]
+			if (partner != nil)
+				partner.game = nil
+				partner.in_game = false
+				puts "client disconnected"
+				client.partner.send({type: "partner_disconnected"}.to_json)
+			end
+		end
+    	$clients.delete(ws)
     end
 end
 }

@@ -12,14 +12,15 @@ const TILE = 20;
 let player_id = -1;
 let snakes = [];
 let mouse_pos = {x: 0.0, y: 0.0};
-let state = "menu";
+let state = "connecting";
+let menu_text = "";
 
 let gameState = {
 	snakes: [],
 	food: []
 }
 
-let buttons = [
+let menu_buttons = [
 	{
 		pos: {x: canvas.width * 0.35, y: canvas.height * 0.8},
 		size: {x: canvas.width * 0.3, y: canvas.height * 0.1},
@@ -51,6 +52,46 @@ let buttons = [
 		}
 	}
 ];
+
+let victory_buttons = [
+	{
+		pos: {x: canvas.width * 0.35, y: canvas.height * 0.8},
+		size: {x: canvas.width * 0.3, y: canvas.height * 0.1},
+		color: "darkcyan",
+		color_hover: "darkslategray",
+		on_click: function() {state = "menu"},
+		textBox: {
+			text: "OK",
+			color: "white",
+			font: "24px Arial",
+			pos: {x: canvas.width * 0.15, y: 8 + canvas.height * 0.05},
+			align: "center"
+		}
+	}
+]
+
+let defeat_buttons = [
+	{
+		pos: {x: canvas.width * 0.35, y: canvas.height * 0.8},
+		size: {x: canvas.width * 0.3, y: canvas.height * 0.1},
+		color: "darkcyan",
+		color_hover: "darkslategray",
+		on_click: function() {state = "menu"},
+		textBox: {
+			text: "OK",
+			color: "white",
+			font: "24px Arial",
+			pos: {x: canvas.width * 0.15, y: 8 + canvas.height * 0.05},
+			align: "center"
+		}
+	}
+]
+
+let button_map = {
+	menu: menu_buttons,
+	victory: victory_buttons,
+	defeat: defeat_buttons
+}
 
 let options = {
 	option_1: false
@@ -122,6 +163,7 @@ function updateGame(data)
 
 function drawButtons()
 {
+	let buttons = button_map[state] != null ? button_map[state] : []
 	for (i in buttons)
 	{
 		let button = buttons[i];
@@ -163,6 +205,12 @@ function drawButtons()
 function updateMenu() 
 {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	ctx.fillStyle = "white";
+	ctx.font = "24px Arial";
+	ctx.textAlign = "center";
+	ctx.fillText("Snake!", canvas.width / 2, 28);
+	ctx.font = "16px Arial";
+	ctx.fillText(menu_text, canvas.width / 2, 50);
 
 	drawButtons();
 }
@@ -177,6 +225,50 @@ function updateSearching()
 	ctx.fillText("Searching for opponent...", canvas.width / 2, canvas.height / 2);
 }
 
+function updateConnecting()
+{
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+	ctx.fillStyle = "white";
+	ctx.textAlign = "center";
+	ctx.font = "48px Arial";
+	ctx.fillText("Connecting to server...", canvas.width / 2, canvas.height / 2);
+}
+
+function updateDisconnected()
+{
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+	ctx.fillStyle = "white";
+	ctx.textAlign = "center";
+	ctx.font = "32px Arial";
+	ctx.fillText("Could not connect to server, try again later...", canvas.width / 2, canvas.height / 2);
+}
+
+function updateVictory()
+{
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+	ctx.fillStyle = "green";
+	ctx.textAlign = "center";
+	ctx.font = "64px Arial";
+	ctx.fillText("Victory!", canvas.width / 2, canvas.height / 3);
+
+	drawButtons();
+}
+
+function updateDefeat()
+{
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+	ctx.fillStyle = "red";
+	ctx.textAlign = "center";
+	ctx.font = "64px Arial";
+	ctx.fillText("Defeat!", canvas.width / 2, canvas.height / 3);
+
+	drawButtons();
+}
+
 ws.onopen = function(event) {
 	console.log("Connected to websocket server");
 };
@@ -184,20 +276,42 @@ ws.onopen = function(event) {
 
 ws.onmessage = function(event) {
     try {
-		//console.log("message received from server:");
         const msg = JSON.parse(event.data);
-        if(msg.type === 'state') {
-			gameState = msg.data;
-            updateGame(msg.data);
-        } else if(msg.type === 'welcome') {
-            console.log(msg.message);
-			//ws.send(JSON.stringify({type: "find_snake"}));
-        } else if (msg.type === 'game_found')
+		console.log(msg.type);
+		switch (msg.type)
 		{
-			console.log("game found");
-			player_id = msg.data.player_id;
-			state = "game";
-			console.log("player_id: ", player_id);
+			case "state":
+				if (msg.data.winner != null)
+				{
+					if (msg.data.winner == player_id)
+					{
+						menu_text = "";
+						state = "victory";
+					}
+					else
+					{
+						menu_text = "";
+						state = "defeat";
+					}
+					break;
+				}
+				gameState = msg.data;
+           		updateGame(msg.data);
+				break;
+			case "welcome":
+            	console.log(msg.message);
+				state = "menu";
+				break;
+			case "game_found":
+				console.log("game found");
+				player_id = msg.data.player_id;
+				state = "game";
+				console.log("player_id: ", player_id);
+				break;
+			case "partner_disconnected":
+				menu_text = "opponent disconnected"
+				state = "menu";
+				break;
 		}
     } catch (e) {
         console.error('Error parsing message:', e);
@@ -206,6 +320,7 @@ ws.onmessage = function(event) {
 
   ws.onclose = function(event) {
 	console.log('websocket connection closed', event.code, event.reason);
+	state = "disconnected";
   };
 
 document.addEventListener('keydown', function(event) {
@@ -223,6 +338,7 @@ document.addEventListener('mousemove', function(event) {
 
 document.addEventListener('click', function(event)
 {
+	let buttons = button_map[state] != null ? button_map[state] : []
 	for (i in buttons)
 	{
 		let button = buttons[i];
@@ -245,6 +361,14 @@ function gameLoop() {
 			updateSearching(); break;
 		case "game":
 			updateGame(gameState); break;
+		case "connecting":
+			updateConnecting(); break;
+		case "disconnected":
+				updateDisconnected(); break;
+		case "victory":
+				updateVictory(); break;
+		case "defeat":
+				updateDefeat(); break;
 	}
 
 	requestAnimationFrame(gameLoop);
