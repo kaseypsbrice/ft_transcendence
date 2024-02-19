@@ -1,0 +1,2 @@
+requires libwebsockets and ncurses
+apt-get install libwebsockets-dev libncurses5-dev libncursesw5-dev

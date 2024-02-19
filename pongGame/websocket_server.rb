@@ -113,9 +113,12 @@ EM.run {
 		puts "Received message: #{msg}"
 		if $clients[ws] == nil
 			puts "Discarding message from disconnected client"
-			return
+			next
 		end
 		action = JSON.parse(msg)
+		if !action.is_a?(Hash)
+			next
+		end
         # ... handle actions
 		case action["type"]
 		when "move_left_paddle", "move_right_paddle" # Corrected to match client message types
@@ -159,8 +162,8 @@ EM.run {
 
 		# clients.each { |client| client.send({type: "state", data: game.state_as_json}.to_json) }
 
-		#rescue JSON::ParserError => e
-		#	puts "Error parsing JSON: #{e.message}"
+		rescue JSON::ParserError => e
+			puts "Error parsing JSON: #{e.message}"
 	end
 
     ws.onclose do |code, reason|
@@ -174,6 +177,7 @@ EM.run {
 				client.partner.send({type: "partner_disconnected"}.to_json)
 			end
 		end
+		puts "WebSocket connection closed"
     	$clients.delete(ws)
     end
 end

@@ -112,11 +112,11 @@ class SnakeGame
 			s1_len = 0
 			s2_len = 0
 			while head1 != nil
-				s1_len++
+				s1_len += 1
 				head1 = head1.next
 			end
 			while head2 != nil
-				s2_len++
+				s2_len += 1
 				head2 = head2.next
 			end
 			if s1_len == s2_len
