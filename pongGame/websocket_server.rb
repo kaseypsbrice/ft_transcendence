@@ -2,11 +2,14 @@ require 'em-websocket'
 require 'faye/websocket'
 require 'eventmachine'
 require 'json'
+require 'pg'
 require_relative 'client'
 require_relative 'pong' # Ensure pong.rb is correctly referenced
 require_relative 'snake'
+require_relative 'user'
 
 $clients = Hash.new
+$db = PG::Connection.new("localhost", "5432", nil, nil, "transcendence", "admin", "password");
 
 Signal.trap("INT") {
 	puts "Shutting down server..."
@@ -54,9 +57,7 @@ def start_game(player1_ws, player2_ws, game_name)
 	player2_ws.send({type: "game_found", data: {player_id: player2.id}}.to_json);
 end
 
-# todo: proper client disconnection
 def game_loop(player_ws, timer)
-	#puts "update_pong_state"
 	if $clients[player_ws] == nil
 		timer.cancel
 		puts "player_ws nil"
@@ -91,16 +92,6 @@ def game_loop(player_ws, timer)
 end
 
 EM.run {
-  # Periodic timer for game state updates
-  #EM.add_periodic_timer(0.016) do
-  #  game.update_game_state # Your method to update the game state
-   # game_state_json = game.state_as_json.to_json
-    # clients.each { |client| client.send(game_state_json) }
-	#clients.each {|ws, client|
-	#	ws.send({type: "state", data: game.state_as_json}.to_json) 
-	#}
-  #end
-
 	EM::WebSocket.run(:host => '0.0.0.0', :port => 8080) do |ws|
 		ws.onopen do |handshake|
 		puts "WebSocket connection open"
@@ -115,6 +106,7 @@ EM.run {
 			puts "Discarding message from disconnected client"
 			next
 		end
+		begin
 		action = JSON.parse(msg)
 		if !action.is_a?(Hash)
 			next
@@ -122,7 +114,7 @@ EM.run {
         # ... handle actions
 		case action["type"]
 		when "move_left_paddle", "move_right_paddle" # Corrected to match client message types
-			if $clients[ws].game != nil
+			if $clients[ws].game != nil && action.key?("direction")
 				direction = action["direction"].to_i
 				if action["type"] == "move_left_paddle"
 					$clients[ws].game.move_left_paddle(direction)
@@ -131,7 +123,7 @@ EM.run {
 				end
 			end
 		when "change_direction"
-			if $clients[ws].game != nil
+			if $clients[ws].game != nil && action.key?("direction")
 				$clients[ws].game.change_direction($clients[ws].id, action["direction"].to_i)
 			end
 		when "find_pong"
@@ -154,16 +146,20 @@ EM.run {
 					timer = EM.add_periodic_timer(0.1) {game_loop(ws, timer)}
 				end
 			end
+		when "register"
+			if !action.key?("data") || !action["data"].key?("username") || !action["data"].key?("username")
+				puts "Invalid register request"
+				return
+			end
+			user = User.create(action["data"]["username"], action["data"]["password"], $db);
+			if user.error == nil
+				puts "New User: " + user.id.to_s
+			end
 		end
         
-        # # add log to see the game state
-		#game_state_json = game.state_as_json.to_json
-        #puts "Game state: #{game_state_json}"
-
-		# clients.each { |client| client.send({type: "state", data: game.state_as_json}.to_json) }
-
 		rescue JSON::ParserError => e
 			puts "Error parsing JSON: #{e.message}"
+		end
 	end
 
     ws.onclose do |code, reason|

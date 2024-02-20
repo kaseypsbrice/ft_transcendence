@@ -1,0 +1,6 @@
+will require postgreSQL database 'transcendence' with 'users' table
+and user 'admin' with password 'pass' with correct privileges
+apt install libpq-dev
+apt-get rub-full
+bundle
+ruby websocket_server.rb

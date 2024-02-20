@@ -2,6 +2,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     base64 (0.2.0)
+    bcrypt (3.1.20)
     daemons (1.4.1)
     em-websocket (0.5.3)
       eventmachine (>= 0.12.9)
@@ -12,6 +13,7 @@ GEM
       websocket-driver (>= 0.5.1)
     http_parser.rb (0.8.0)
     json (2.7.1)
+    pg (1.5.5)
     rack (2.2.8)
     thin (1.8.2)
       daemons (~> 1.0, >= 1.0.9)
@@ -26,10 +28,12 @@ PLATFORMS
 
 DEPENDENCIES
   base64
+  bcrypt
   em-websocket
   eventmachine
   faye-websocket
   json
+  pg
   thin
 
 BUNDLED WITH
