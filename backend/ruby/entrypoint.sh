@@ -1,0 +1,1 @@
+ruby /var/server/websocket_server.rb

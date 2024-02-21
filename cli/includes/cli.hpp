@@ -31,7 +31,8 @@ enum states {
 	menu,
 	snake,
 	victory,
-	defeat
+	defeat,
+	searching
 };
 
 typedef struct s_game

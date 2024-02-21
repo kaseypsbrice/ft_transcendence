@@ -9,7 +9,7 @@ require_relative 'snake'
 require_relative 'user'
 
 $clients = Hash.new
-$db = PG::Connection.new("localhost", "5432", nil, nil, "transcendence", "admin", "password");
+#$db = PG::Connection.new("localhost", "5432", nil, nil, "transcendence", "admin", "password");
 
 Signal.trap("INT") {
 	puts "Shutting down server..."
@@ -151,10 +151,10 @@ EM.run {
 				puts "Invalid register request"
 				return
 			end
-			user = User.create(action["data"]["username"], action["data"]["password"], $db);
-			if user.error == nil
-				puts "New User: " + user.id.to_s
-			end
+			#user = User.create(action["data"]["username"], action["data"]["password"], $db);
+			#if user.error == nil
+			#	puts "New User: " + user.id.to_s
+			#end
 		end
         
 		rescue JSON::ParserError => e

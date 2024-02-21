@@ -1,6 +1,1 @@
-will require postgreSQL database 'transcendence' with 'users' table
-and user 'admin' with password 'password' with correct privileges
-apt install libpq-dev
-apt-get rub-full
-bundle
-ruby websocket_server.rb
+register.html is broken for now while I set up db in container

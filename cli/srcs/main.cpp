@@ -164,26 +164,6 @@ void update_game()
 	{
 		case menu:
 		{
-			if (!game.msg.empty())
-			{
-				if (game.msg.find(GAME_FOUND) != std::string::npos)
-				{
-					size_t i = game.msg.find(PLAYER_ID);
-					if (i == std::string::npos)
-					{
-						std::cerr << "unable to find player id in game found response" << std::endl;
-						game.msg.clear();
-						break;
-					}
-					i += strlen(PLAYER_ID);
-					game.msg.clear();
-					game.state = snake;
-					game.player_id = game.msg[i] - '0';
-					break;
-				}
-				game.msg.clear();
-			}
-
 			clear();
 			cbreak();
 			noecho();
@@ -192,6 +172,7 @@ void update_game()
 			int c = getch();
 			if (c == K_ENTER)
 			{
+				game.state = searching;
 				write_buf = FIND_SNAKE;
 				lws_callback_on_writable(web_socket);
 			}
@@ -243,6 +224,35 @@ void update_game()
 			int c = getch();
 			if (c == K_ENTER)
 				game.state = menu;
+			break;
+		}
+		case searching:
+		{
+			if (!game.msg.empty())
+			{
+				if (game.msg.find(GAME_FOUND) != std::string::npos)
+				{
+					size_t i = game.msg.find(PLAYER_ID);
+					if (i == std::string::npos)
+					{
+						std::cerr << "unable to find player id in game found response" << std::endl;
+						game.msg.clear();
+						break;
+					}
+					i += strlen(PLAYER_ID);
+					game.msg.clear();
+					game.state = snake;
+					game.player_id = game.msg[i] - '0';
+					break;
+				}
+				game.msg.clear();
+			}
+			clear();
+			cbreak();
+			noecho();
+			nodelay(stdscr, 1);
+			printw("Searching for opponent...\n");
+			getch();
 			break;
 		}
 	}
