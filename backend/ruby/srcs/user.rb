@@ -2,11 +2,11 @@ require 'pg'
 require 'bcrypt'
 
 class User
-	attr_accessor :id, :email, :password, :error
+	attr_accessor :id, :username, :password, :error
 
-	def initialize(id:, email:, password:, error: nil)
+	def initialize(id:, username:, password:, error: nil)
 		@id = id
-		@email = email
+		@username = username
 		@password = password
 		@error = error
 	end
@@ -14,13 +14,13 @@ class User
 	def self.err(error)
 		new(
 			id: nil,
-			email: nil,
+			username: nil,
 			password: nil,
 			error: error
 		)
 	end
 
-	def self.create(email, password, db)
+	def self.create(username, password, db)
 
 		if password.size < 8
 			puts "Password too short"
@@ -28,17 +28,17 @@ class User
 		end
 
 		encrypted_password = BCrypt::Password.create(password)
-		puts email
+		puts username
 		puts password
 		begin
 		result = db.exec_params(
-			'INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id',
-			[email, encrypted_password]
+			'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id',
+			[username, encrypted_password]
 		)
 
 		new(
 			id: result[0]['id'],
-			email: email,
+			username: username,
 			password: encrypted_password
 		)
 		rescue PG::UniqueViolation

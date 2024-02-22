@@ -6,7 +6,7 @@ build:
 	docker-compose -f ./docker-compose.yml up -d --build
 
 down:
-	docker-compose -f ./docker-compose.yml down
+	docker-compose -f ./docker-compose.yml down --volumes
 
 re:	down
 	docker-compose -f ./docker-compose.yml up -d --build
