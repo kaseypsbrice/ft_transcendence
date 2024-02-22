@@ -11,6 +11,10 @@ ws.onmessage = function(event) {
         if(msg.type === 'welcome') {
             console.log(msg.message);
         }
+		else if (msg.type != null)
+		{
+			console.log(msg.type);
+		}
     } catch (e) {
         console.error('Error parsing message:', e);
     }

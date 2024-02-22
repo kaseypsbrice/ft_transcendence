@@ -3,6 +3,8 @@ require 'faye/websocket'
 require 'eventmachine'
 require 'json'
 require 'pg'
+require 'openssl'
+require 'jwt'
 require_relative 'client'
 require_relative 'pong' # Ensure pong.rb is correctly referenced
 require_relative 'snake'
@@ -11,6 +13,9 @@ require_relative 'user'
 $stdout.sync = true
 $clients = Hash.new
 $db = PG::Connection.new("db", "5432", nil, nil, "pong", "postgres", "password");
+$rsa_private = OpenSSL::PKey::RSA.generate 2048
+$rsa_public = $rsa_private.public_key
+
 
 Signal.trap("INT") {
 	puts "Shutting down server..."
@@ -92,6 +97,19 @@ def game_loop(player_ws, timer)
 	end
 end
 
+def getToken(payload)
+	return JWT.encode(payload, $rsa_private, 'RS256')
+end
+
+def getAuthToken(user)
+	payload = {
+		username: user.username,
+		id: user.id,
+		expires_at: Time.now.to_i + 3600
+	}
+	return getToken(payload)
+end
+
 EM.run {
 	EM::WebSocket.run(:host => '0.0.0.0', :port => 8080, :secure => true, :tls_options => {
 		:private_key_file => "/var/ssl/pong.key",
@@ -154,14 +172,30 @@ EM.run {
 		when "register"
 			if !action.key?("data") || !action["data"].key?("username") || !action["data"].key?("username")
 				puts "Invalid register request"
+				ws.send({type: "RegisterFormatError"}.to_json)
 				return
 			end
-			user = User.create(action["data"]["username"], action["data"]["password"], $db);
+			user = User.register(action["data"]["username"], action["data"]["password"], $db);
 			if user.error == nil
 				puts "New User: " + user.id.to_s
+				ws.send({type: "authentication", token: getAuthToken(user)}.to_json)
+			else
+				ws.send({type: user.error}.to_json)
+			end
+		when "login"
+			if !action.key?("data") || !action["data"].key?("username") || !action["data"].key?("username")
+				puts "Invalid login request"
+				ws.send({type: "LoginFormatError"}.to_json)
+				return
+			end
+			user = User.login(action["data"]["username"], action["data"]["password"], $db);
+			if user.error == nil
+				puts "User successfully logged in"
+				ws.send({type: "authentication", token: getAuthToken(user)}.to_json)
+			else
+				ws.send({type: user.error}.to_json)
 			end
 		end
-        
 		rescue JSON::ParserError => e
 			puts "Error parsing JSON: #{e.message}"
 		end
