@@ -11,6 +11,7 @@ services:
     volumes:
       - ./pongGame:/var/www/public/html
       - ./backend/nginx/conf.d:/etc/nginx/conf.d/
+      - ./backend/nginx/tools:/etc/nginx/ssl/
     restart: always
     depends_on:
       - ruby
@@ -25,6 +26,7 @@ services:
       - "8080:8080"
     volumes:
       - ./backend/ruby/srcs:/var/server
+      - ./backend/nginx/tools:/var/ssl/
     restart: always
     depends_on:
       - db

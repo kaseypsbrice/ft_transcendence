@@ -93,7 +93,11 @@ def game_loop(player_ws, timer)
 end
 
 EM.run {
-	EM::WebSocket.run(:host => '0.0.0.0', :port => 8080) do |ws|
+	EM::WebSocket.run(:host => '0.0.0.0', :port => 8080, :secure => true, :tls_options => {
+		:private_key_file => "/var/ssl/pong.key",
+		:cert_chain_file => "/var/ssl/pong.crt",
+		:verify_peer => false
+	}) do |ws|
 		ws.onopen do |handshake|
 		puts "WebSocket connection open"
 		$clients[ws] = Client.new

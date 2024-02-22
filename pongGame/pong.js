@@ -8,7 +8,7 @@ let gameState = {
 
 const canvas = document.getElementById('pongCanvas')
 const ctx = canvas.getContext('2d');
-const ws = new WebSocket('ws://127.0.0.1:8080');
+const ws = new WebSocket('wss://127.0.0.1:8080');
 
 
 
