@@ -1,24 +1,22 @@
+let gameState = {
+	ball_position: {x: 0, y: 0},
+	left_paddle: {y:5},
+	right_paddle: {y:5},
+	score_left: 0,
+	score_right: 0
+};
+
 const canvas = document.getElementById('pongCanvas')
 const ctx = canvas.getContext('2d');
 const ws = new WebSocket('wss://127.0.0.1:8080');
+
 const scaleX = canvas.width / 10;
 const scaleY = canvas.height / 10;
-const RIGHT = 0;
-const DOWN = 1;
-const LEFT = 2;
-const UP = 3;
-const TILE = 20;
 
 let player_id = -1;
-let snakes = [];
 let mouse_pos = {x: 0.0, y: 0.0};
 let state = "connecting";
 let menu_text = "";
-
-let gameState = {
-	snakes: [],
-	food: []
-}
 
 let menu_buttons = [
 	{
@@ -100,7 +98,7 @@ let options = {
 function start_game()
 {
 	state = "searching";
-	ws.send(JSON.stringify({type: "find_snake"}));
+	sendWithToken(ws, {type: "find_pong"});
 }
 
 function getMousePos(event)
@@ -120,45 +118,43 @@ function mouseInRect(x, y, width, height)
 	return false;
 }
 
-function drawTile(x, y, color)
-{
-	ctx.fillStyle = color;
-	ctx.fillRect(x * TILE + 1, y * TILE + 1, TILE - 2, TILE - 2);
+
+function drawPaddle(position, paddleSide) {
+    ctx.fillStyle = '#FFF';
+    let xPosition, paddleHeight = 4 * scaleY; // Make sure this matches the PongClass @paddle_height
+    if (paddleSide === 'left') {
+        xPosition = 20; // Left paddle x position
+    } else { // 'right'
+        xPosition = canvas.width - 30; // Right paddle x position
+    }
+    // Adjust the yPosition to draw from the top-left corner of the paddle
+    let yPosition = (10 - position.y - 4) * scaleY; // Subtracting 4 to align with the game logic
+
+    // Draw the paddle
+    ctx.fillRect(xPosition, yPosition, 10, paddleHeight);
+
+    // Draw the bounding box for debugging
+    ctx.strokeStyle = 'red';
+    ctx.strokeRect(xPosition, yPosition, 10, paddleHeight);
+    //console.log(`Drawing ${paddleSide} paddle at x: ${xPosition}, y: ${yPosition}, height: ${paddleHeight}`);
 }
 
-function drawSnakes(snakes)
-{
-	for (s in snakes)
-	{
-		let snake = snakes[s];
-		let i = 0;
-		while (i < snake.length - 1)
-		{
-			drawTile(snake[i], snake[i + 1], "white");
-			i += 2;
-		}
-	}
+
+// Invert the y-coordinate for the canvas system
+function drawBall(position) {
+    ctx.fillStyle = '#FFF';
+    ctx.beginPath();
+    ctx.arc(position.x * scaleX, (10 - position.y) * scaleY, 10, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.fill();
 }
 
-function drawFood(food)
-{
-	let i = 0;
-	while (i < food.length - 1)
-	{
-		drawTile(food[i], food[i + 1], "yellow");
-		i += 2;
-	}
-}
 
-function updateGame(data)
-{   
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-	gameState.snakes = data.snakes;
-	gameState.food = data.food;
-
-	drawFood(gameState.food);
-    drawSnakes(gameState.snakes);
+function drawScore(score, x, y) {
+	ctx.fillStyle = '#FFF';
+	ctx.font = '32px Arial';
+	ctx.fillText(score, x, y);
 }
 
 function drawButtons()
@@ -208,7 +204,7 @@ function updateMenu()
 	ctx.fillStyle = "white";
 	ctx.font = "24px Arial";
 	ctx.textAlign = "center";
-	ctx.fillText("Snake!", canvas.width / 2, 28);
+	ctx.fillText("Pong!", canvas.width / 2, 28);
 	ctx.font = "16px Arial";
 	ctx.fillText(menu_text, canvas.width / 2, 50);
 
@@ -259,8 +255,6 @@ function updateVictory()
 
 function updateDefeat()
 {
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
-
 	ctx.fillStyle = "red";
 	ctx.textAlign = "center";
 	ctx.font = "64px Arial";
@@ -269,13 +263,47 @@ function updateDefeat()
 	drawButtons();
 }
 
+function updateLoggedOut()
+{
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+	ctx.fillStyle = "white";
+	ctx.textAlign = "center";
+	ctx.font = "32px Arial";
+	ctx.fillText("You are not logged in, log in at URL/login", canvas.width / 2, canvas.height / 2);
+}
+
+function updateGame(data) {
+	//console.log("inside updateGame");
+	//console.log("New data:", data);
+
+	// Assign the new data to the gameState variable
+	gameState.ball_position = data.ball_position;
+	gameState.left_paddle = data.left_paddle;
+	gameState.right_paddle = data.right_paddle;
+	gameState.score_left = data.score_left;
+	gameState.score_right = data.score_right;
+
+	//console.log("Updated game state:", gameState);
+
+	// Clear the canvas
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+	// Redraw all game elements with the updated game state
+	drawBall(gameState.ball_position);
+	drawPaddle(gameState.left_paddle, 'left'); 
+	drawPaddle(gameState.right_paddle, 'right'); 
+	drawScore(gameState.score_left, canvas.width / 4, 50);
+	drawScore(gameState.score_right, (canvas.width / 4) * 3, 50);
+}
+
 ws.onopen = function(event) {
 	console.log("Connected to websocket server");
 };
 
 
 ws.onmessage = function(event) {
-    try {
+	try {
         const msg = JSON.parse(event.data);
 		console.log(msg.type);
 		switch (msg.type)
@@ -312,24 +340,61 @@ ws.onmessage = function(event) {
 				menu_text = "opponent disconnected"
 				state = "menu";
 				break;
+			case "InvalidToken":
+				state = "logged_out";
+				break;
 		}
     } catch (e) {
         console.error('Error parsing message:', e);
     }
 };
 
-  ws.onclose = function(event) {
+ws.onclose = function(event) {
 	console.log('websocket connection closed', event.code, event.reason);
 	state = "disconnected";
   };
 
+function sendWithToken(ws, data)
+{
+	var token = null;
+	const cookies = document.cookie.split(';');
+	for (let cookie of cookies) {
+		const [name, value] = cookie.trim().split('=');
+		if (name === 'access_token') {
+
+			token = value;
+			break;
+		}
+	}
+	if (token == null)
+	{
+		//state = "logged_out";
+		return true;
+	}
+	data["token"] = token;
+	ws.send(JSON.stringify(data));
+	return false;
+}
+
+
+
+// function to send puddle movement to server
+function movePaddle(paddle, direction) {
+	const type = (paddle === 'left') ? 'move_left_paddle' : 'move_right_paddle';
+	sendWithToken(ws, {type: type, direction: direction});
+}
+
+// listen for key presses to control the paddle
 document.addEventListener('keydown', function(event) {
 	if (player_id < 0)
 		return;
-	if (event.key === 'ArrowUp') ws.send(JSON.stringify({type: "change_direction", direction: UP}));
-	if (event.key === 'ArrowDown') ws.send(JSON.stringify({type: "change_direction", direction: DOWN}));
-	if (event.key === 'ArrowLeft') ws.send(JSON.stringify({type: "change_direction", direction: LEFT}));
-	if (event.key === 'ArrowRight') ws.send(JSON.stringify({type: "change_direction", direction: RIGHT}));
+	if (event.key === 'ArrowUp' && player_id == 0) movePaddle('left', 1);
+	if (event.key === 'ArrowDown' && player_id == 0) movePaddle('left', -1);
+	if (event.key === 'ArrowUp' && player_id == 1) movePaddle( 'right', 1); // Move up
+	if (event.key === 'ArrowDown' && player_id == 1) movePaddle('right', -1); // Move down
+
+	//if (event.key === 'w') movePaddle('left', 1); // Move up
+	//if (event.key === 's') movePaddle('left', -1); // Move down
 });
 
 document.addEventListener('mousemove', function(event) {
@@ -364,13 +429,14 @@ function gameLoop() {
 		case "connecting":
 			updateConnecting(); break;
 		case "disconnected":
-				updateDisconnected(); break;
+			updateDisconnected(); break;
 		case "victory":
-				updateVictory(); break;
+			updateVictory(); break;
 		case "defeat":
-				updateDefeat(); break;
+			updateDefeat(); break;
+		case "logged_out":
+			updateLoggedOut(); break;
 	}
-
 	requestAnimationFrame(gameLoop);
 }
 

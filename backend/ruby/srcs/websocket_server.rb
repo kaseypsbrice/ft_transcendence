@@ -103,11 +103,22 @@ end
 
 def getAuthToken(user)
 	payload = {
-		username: user.username,
-		id: user.id,
-		expires_at: Time.now.to_i + 3600
+		data: {
+			username: user.username,
+			id: user.id
+		},
+		exp: Time.now.to_i + 3600
 	}
 	return getToken(payload)
+end
+
+def isValidToken(token)
+	begin
+	decoded = JWT.decode token, $rsa_public, true, { :algorithm => 'RS256'}
+	return true
+	rescue JWT::DecodeError
+		return false
+	end
 end
 
 EM.run {
@@ -134,6 +145,15 @@ EM.run {
 		if !action.is_a?(Hash)
 			next
 		end
+
+		# if this isn't a login or register request verify token
+		if action["type"] != "login" && action["type"] != "register"
+			if !action["token"] || !isValidToken(action["token"])
+				ws.send({type: "InvalidToken"}.to_json)
+				next
+			end
+		end
+
         # ... handle actions
 		case action["type"]
 		when "move_left_paddle", "move_right_paddle" # Corrected to match client message types
@@ -173,7 +193,7 @@ EM.run {
 			if !action.key?("data") || !action["data"].key?("username") || !action["data"].key?("username")
 				puts "Invalid register request"
 				ws.send({type: "RegisterFormatError"}.to_json)
-				return
+				next
 			end
 			user = User.register(action["data"]["username"], action["data"]["password"], $db);
 			if user.error == nil
@@ -186,7 +206,7 @@ EM.run {
 			if !action.key?("data") || !action["data"].key?("username") || !action["data"].key?("username")
 				puts "Invalid login request"
 				ws.send({type: "LoginFormatError"}.to_json)
-				return
+				next
 			end
 			user = User.login(action["data"]["username"], action["data"]["password"], $db);
 			if user.error == nil

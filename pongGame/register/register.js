@@ -14,6 +14,10 @@ ws.onmessage = function(event) {
 		else if (msg.type != null)
 		{
 			console.log(msg.type);
+			if (msg.type === 'authentication' && msg.token != null)
+			{
+				document.cookie = 'access_token=${msg.token};SameSite=Strict;Secure;'
+			}
 		}
     } catch (e) {
         console.error('Error parsing message:', e);

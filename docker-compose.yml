@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: nginx
     ports:
-      - "80:80"
+      - "9001:9001"
     volumes:
       - ./pongGame:/var/www/public/html
       - ./backend/nginx/conf.d:/etc/nginx/conf.d/
