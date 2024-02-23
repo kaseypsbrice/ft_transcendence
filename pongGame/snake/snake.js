@@ -259,7 +259,7 @@ function updateVictory()
 
 function updateDefeat()
 {
-	
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 	ctx.fillStyle = "red";
 	ctx.textAlign = "center";
