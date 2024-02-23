@@ -241,7 +241,7 @@ function updateDisconnected()
 
 	ctx.fillStyle = "white";
 	ctx.textAlign = "center";
-	ctx.font = "48px Arial";
+	ctx.font = "32px Arial";
 	ctx.fillText("Could not connect to server, try again later...", canvas.width / 2, canvas.height / 2);
 }
 
