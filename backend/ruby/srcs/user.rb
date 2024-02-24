@@ -2,29 +2,51 @@ require 'pg'
 require 'bcrypt'
 
 class User
-	attr_accessor :id, :username, :password, :error
+	attr_accessor :id, :username, :password
 
-	def initialize(id:, username:, password:, error: nil)
+	def initialize(id:, username:, password:)
 		@id = id
 		@username = username
 		@password = password
-		@error = error
 	end
 
-	def self.err(error)
-		new(
-			id: nil,
-			username: nil,
-			password: nil,
-			error: error
-		)
+	class Error < StandardError
+	end
+	class UsernameTaken < Error
+		def initialize(message = "Username taken")
+			super(message)
+		end
+	end
+
+	class UserNotFound < Error
+		def initialize(message = "User not found")
+			super(message)
+		end
+	end
+
+	class PasswordIncorrect < Error
+		def initialize(message = "Password incorrect")
+			super(message)
+		end
+	end
+
+	class PasswordTooShort < Error
+		def initialize(message = "Password too short")
+			super(message)
+		end
+	end
+
+	class DatabaseError < Error
+		def initialize(message = "Error accessing database")
+			super(message)
+		end
 	end
 
 	def self.register(username, password, db)
 
 		if password.size < 8
 			puts "Password too short"
-			return err("PasswordTooShort")
+			raise PasswordTooShort
 		end
 
 		encrypted_password = BCrypt::Password.create(password)
@@ -41,10 +63,10 @@ class User
 		)
 		rescue PG::UniqueViolation
 			puts "Username already in use"
-			return err("UsernameInUse")
+			raise UsernameTaken
 		rescue PG::Error => e
 			puts "An error occured while inserting into db: #{e.message}"
-			return err("Unknown")
+			raise DatabaseError
 		end
 	end
 
@@ -57,7 +79,7 @@ class User
 		)
 		if result.num_tuples < 1
 			puts "Could not find user in database"
-			return err("UserNotFound")
+			raise UserNotFound
 		end
 		#puts result[0]['username']
 		#puts result[0]['id']
@@ -66,7 +88,7 @@ class User
 		#puts encrypted_password == password
 		if encrypted_password != password
 			puts "Incorrect password"
-			return err("PasswordIncorrect")
+			raise PasswordIncorrect
 		end
 		new(
 			id: result[0]['id'],
@@ -75,7 +97,29 @@ class User
 		)
 		rescue PG::Error => e
 			puts "An error occured while querying db: #{e.message}"
-			return err("Unknown")
+			raise DatabaseError
+		end
+	end
+
+	def self.from_id(id, db)
+		begin
+		result = db.exec_params(
+			'SELECT * FROM users
+			WHERE id=$1',
+			[id]
+		)
+		if result.num_tuples < 1
+			puts "Could not find user in database"
+			raise UserNotFound
+		end
+		new(
+			id: result[0]['id'],
+			username: result[0]['username'],
+			password: result[0]['password']
+		)
+		rescue PG::Error => e
+			puts "An error occured while querying db: #{e.message}"
+			raise DatabaseError
 		end
 	end
 end
