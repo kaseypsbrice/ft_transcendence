@@ -98,7 +98,7 @@ let options = {
 function start_game()
 {
 	state = "searching";
-	sendWithToken(ws, {type: "find_pong"});
+	sendWithToken(ws, {type: "get_match_history"});
 }
 
 function getMousePos(event)

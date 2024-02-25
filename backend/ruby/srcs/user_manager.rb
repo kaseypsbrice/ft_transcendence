@@ -47,13 +47,13 @@ class UserManager
 		rescue User::PasswordIncorrect => e
 			client.ws.send({"type": "LoginError", "message": "Password incorrect"}.to_json);
 		rescue User::Error => e
-			client.ws.send({"type": "LoginError", "message": "Unknown"}.to_json);
+			client.ws.send({"type": "LoginError", "message": "Internal"}.to_json);
 		end
 	end
 
-	def register(client, username, password)
+	def register(client, username, password, display_name)
 		begin
-			user = User.register(username, password, @db)
+			user = User.register(username, password, display_name, @db)
 			client.user_id = user.id
 			add_user(user)
 			client.ws.send({type: "authentication", token: get_auth_token(user)}.to_json)
@@ -61,8 +61,49 @@ class UserManager
 			client.ws.send({"type": "RegisterError", "message": "Password too short"}.to_json);
 		rescue User::UsernameTaken => e
 			client.ws.send({"type": "RegisterError", "message": "Username taken"}.to_json);
+		rescue User::DisplayNameTaken => e
+			client.ws.send({"type": "RegisterError", "message": "Display name taken"}.to_json);
+		rescue User::UsernameTooLong => e
+			client.ws.send({"type": "RegisterError", "message": "Username too long"}.to_json);
+		rescue User::DisplayNameTooLong => e
+			client.ws.send({"type": "RegisterError", "message": "Display name too long"}.to_json);
 		rescue User::Error => e
-			client.ws.send({"type": "RegisterError", "message": "Unknown"}.to_json);
+			client.ws.send({"type": "RegisterError", "message": "Internal"}.to_json);
+		end
+	end
+
+	def get_match_history(client, token)
+		begin
+			decoded = JWT.decode token, @rsa_public, true, { :algorithm => 'RS256'}
+			if decoded.size < 1 || !decoded[0].key?("data") || !decoded[0]["data"].key?("id")
+				puts "ERROR: trying to get user history from invalid token, did you forget to use 'token_valid?'"
+			else
+				user = get_user(decoded[0]["data"]["id"])
+				if user == nil
+					user = new_user_from_id(client, decoded[0]["data"]["id"])
+				end
+				return user.get_match_history(@db)
+			end
+		rescue User::DatabaseError => e
+			puts "ERROR: get_match_history: #{e.message}"
+			return []
+		rescue User::Error => e
+			puts "ERROR: get_match_history: could not create new user from token id: #{e.message}"
+			return []
+		rescue JWT::DecodeError
+			puts "ERROR: trying to get user history from invalid token, did you forget to use 'token_valid?'"
+			return []
+		end
+	end
+
+	def save_match(game, player1_id, player2_id, winner, info)
+		begin
+			@db.exec_params(
+			'INSERT INTO matches (game, player1, player2, winner, info) VALUES ($1, $2, $3, $4, $5)',
+			[game, player1_id, player2_id, winner, info]
+		)
+		rescue PG::Error => e
+			puts "An error occured while saving match: #{e.message}"
 		end
 	end
 

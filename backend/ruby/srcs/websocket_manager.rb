@@ -88,15 +88,20 @@ class WebSocketManager
 					timer = EM.add_periodic_timer(0.1) {game_loop(ws, timer)}
 				end
 			end
+		when "get_match_history"
+			history = @user_manager.get_match_history(client, msg_data["token"])
+			ws.send({type: "MatchHistory", data: history}.to_json)
+			puts history
+			return
 		when "register" # 				-------- USER REGISTRATION --------
-			if !msg_data.key?("data") || !msg_data["data"].key?("username") || !msg_data["data"].key?("password")
+			if !msg_data.key?("data") || !msg_data["data"].key?("username") || !msg_data["data"].key?("password") || !msg_data["data"].key?("display_name")
 				puts "Invalid register request"
 				ws.send({type: "RegisterFormatError"}.to_json)
 				return # make sure the user sent a username and password
 			end
 
 			# create a new user object with credentials, this reads from the database: user.rb
-			@user_manager.register(client, msg_data["data"]["username"], msg_data["data"]["password"]);
+			@user_manager.register(client, msg_data["data"]["username"], msg_data["data"]["password"], msg_data["data"]["display_name"]);
 
 		when "login" # 						-------- USER LOGIN --------
 			if !msg_data.key?("data") || !msg_data["data"].key?("username") || !msg_data["data"].key?("password")
@@ -202,6 +207,11 @@ class WebSocketManager
 		player_ws.send({type: "state", data: game.state_as_json}.to_json) 
 		player.partner.send({type: "state", data: game.state_as_json}.to_json)
 		if game.state_as_json["winner"] != nil && game.state_as_json["winner"] > -1
+			winner_id = player.user_id
+			if game.state_as_json["winner"] != player.id
+				winner_id = partner.user_id
+			end
+			@user_manager.save_match(player.game_selected, player.user_id, partner.user_id, winner_id, "INSERT MATCH TYPE HERE")
 			player.in_game = false
 			player.game = nil
 			partner.in_game = false

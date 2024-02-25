@@ -34,8 +34,10 @@ function submitForm(event)
 
 	var username = document.getElementById("username").value;
 	var password = document.getElementById("password").value;
+	var display_name = document.getElementById("display_name").value;
 
 	console.log("Username: ", username);
 	console.log("Password: ", password);
-	ws.send(JSON.stringify({"type": "register", "data": {"username": username, "password": password}}));
+	console.log("Display Name: ", display_name);
+	ws.send(JSON.stringify({"type": "register", "data": {"username": username, "password": password, "display_name": display_name}}));
 }
