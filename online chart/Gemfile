@@ -1,0 +1,34 @@
+source 'https://rubygems.org'
+
+# webframework
+gem 'sinatra', '~> 4.0'
+gem 'sinatra-cross_origin', '~> 0.4.0' #  for cross-origin requests
+
+# JSON
+gem 'json', '~> 2.7' #  for JSON parsing
+
+# websocket
+gem 'em-websocket', '~> 0.5.3'
+# event machine
+gem 'eventmachine', '~> 1.2' #  for em-websocket
+# Database and ORM
+gem 'pg', '~> 1.5' # postgresql database adapter
+gem 'activerecord', '~> 7.1' # ORM for database interaction
+gem 'activerecord-import', '~> 1.5' # fast bulk inserts
+
+# Database connection management
+gem 'sinatra-activerecord', '~> 2.0' #  for activerecord and sinatra
+gem 'rackup', '~> 2.1' #  for sinatra-activerecord
+
+# # Background job processing
+# gem 'sidekiq' # background job processing
+
+# Testing
+gem 'rspec', '~> 3.13' # testing framework  
+gem 'rack-test', '~> 2.1', require: 'rack/test'# testing sinatra routes
+
+# Development aand bugging
+gem 'pry', '~> 0.14.2' # debugging tool
+gem 'dotenv', '~> 3.0' # Maanage environment variables
+
+
