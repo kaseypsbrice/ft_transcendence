@@ -5,19 +5,27 @@
 	<head>
 		<meta charset="UTF-8">
 		<title></title>
-		<!-- <link rel="stylesheet" href="./css/style.css"> -->
+		<link rel="stylesheet" href="./css/style.css">
 		<meta name="description" content="">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	</head>
 	<body>
 		<div id="main">
-			<nav>
-				<ul>
-					<li><a href="#home">Home</a></li>
-					<li><a href="#leaderboard">Leaderboard</a></li>
-					<li><a href="#example">Example</a></li>
-				</ul>
-			</nav>
+            <div class="navbar-container-wrapper">
+			    <nav class="navbar-wrapper">
+                    <div class="site-name">MightyPong</div>
+				    <ul>
+					    <a href="#home"><span class="ic--round-home"></span><li>Home</li></a>
+					    <a href="#leaderboard"><span class="ic--round-leaderboard"></span><li>Leaderboard</li></a>
+					    <div class="games-dropdown"><a href="#games"><span class="mingcute--game-2-fill"></span>Games</div><span class="bxs--down-arrow"></span></a>
+				    </ul>
+			    </nav>
+                <div class="navbar-rightside-wrapper">
+                    <a href="#login"><div class="signup-login-button">Login</div></a>
+                    <a href="#signup"><div class="signup-login-button">Sign Up</div></a>
+                    <div class="settings-button"></div><span class="ic--round-settings"></span>
+                </div>
+            </div>
 			<div id="content"></div>
 		</div>
 		<script src="./js/hash-router.js"></script>
@@ -25,3 +33,10 @@
 </html>
 
 <!-- This is the base for all of our html pages -->
+<!-- To do:
+    * Dropdown menu for Games
+    * Have pop-up window for settings button 
+    * The perfectionist in me says to wrap the navbar links with rectangular divs to make sure that when you're
+        within the area of the item you can click on the link or dropdown. 
+    * JS for processing forms 
+-->
