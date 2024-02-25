@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  nginx:
+    build:
+      context: backend/nginx
+      dockerfile: Dockerfile
+    container_name: nginx
+    ports:
+      - "9001:9001"
+    volumes:
+      - ./pongGame:/var/www/public/html
+      - ./backend/nginx/conf.d:/etc/nginx/conf.d/
+    restart: always
+    depends_on:
+      - ruby
+      - db
+  
+  ruby:
+    build:
+      context: backend/ruby
+      dockerfile: Dockerfile
+    container_name: ruby
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend/ruby/srcs:/var/server
+    restart: always
+    depends_on:
+      - db
+  
+  db:
+    build:
+      context: backend/db
+      dockerfile: Dockerfile
+    container_name: db
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+      POSTGRES_DB: pong
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: always
+  
+volumes:
+  db_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./local/db
+      o: bind
+    name: db_data_volume

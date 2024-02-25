@@ -16,11 +16,16 @@ const routes = {
 		title: pageTitle + " | Leaderboard",
 		description: "View leaderboard on this page"
 	},
-	example: {
-		template: "./templates/example.html",
-		title: pageTitle + " | Example",
-		description: "Example description"
-	},
+    login: {
+        template: "./templates/login.html",
+		title: pageTitle + " | Login",
+		description: "Login if you're an existing member of the site"
+    },
+    signup: {
+        template: "./templates/signup.html",
+		title: pageTitle + " | Sign Up",
+		description: "Sign up and become a member of the site"
+    },
 };
 // Add other pages to the list
 

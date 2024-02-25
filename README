@@ -1,0 +1,6 @@
+1. run make
+2. go to https://127.0.0.1:8080 and find the option to proceed at you own risk
+3. go to https://127.0.0.1:9001 and do the same
+
+no feedback on login or register yet, check console logs for "authentication" to see if you logged
+in successfully
