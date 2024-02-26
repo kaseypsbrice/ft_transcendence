@@ -15,6 +15,7 @@ gem 'eventmachine', '~> 1.2' #  for em-websocket
 gem 'pg', '~> 1.5' # postgresql database adapter
 gem 'activerecord', '~> 7.1' # ORM for database interaction
 gem 'activerecord-import', '~> 1.5' # fast bulk inserts
+# gem 'activerecord-migrations', '~> 1.5' # for running migrations
 
 # Database connection management
 gem 'sinatra-activerecord', '~> 2.0' #  for activerecord and sinatra

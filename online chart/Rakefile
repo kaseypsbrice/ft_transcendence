@@ -1,0 +1,17 @@
+require 'active_record'
+require 'rake'
+
+namespace :db do
+  desc "Migrates the database (options: VERSION=x, VERBOSE=false, SCOPE=blog)."
+  task migrate: :environment do
+    # Adjusted according to deprecation warning
+    migrations_paths = File.join(File.dirname(__FILE__), 'db', 'migrate')
+    context = ActiveRecord::MigrationContext.new(migrations_paths)
+    context.migrate
+  end
+end
+
+task :environment do
+  db_config = YAML.load_file(File.join(File.dirname(__FILE__), 'config', 'database.yml'))
+  ActiveRecord::Base.establish_connection(db_config['development'])
+end
