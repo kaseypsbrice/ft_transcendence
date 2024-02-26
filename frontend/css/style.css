@@ -10,9 +10,16 @@
 }
 
 body {
+    max-width: 100%;
+    overflow-x: hidden;
     background-color: #060606;
     font-family: "Inter", sans-serif; /* Default font */
 }
+/* Added the max-width and overflow-x properties to make sure the
+ * page size and appearance of it is the same regardless of what
+ * monitor you're using to view it. 
+ * Note: The website is NOT mobile friendly, it's only designed to
+ * fit computer screens. */
 
 /* ========================= Navbar ========================= */
 
