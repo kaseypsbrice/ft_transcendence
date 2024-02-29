@@ -11,10 +11,14 @@ services:
     volumes:
       - ./pongGame:/var/www/public/html
       - ./backend/nginx/conf.d:/etc/nginx/conf.d/
+      - ${KEY_}:/etc/nginx/ssl/pong.key
+      - ${CERT_}:/etc/nginx/ssl/pong.crt
     restart: always
     depends_on:
       - ruby
       - db
+    env_file: .env
+    
   
   ruby:
     build:
@@ -25,9 +29,12 @@ services:
       - "8080:8080"
     volumes:
       - ./backend/ruby/srcs:/var/server
+      - ${KEY_}:/var/ssl/pong.key
+      - ${CERT_}:/var/ssl/pong.crt
     restart: always
     depends_on:
       - db
+    env_file: .env
   
   db:
     build:
