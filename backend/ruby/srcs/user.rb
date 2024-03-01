@@ -142,21 +142,44 @@ class User
 
 	def self.from_id(id, db)
 		begin
-		result = db.exec_params(
-			'SELECT * FROM users
-			WHERE id=$1',
-			[id]
-		)
-		if result.num_tuples < 1
-			puts "Could not find user in database"
-			raise UserNotFound
+			result = db.exec_params(
+				'SELECT * FROM users
+				WHERE id=$1',
+				[id]
+			)
+			if result.num_tuples < 1
+				puts "Could not find user in database"
+				raise UserNotFound
+			end
+			new(
+				id: result[0]['id'],
+				username: result[0]['username'],
+				password: result[0]['password'],
+				display_name: result[0]['display_name']
+			)
+		rescue PG::Error => e
+			puts "An error occured while querying users: #{e.message}"
+			raise DatabaseError
 		end
-		new(
-			id: result[0]['id'],
-			username: result[0]['username'],
-			password: result[0]['password'],
-			display_name: result[0]['display_name']
-		)
+	end
+
+	def self.from_display_name(display_name, db)
+		begin
+			result = db.exec_params(
+				'SELECT * FROM users
+				WHERE display_name=$1',
+				[display_name]
+			)
+			if result.num_tuples < 1
+				puts "Could not find user in database"
+				raise UserNotFound
+			end
+			new(
+				id: result[0]['id'],
+				username: result[0]['username'],
+				password: result[0]['password'],
+				display_name: result[0]['display_name']
+			)
 		rescue PG::Error => e
 			puts "An error occured while querying users: #{e.message}"
 			raise DatabaseError

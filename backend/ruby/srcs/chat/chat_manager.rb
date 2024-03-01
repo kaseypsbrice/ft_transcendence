@@ -2,6 +2,15 @@ require 'em-websocket'
 require_relative 'db_init'
 require_relative 'models/chat_message'
 
+class ChatManager
+
+
+	def handleChatMessage(msg)
+
+	end
+
+end
+
 Signal.trap("INT") {
 	puts "Shutting down server..."
 	# Close the WebSocket connections

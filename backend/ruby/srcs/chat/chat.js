@@ -1,4 +1,26 @@
-const ws = new WebSocket('ws://localhost:8080');
+const ws = new WebSocket('wss://localhost:8080');
+
+function sendWithToken(ws, data)
+{
+	var token = null;
+	const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'access_token') {
+
+            token = value;
+			break;
+		}
+	}
+	if (token == null)
+	{
+		state = "logged_out";
+		return true;
+	}
+	data["token"] = token;
+	ws.send(JSON.stringify(data));
+	return false;
+}
 
 ws.onopen = function() {
     console.log('Connected to the chat server');
@@ -16,12 +38,12 @@ ws.onerror = function(error) {
 
 function sendMessage() {
     const message = {
-        sender_id: 1,
-        receiver_id: 2,
+		type: "chat_message",
         content: document.getElementById('messageInput').value
     };
     console.log('Sending message:', message);
-    ws.send(JSON.stringify(message));
+    if (sendWithToken(ws, message))
+		console.log("You are not logged in!");
     document.getElementById('messageInput').value = '';
 }
 

@@ -4,11 +4,13 @@ require_relative 'user_manager'
 require_relative 'pong'
 require_relative 'snake'
 require_relative 'client'
+require_relative 'chat/db_init'
+require_relative 'chat/models/chat_message'
 
 class WebSocketManager
 	def initialize
 		@connections = {} # (websocket connection : client object)
-		@db = PG::Connection.new("db", "5432", nil, nil, "pong", "postgres", "password");
+		@db = PG::Connection.new("localhost", "5432", nil, nil, "transcendence", "transcendence", "pass");
 		@rsa_private = OpenSSL::PKey::RSA.generate 2048
 		@rsa_public = @rsa_private.public_key
 		@user_manager = UserManager.new(@db, @rsa_private, @rsa_public)
@@ -93,6 +95,64 @@ class WebSocketManager
 			ws.send({type: "MatchHistory", data: history}.to_json)
 			puts history
 			return
+		when "chat_message"
+			# TODO: Extract sender_id and receiver_id from the message or session context
+			msg_data = JSON.parse(msg)
+			sender_id = client.user_id
+			receiver_id = -1
+			msg_data["sender"] = @user_manager.get_user(client.user_id).display_name
+			msg_data["content"] = msg_data["content"].lstrip.rstrip
+			if !msg_data["content"] || msg_data["content"].empty?
+				return
+			end
+
+			# Chat commands
+			if msg_data["content"].starts_with("/")
+				msg_data["content"].slice!(0)
+				split_msg = msg_data["content"].split(' ', 3)
+				case split_msg[0]
+				when "w"
+					if split_msg.size < 3
+						ws.send({type:"ChatMessageError", error:"NoWhisperUser", message:"/w {user} {msg}"}.to_json)
+						return
+					end
+					begin
+						user = User.from_display_name(split_msg[1])
+						if !@user_manager.user?(user.id)
+							ws.send({type:"ChatMessageError", error:"UserOffline", message:"User #{split_msg[1]} is offline"}.to_json)
+							return
+						end
+						receiver_id = user.id
+						msg_data["content"] = split_msg[2]
+						
+						ws.send({type:"WhisperResponse", user: split_msg[1], message: msg_data["content"]}.to_json)
+					rescue User::Error
+						ws.send({type:"ChatMessageError", error:"UserNotFound", message:"User #{split_msg[1]} does not exist"}.to_json)
+						return
+					end
+				when "help"
+					ws.send({type:"HelpResponse", message:"Commands\n\t/w {user} {msg} : whisper to a user"}.to_json)
+					return
+				end
+			end
+
+			#TODO: check if client is in game and send to partner game websocket
+
+			# Save the message to the database
+			ChatMessage.create(sender_id: sender_id, receiver_id: receiver_id, content:msg_data["content"])
+
+			# Broadcast the message to all clients (including the sender)
+			if receiver_id == -1
+				@connections.each { |client_ws, client| 
+				client_ws.send({type: "ChatMessage", message: msg_data}.to_json)
+				}
+			else # Whisper to all clients logged in as correct user
+				@connections.each { |client_ws, client| 
+					if client.user_id == receiver_id
+						client_ws.send({type: "ChatMessage", message: msg_data}.to_json)
+					end
+				}
+			end
 		when "register" # 				-------- USER REGISTRATION --------
 			if !msg_data.key?("data") || !msg_data["data"].key?("username") || !msg_data["data"].key?("password") || !msg_data["data"].key?("display_name")
 				puts "Invalid register request"

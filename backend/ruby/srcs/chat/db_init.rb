@@ -4,7 +4,7 @@ require_relative 'models/chat_message'
 # Set up database connection
 ActiveRecord::Base.establish_connection(
   adapter: 'postgresql',
-  database: 'online_chat',
+  database: 'transcendence',
   username: 'transcendence',
   password: 'pass',
   host: 'localhost'
