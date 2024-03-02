@@ -14,7 +14,7 @@ Signal.trap("INT") {
 @clients = []
 
 EventMachine.run do
-	EventMachine::WebSocket.start(host: '0.0.0.0', port:8080) do |ws|
+	EventMachine::WebSocket.start(host: '0.0.0.0', port:8081) do |ws|
 		ws.onopen do
 			puts "Websocket connection opened"
 			@clients << ws
