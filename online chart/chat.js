@@ -1,4 +1,5 @@
-const ws = new WebSocket('ws://localhost:8080');
+// const ws = new WebSocket('wss://localhost:8081');
+const ws = new WebSocket('wss://localhost/ws');
 
 ws.onopen = function() {
     console.log('Connected to the chat server');
@@ -39,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const messagesDiv = document.getElementById('messages'); // container where messages are displayed
 
     function fetchChatHistory() {
-        fetch('http://localhost:4567/chat-history')
+        fetch('https://localhost:4567/chat-history')
             .then(response => response.json())
             .then(messages => {
                 messages.forEach(message => displayMessage(message));
