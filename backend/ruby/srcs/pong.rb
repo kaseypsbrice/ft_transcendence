@@ -120,19 +120,10 @@ class PongGame
 		score_right: @score_right,
 		ball_position: @ball_position,
 		left_paddle: @left_paddle,
-		right_paddle: @right_paddle
+		right_paddle: @right_paddle,
+		game: "pong"
 	}
 	end
-
-	def to_json
-		{
-			score_left: @score_left,
-			score_right: @score_right,
-			ball_position: @ball_position,
-			left_paddle: @left_paddle,
-			right_paddle: @right_paddle
-		}.to_json
-		end
 
 	
 

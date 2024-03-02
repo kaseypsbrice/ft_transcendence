@@ -35,8 +35,8 @@ class WebSocketManager
 			return
 		end
 
-		# if this isn't a login or register request, verify token
-		if msg_data["type"] != "login" && msg_data["type"] != "register"
+		# if this isn't a login, register or ping request, verify token
+		if msg_data["type"] != "login" && msg_data["type"] != "register" && msg_data["type"] != "ping"
 			if !msg_data["token"] || !@user_manager.token_valid?(msg_data["token"])
 				ws.send({type: "InvalidToken"}.to_json)
 				return
@@ -54,6 +54,12 @@ class WebSocketManager
 		
         # ... handle msg_data
 		case msg_data["type"]
+		when "ping"
+			d = ""
+			if msg_data["data"]
+				d = msg_data["data"]
+			end
+			ws.send({type:"pong", data: d}.to_json)
 		# 								-------- GAME COMMANDS --------
 		when "move_left_paddle", "move_right_paddle" # Corrected to match client message types
 			if client.game != nil && msg_data.key?("direction")

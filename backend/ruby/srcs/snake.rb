@@ -172,6 +172,7 @@ class SnakeGame
 
 	def state_as_json
 		data = {}
+		data["game"] = "snake"
 		data["snakes"] = []
 		data["food"] = @food
 		if (@winner != -1)
