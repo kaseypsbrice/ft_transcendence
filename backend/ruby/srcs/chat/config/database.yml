@@ -1,0 +1,8 @@
+development:
+  adapter: 'postgresql'
+  database: 'pong'
+  username: 'postgres'
+  password: 'password'
+  host: 'db'
+
+

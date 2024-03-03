@@ -1,8 +1,0 @@
-development:
-  adapter: 'postgresql'
-  database: 'online_chat'
-  username: 'transcendence'
-  password: 'pass'
-  host: 'localhost'
-
-

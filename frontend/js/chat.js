@@ -1,49 +1,16 @@
-const ws = new WebSocket('wss://127.0.0.1:8080');
-
-function sendWithToken(ws, data)
-{
-	var token = null;
-	const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
-        const [name, value] = cookie.trim().split('=');
-        if (name === 'access_token') {
-
-            token = value;
-			break;
-		}
-	}
-	if (token == null)
-	{
-		state = "logged_out";
-		return true;
-	}
-	data["token"] = token;
-	ws.send(JSON.stringify(data));
-	return false;
+function onMessage(ws, event, msg) {
+	console.log(msg)
+	if (msg.type === "ChatMessage" && msg["message"] != null && msg.message["content"] != null)
+		displayMessage(msg.message);
 }
 
-ws.onopen = function() {
-    console.log('Connected to the chat server');
-};
-
-ws.onmessage = function(event) {
-    console.log('Received message:', event.data);
-    const message = JSON.parse(event.data);
-    displayMessage(message);
-};
-
-ws.onerror = function(error) {
-    console.log('WebSocket Error:', error);
-};
-
 function sendMessage() {
-    const message = {
+    message = {
 		type: "chat_message",
         content: document.getElementById('messageInput').value
     };
     console.log('Sending message:', message);
-    if (sendWithToken(ws, message))
-		console.log("You are not logged in!");
+    sendWithToken(ws, message);
     document.getElementById('messageInput').value = '';
 }
 
@@ -56,12 +23,13 @@ function displayMessage(message) {
     document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+(function (){
+	console.log("loaded")
     const messageInput = document.getElementById('messageInput'); // input element for typing messages
     const messagesDiv = document.getElementById('messages'); // container where messages are displayed
 
     function fetchChatHistory() {
-        fetch('http://localhost:9002/chat-history')
+        fetch('https://127.0.0.1:9001/chat-history')
             .then(response => response.json())
             .then(messages => {
                 messages.forEach(message => displayMessage(message));
@@ -73,6 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('sendButton').addEventListener('click', function(event) {
         event.preventDefault(); // Prevent the default button click behavior
+		console.log("clicked");
         sendMessage();
     });
 
@@ -82,4 +51,4 @@ document.addEventListener('DOMContentLoaded', function() {
 			sendMessage();
 		}
 	})
-});
+})();

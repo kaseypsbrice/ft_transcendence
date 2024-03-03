@@ -43,6 +43,12 @@ const routes = {
         description: "Play snake",
         scripts: ["./js/snake.js"]
     },
+	chat: {
+        template: "./templates/chat.html",
+        title: pageTitle + " | Chat",
+        description: "Chat",
+        scripts: ["./js/chat.js"]
+    },
 };
 // Add other pages to the list
 

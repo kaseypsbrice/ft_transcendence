@@ -4,6 +4,8 @@ require_relative 'user_manager'
 require_relative 'pong'
 require_relative 'snake'
 require_relative 'client'
+require_relative 'chat/db_init'
+require_relative 'chat/models/chat_message'
 
 class WebSocketManager
 	def initialize
@@ -118,6 +120,68 @@ class WebSocketManager
 
 			# create a new user object with credentials, this reads from the database: user.rb
 			@user_manager.login(client, msg_data["data"]["username"], msg_data["data"]["password"]);
+		when "chat_message"
+			# TODO: Extract sender_id and receiver_id from the message or session context
+			sender_id = client.user_id
+			receiver_id = -1
+			msg_data.delete("token")
+			msg_data.delete("type")
+			msg_data["sender"] = @user_manager.get_user(client.user_id).display_name
+			msg_data["content"] = msg_data["content"].lstrip.rstrip
+			puts "1"
+			if !msg_data["content"] || msg_data["content"].empty?
+				return
+			end
+
+			puts "2"
+			# Chat commands
+			if msg_data["content"].start_with?("/")
+				msg_data["content"].slice!(0)
+				split_msg = msg_data["content"].split(' ', 3)
+				case split_msg[0]
+				when "w"
+					if split_msg.size < 3
+						ws.send({type:"ChatMessageError", error:"NoWhisperUser", message:"/w {user} {msg}"}.to_json)
+						return
+					end
+					begin
+						user = User.from_display_name(split_msg[1])
+						if !@user_manager.user?(user.id)
+							ws.send({type:"ChatMessageError", error:"UserOffline", message:"User #{split_msg[1]} is offline"}.to_json)
+							return
+						end
+						receiver_id = user.id
+						msg_data["content"] = split_msg[2]
+						
+						ws.send({type:"WhisperResponse", user: split_msg[1], message: msg_data["content"]}.to_json)
+					rescue User::Error
+						ws.send({type:"ChatMessageError", error:"UserNotFound", message:"User #{split_msg[1]} does not exist"}.to_json)
+						return
+					end
+				when "help"
+					ws.send({type:"HelpResponse", message:"Commands\n\t/w {user} {msg} : whisper to a user"}.to_json)
+					return
+				end
+			end
+
+			#TODO: check if client is in game and send to partner game websocket
+
+			# Save the message to the database
+			puts "creating chat message"
+			ChatMessage.create(sender_id: sender_id, receiver_id: receiver_id, content: msg_data["content"])
+
+			# Broadcast the message to all clients (including the sender)
+			if receiver_id == -1
+				@connections.each { |client_ws, client| 
+				client_ws.send({type: "ChatMessage", message: msg_data}.to_json)
+				}
+			else # Whisper to all clients logged in as correct user
+				@connections.each { |client_ws, client| 
+					if client.user_id == receiver_id
+						client_ws.send({type: "ChatMessage", message: msg_data}.to_json)
+					end
+				}
+			end
 		end
 		rescue JSON::ParserError => e
 			puts "Error parsing JSON: #{e.message}"

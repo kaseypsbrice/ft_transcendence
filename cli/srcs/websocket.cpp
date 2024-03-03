@@ -115,9 +115,9 @@ void websocket_connect(t_game *game)
 		memset(&ccinfo, 0, sizeof(ccinfo));
 		
 		ccinfo.context = game->context;
-		ccinfo.address = "localhost";
-		ccinfo.port = 8080;
-		ccinfo.path = "/";
+		ccinfo.address = "127.0.0.1";
+		ccinfo.port = 9001;
+		ccinfo.path = "/ws";
 		ccinfo.host = lws_canonical_hostname( game->context );
 		ccinfo.origin = "origin";
 		ccinfo.protocol = protocols[PROTOCOL_EXAMPLE].name;

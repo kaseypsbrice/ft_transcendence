@@ -16,7 +16,6 @@ end
 
 # Endpoint for chat history
 get '/chat-history' do
-	cross_origin
 	content_type :json
   
 	# Fetch messages from the database
@@ -38,7 +37,7 @@ get '/chat-history' do
   options "*" do
 	response.headers["Allow"] = "GET, POST, OPTIONS"
 	response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-	response.headers["Access-Control-Allow-Origin"] = "http://127.0.0.1:5500" # remember to change this to the domain of website
+	response.headers["Access-Control-Allow-Origin"] = "https://127.0.0.1:9001" # remember to change this to the domain of website
 	response.headers["Access-Conrtol-Allow-Methods"] = "POST, GET, OPTIONS"
 	200
 end

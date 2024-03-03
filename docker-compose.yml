@@ -8,6 +8,7 @@ services:
     container_name: nginx
     ports:
       - "9001:9001"
+      - "9002:9002"
     volumes:
       - ./frontend:/usr/share/nginx/html/
       - ./backend/nginx/conf.d:/etc/nginx/conf.d/
@@ -27,6 +28,7 @@ services:
     container_name: ruby
     ports:
       - "8080:8080"
+      - "4567:4567"
     volumes:
       - ./backend/ruby/srcs:/var/server
       - ${KEY_}:/var/ssl/pong.key

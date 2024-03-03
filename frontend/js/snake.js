@@ -366,8 +366,6 @@ document.addEventListener('click', function(event)
 function gameLoop() {
 	if (state == "menu" && !logged_in)
 		state = "logged_out";
-	console.log(state)
-	console.log(logged_in)
 	switch (state)
 	{
 		case "menu":
