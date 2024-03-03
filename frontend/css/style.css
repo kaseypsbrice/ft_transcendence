@@ -64,17 +64,41 @@ nav a:hover {
     font-size: 16px;
 }
 
+.games-dropdown-title {
+    cursor: pointer;
+}
+
 .games-dropdown-content {
-    visibility: hidden;
-    opacity: 0;
+    border-top: #060606 8px solid;
+    display: none;
     position: absolute;
-    background-color: grey;
+    top: 100%;
+    left: 0;
+    background-color: #1a1a1d;
     z-index: 1;
+}
+.games-dropdown-content ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.games-dropdown-content ul li {
+    padding: 10px 12px;
+}
+
+.games-dropdown-content ul li:hover {
+    width: 100%;
+    background-color: #4d4d4d;
+}
+
+.games-dropdown-content ul li a {
+    color: white;
+    text-decoration: none;
 }
 
 .games-dropdown:hover .games-dropdown-content {
     display: block;
-    visibility: visible;
 }
 
 .settings-button {
@@ -161,10 +185,11 @@ nav a:hover {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none'%3E%3Cpath d='M24 0v24H0V0zM12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035c-.01-.004-.019-.001-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427c-.002-.01-.009-.017-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093c.012.004.023 0 .029-.008l.004-.014l-.034-.614c-.003-.012-.01-.02-.02-.022m-.715.002a.023.023 0 0 0-.027.006l-.006.014l-.034.614c0 .012.007.02.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z'/%3E%3Cpath fill='white' d='M17 4c1.106 0 1.955.843 2.584 1.75l.213.321l.195.32c.062.104.121.208.178.308c.787 1.407 1.472 3.244 1.925 5.059c.45 1.801.699 3.682.54 5.161C22.475 18.404 21.71 20 20 20c-1.534 0-2.743-.82-3.725-1.621l-1.11-.931C14.242 16.692 13.232 16 12 16s-2.243.692-3.164 1.448l-1.11.93C6.742 19.18 5.533 20 4 20c-1.711 0-2.476-1.596-2.635-3.081c-.158-1.48.09-3.36.54-5.161c.453-1.815 1.138-3.652 1.925-5.059l.178-.309l.195-.319l.213-.321C5.045 4.843 5.894 4 7 4c.51 0 1.017.124 1.515.27l.593.182c.098.03.195.059.292.086c.865.248 1.75.462 2.6.462c.85 0 1.735-.214 2.6-.462l.885-.267C15.983 4.124 16.49 4 17 4M8.5 8a2.5 2.5 0 1 0 0 5a2.5 2.5 0 0 0 0-5m7 0a1 1 0 0 0-1 1v.5H14a1 1 0 1 0 0 2h.5v.5a1 1 0 1 0 2 0v-.5h.5a1 1 0 1 0 0-2h-.5V9a1 1 0 0 0-1-1m-7 2a.5.5 0 1 1 0 1a.5.5 0 0 1 0-1'/%3E%3C/g%3E%3C/svg%3E");
 }
 
-.bxs--down-arrow {
-    margin-top: 4px;
-    margin-left: 11px;
-    float: left;
+.games-dropdown-title .bxs--down-arrow {
+    position: absolute;
+    top: 50%;
+    left: 107px;
+    transform: translateY(-40%);
     width: 15px;
     height: 15px;
     background-repeat: no-repeat;
@@ -365,3 +390,10 @@ p {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 17a2 2 0 0 1-2-2c0-1.11.89-2 2-2a2 2 0 0 1 2 2a2 2 0 0 1-2 2m6 3V10H6v10zm0-12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V10c0-1.11.89-2 2-2h1V6a5 5 0 0 1 5-5a5 5 0 0 1 5 5v2zm-6-5a3 3 0 0 0-3 3v2h6V6a3 3 0 0 0-3-3'/%3E%3C/svg%3E");
 }
 
+/* =========================== Game CSS =========================== */
+
+#game-canvas {
+    background-color: #000;
+    display: block;
+    margin: auto;
+}
