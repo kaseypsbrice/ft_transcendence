@@ -5,16 +5,17 @@
 
         <div class="input-container">
             <span class="bx--user"></span>
-            <input type="text" class="input" placeholder="Username or Email">
+            <input type="text" id="username" class="input" placeholder="Username or Email">
         </div>
 
         <div class="input-container">
             <span class="mdi--password-outline"></span>
-            <input type="password" class="input" placeholder="Password">
+            <input type="password" id="password" class="input" placeholder="Password">
         </div>
 
-        <input type="submit" class="signup-button" value="Create Account">
+        <input type="submit" onclick="submitForm(event)" class="signup-button" value="Create Account">
         <div class="divider"></div>
         <div class="prompt">Don't have an account yet? <a href="#signup">Sign Up</a></div>
     </form>
+	<script src = "./js/login.js"></script>
 </div>
