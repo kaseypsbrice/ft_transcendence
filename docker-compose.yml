@@ -9,7 +9,7 @@ services:
     ports:
       - "9001:9001"
     volumes:
-      - ./pongGame:/var/www/public/html
+      - ./frontend:/usr/share/nginx/html/
       - ./backend/nginx/conf.d:/etc/nginx/conf.d/
       - ${KEY_}:/etc/nginx/ssl/pong.key
       - ${CERT_}:/etc/nginx/ssl/pong.crt
