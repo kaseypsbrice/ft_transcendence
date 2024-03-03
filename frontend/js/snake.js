@@ -1,6 +1,6 @@
+(function() { // ecapsulate variables in function, globals can be edited with 'window.'
 const canvas = document.getElementById('pongCanvas')
 const ctx = canvas.getContext('2d');
-const ws = new WebSocket('wss://127.0.0.1:8080');
 const scaleX = canvas.width / 10;
 const scaleY = canvas.height / 10;
 const RIGHT = 0;
@@ -87,10 +87,28 @@ let defeat_buttons = [
 	}
 ]
 
+let logged_out_buttons = [
+	{
+		pos: {x: canvas.width * 0.35, y: canvas.height * 0.8},
+		size: {x: canvas.width * 0.3, y: canvas.height * 0.1},
+		color: "darkcyan",
+		color_hover: "darkslategray",
+		on_click: function() {window.location.hash = "#login"},
+		textBox: {
+			text: "Login",
+			color: "white",
+			font: "24px Arial",
+			pos: {x: canvas.width * 0.15, y: 8 + canvas.height * 0.05},
+			align: "center"
+		}
+	}
+]
+
 let button_map = {
 	menu: menu_buttons,
 	victory: victory_buttons,
-	defeat: defeat_buttons
+	defeat: defeat_buttons,
+	logged_out: logged_out_buttons
 }
 
 let options = {
@@ -277,86 +295,44 @@ function updateLoggedOut()
 	ctx.textAlign = "center";
 	ctx.font = "32px Arial";
 	ctx.fillText("You are not logged in, log in at URL/login", canvas.width / 2, canvas.height / 2);
+
+	drawButtons();
 }
 
-ws.onopen = function(event) {
-	console.log("Connected to websocket server");
-};
-
-
-function sendWithToken(ws, data)
+window.onMessage = function(ws, event, msg) 
 {
-	var token = null;
-	const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
-        const [name, value] = cookie.trim().split('=');
-        if (name === 'access_token') {
-
-            token = value;
-			break;
-		}
-	}
-	if (token == null)
+	switch (msg.type)
 	{
-		state = "logged_out";
-		return true;
-	}
-	data["token"] = token;
-	ws.send(JSON.stringify(data));
-	return false;
-}
-
-ws.onmessage = function(event) {
-    try {
-        const msg = JSON.parse(event.data);
-		console.log(msg.type);
-		switch (msg.type)
-		{
-			case "state":
-				if (msg.data.winner != null)
+		case "state":
+			if (msg.data.winner != null)
+			{
+				if (msg.data.winner == player_id)
 				{
-					if (msg.data.winner == player_id)
-					{
-						menu_text = "";
-						state = "victory";
-					}
-					else
-					{
-						menu_text = "";
-						state = "defeat";
-					}
-					break;
+					menu_text = "";
+					state = "victory";
 				}
-				gameState = msg.data;
-           		updateGame(msg.data);
+				else
+				{
+					menu_text = "";
+					state = "defeat";
+				}
 				break;
-			case "welcome":
-            	console.log(msg.message);
-				state = "menu";
-				break;
-			case "game_found":
-				console.log("game found");
-				player_id = msg.data.player_id;
-				state = "game";
-				console.log("player_id: ", player_id);
-				break;
-			case "partner_disconnected":
-				menu_text = "opponent disconnected"
-				state = "menu";
-				break;
-			case "InvalidToken":
-				state = "logged_out";
-				break;
-		}
-    } catch (e) {
-        console.error('Error parsing message:', e);
-    }
-};
-
-  ws.onclose = function(event) {
-	console.log('websocket connection closed', event.code, event.reason);
-	state = "disconnected";
-  };
+			}
+			gameState = msg.data;
+			updateGame(msg.data);
+			break;
+		case "game_found":
+			console.log("game found");
+			player_id = msg.data.player_id;
+			state = "game";
+			console.log("player_id: ", player_id);
+			break;
+		case "partner_disconnected":
+			menu_text = "opponent disconnected"
+			state = "menu";
+			break;
+	}
+}
 
 document.addEventListener('keydown', function(event) {
 	if (player_id < 0)
@@ -388,6 +364,10 @@ document.addEventListener('click', function(event)
 });
 
 function gameLoop() {
+	if (state == "menu" && !logged_in)
+		state = "logged_out";
+	console.log(state)
+	console.log(logged_in)
 	switch (state)
 	{
 		case "menu":
@@ -410,5 +390,39 @@ function gameLoop() {
 	requestAnimationFrame(gameLoop);
 }
 
+// websocket.js overloads
+window.onLogout = function()
+{
+	state = "logged_out";
+}
+
+window.onLogin = function()
+{
+	state = "menu";
+}
+
+window.onOpen = function(ws, event)
+{
+	state = "menu"
+}
+
+window.onClose = function(ws, event)
+{
+	state = "disconnected"
+}
+
+// initalize game state
+switch(ws.readyState)
+{
+	case ws.CONNECTING:
+		state = "connecting"; break;
+	case ws.OPEN:
+		onOpen(null, null); break;
+	case ws.CLOSING:
+	case ws.CLOSED:
+		onClosed(null, null); break;
+}
+
 //start the game loop
 requestAnimationFrame(gameLoop);
+})();

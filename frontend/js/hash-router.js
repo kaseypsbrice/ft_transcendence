@@ -1,46 +1,80 @@
 const pageTitle = "Mighty Pong";
 
 const routes = {
-	404: {
-		template: "./templates/404.html",
-		title: pageTitle + " | 404",
-		description: "Page not found"
-	},
-	home: {
-		template: "./templates/home.html",
-		title: pageTitle + " | Home",
-		description: "This is the homepage"
-	},
-	leaderboard: {
-		template: "./templates/leaderboard.html",
-		title: pageTitle + " | Leaderboard",
-		description: "View leaderboard on this page"
-	},
+    404: {
+        template: "./templates/404.html",
+        title: pageTitle + " | 404",
+        description: "Page not found",
+        scripts: []
+    },
+    home: {
+        template: "./templates/home.html",
+        title: pageTitle + " | Home",
+        description: "This is the homepage",
+        scripts: []
+    },
+    leaderboard: {
+        template: "./templates/leaderboard.html",
+        title: pageTitle + " | Leaderboard",
+        description: "View leaderboard on this page",
+        scripts: []
+    },
     login: {
         template: "./templates/login.html",
-		title: pageTitle + " | Login",
-		description: "Login if you're an existing member of the site"
+        title: pageTitle + " | Login",
+        description: "Login if you're an existing member of the site",
+        scripts: ["./js/login.js"]
     },
     signup: {
         template: "./templates/signup.html",
-		title: pageTitle + " | Sign Up",
-		description: "Sign up and become a member of the site"
+        title: pageTitle + " | Sign Up",
+        description: "Sign up and become a member of the site",
+        scripts: ["./js/register.js"]
+    },
+	pong: {
+        template: "./templates/pong.html",
+        title: pageTitle + " | Pong",
+        description: "Play Pong",
+        scripts: ["./js/pong.js"]
+    },
+	snake: {
+        template: "./templates/snake.html",
+        title: pageTitle + " | Snake",
+        description: "Play snake",
+        scripts: ["./js/snake.js"]
     },
 };
 // Add other pages to the list
 
 const locationHandler = async () => {
-	var location = window.location.hash.replace("#", "");
-	if (location.length === 0) {
-		location = "home" // Default route/page
-	}
-	const route = routes[location] || routes[404];
-	const html = await fetch(route.template).then((response) => response.text());
-	document.getElementById("content").innerHTML = html;
-	document.title = route.title;
-	document
-		.querySelector('meta[name="description"]')
-		.setAttribute("content", route.description);
+    var location = window.location.hash.replace("#", "");
+    if (location.length === 0) {
+        location = "home" // Default route/page
+    }
+    const route = routes[location] || routes[404];
+    
+    // Remove scripts from the previous route
+    const previousScripts = document.querySelectorAll('script[data-route]');
+    previousScripts.forEach(script => script.remove());
+
+    // Fetch and load HTML template
+    const html = await fetch(route.template).then((response) => response.text());
+    document.getElementById("content").innerHTML = html;
+    document.title = route.title;
+    document
+        .querySelector('meta[name="description"]')
+        .setAttribute("content", route.description);
+
+    // Fetch and execute scripts for the new route
+    const scripts = await Promise.all(
+        route.scripts.map(script => fetch(script).then(response => response.text()))
+    );
+    scripts.forEach(scriptContent => {
+        const scriptElement = document.createElement("script");
+        scriptElement.innerHTML = scriptContent;
+        scriptElement.setAttribute("data-route", location); // Mark script with data attribute
+        document.body.appendChild(scriptElement);
+    });
 };
 
 window.addEventListener("hashchange", locationHandler);
@@ -48,7 +82,7 @@ window.addEventListener("hashchange", locationHandler);
 locationHandler();
 
 function onRouteChanged() {
-	console.log("Hash changed!");
+    console.log("Hash changed!");
 }
 
 window.addEventListener("hashchange", onRouteChanged);
