@@ -26,7 +26,7 @@ ws.onmessage = function(event) {
 			console.log(msg.type);
 			if (msg.type === 'authentication' && msg.token != null)
 			{
-				document.cookie = 'access_token=${msg.token};SameSite=Strict;Secure;';
+				document.cookie = `access_token=${msg.token};SameSite=Strict;Secure;`;
 				logged_in = true;
 				onLogin();
 			}
