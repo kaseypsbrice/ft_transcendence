@@ -8,7 +8,7 @@ let gameState = {
 	score_right: 0
 };
 
-const canvas = document.getElementById('pongCanvas')
+const canvas = document.getElementById('game-canvas')
 const ctx = canvas.getContext('2d');
 
 const scaleX = canvas.width / 10;
