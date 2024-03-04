@@ -7,11 +7,21 @@ class User
 	MAX_USERNAME = 50
 	MAX_DISPLAY_NAME = 30
 
-	def initialize(id:, username:, password:, display_name:)
+	def initialize(id:, username:, password:, display_name:, friends:, blocked:,\
+		pong_wins:, pong_losses:, snake_wins:, snake_losses:, pong_tournament_wins:,\
+		snake_tournament_wins:)
 		@id = id
 		@username = username
 		@password = password
 		@display_name = display_name
+		@friends = friends
+		@blocked = blocked
+		@pong_wins = pong_wins
+		@pong_losses = pong_losses
+		@snake_wins = snake_wins
+		@snake_losses = snake_losses
+		@pong_tournament_wins = pong_tournament_wins
+		@snake_tournament_wins = snake_tournament_wins
 	end
 
 	class Error < StandardError
@@ -64,6 +74,23 @@ class User
 		end
 	end
 
+	def self.from_db_query(result)
+		new(
+			id: result[0]['id'],
+			username: result[0]['username'],
+			password: result[0]['password'],
+			display_name: result[0]['display_name'],
+			friends: result[0]['friends'],
+			blocked: result[0]['blocked'],
+			snake_wins: result[0]['snake_wins'],
+			snake_losses: result[0]['snake_losses'],
+			pong_wins: result[0]['pong_wins'],
+			pong_losses: result[0]['pong_losses'],
+			snake_tournament_wins: result[0]['snake_tournament_wins'],
+			pong_tournament_wins: result[0]['pong_tournament_wins']
+		)
+	end
+
 	def self.register(username, password, display_name, db)
 
 		if password.size < 8
@@ -88,12 +115,7 @@ class User
 			[username, encrypted_password, display_name]
 		)
 
-		new(
-			id: result[0]['id'],
-			username: username,
-			password: encrypted_password,
-			display_name: display_name
-		)
+		return from_db_query(result)
 		rescue PG::UniqueViolation => e
 			if e.message.include?("(username)=")
 				puts "Username taken"
@@ -128,12 +150,7 @@ class User
 			puts "Incorrect password"
 			raise PasswordIncorrect
 		end
-		new(
-			id: result[0]['id'],
-			username: result[0]['username'],
-			password: result[0]['password'],
-			display_name: result[0]['display_name']
-		)
+		return from_db_query(result)
 		rescue PG::Error => e
 			puts "An error occured while querying users: #{e.message}"
 			raise DatabaseError
@@ -151,12 +168,7 @@ class User
 			puts "Could not find user in database"
 			raise UserNotFound
 		end
-		new(
-			id: result[0]['id'],
-			username: result[0]['username'],
-			password: result[0]['password'],
-			display_name: result[0]['display_name']
-		)
+		from_db_query(result)
 		rescue PG::Error => e
 			puts "An error occured while querying users: #{e.message}"
 			raise DatabaseError

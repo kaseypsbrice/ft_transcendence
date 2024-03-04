@@ -96,12 +96,43 @@ class UserManager
 		end
 	end
 
-	def save_match(game, player1_id, player2_id, winner, info)
+	def get_leaderboard()
+		begin
+			result = @db.exec(
+				'SELECT display_name, pong_wins, snake_wins, pong_losses, snake_losses, \
+				pong_tournament_wins, snake_tournament_wins FROM users;'
+			)
+			result = result.sort_by {|user|
+				(user.snake_wins + user.pong_wins) /\
+				(user.snake_losses + user.pong_losses)
+			}
+			return result
+		rescue PG::Error
+			puts "Error while querying database for leaderboard"
+			return []
+		end
+	end
+
+	def save_match(game, winner_id, loser_id, info)
 		begin
 			@db.exec_params(
-			'INSERT INTO matches (game, player1, player2, winner, info) VALUES ($1, $2, $3, $4, $5)',
-			[game, player1_id, player2_id, winner, info]
+			'INSERT INTO matches (game, winner, loser, info) VALUES ($1, $2, $3, $4)',
+			[game, winner_id, loser_id, info]
 		)
+		# TODO: increment tournament wins
+		@db.exec_params(
+			"UPDATE users
+			SET #{game}_wins = #{game}_wins + 1
+			WHERE id = $1",
+			[winner_id]
+		)
+		@db.exec_params(
+			"UPDATE users
+			SET #{game}_losses = #{game}_losses + 1
+			WHERE id = $1",
+			[loser_id]
+		)
+
 		rescue PG::Error => e
 			puts "An error occured while saving match: #{e.message}"
 		end

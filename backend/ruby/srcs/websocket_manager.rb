@@ -38,7 +38,8 @@ class WebSocketManager
 		end
 
 		# if this isn't a login, register or ping request, verify token
-		if msg_data["type"] != "login" && msg_data["type"] != "register" && msg_data["type"] != "ping"
+		if msg_data["type"] != "login" && msg_data["type"] != "register" && msg_data["type"] != "ping" \
+			&& msg_data["type"] != "get_leaderboard"
 			if !msg_data["token"] || !@user_manager.token_valid?(msg_data["token"])
 				ws.send({type: "InvalidToken"}.to_json)
 				return
@@ -182,6 +183,8 @@ class WebSocketManager
 					end
 				}
 			end
+		when "get_leaderboard"
+			ws.send({type: "GetLeaderboard", data: @user_manager.get_leaderboard()}.to_json)
 		end
 		rescue JSON::ParserError => e
 			puts "Error parsing JSON: #{e.message}"
@@ -278,10 +281,12 @@ class WebSocketManager
 		player.partner.send({type: "state", data: game.state_as_json}.to_json)
 		if game.state_as_json["winner"] != nil && game.state_as_json["winner"] > -1
 			winner_id = player.user_id
+			loser_id = partner.user_id
 			if game.state_as_json["winner"] != player.id
 				winner_id = partner.user_id
+				loser_id = player.user_id
 			end
-			@user_manager.save_match(player.game_selected, player.user_id, partner.user_id, winner_id, "INSERT MATCH TYPE HERE")
+			@user_manager.save_match(player.game_selected, winner_id, loser_id, "INSERT MATCH TYPE HERE")
 			player.in_game = false
 			player.game = nil
 			partner.in_game = false

@@ -1,4 +1,4 @@
-const ws = new WebSocket('wss://127.0.0.1:9001/ws');
+const ws = new WebSocket('wss://60.225.230.139:9001/ws');
 
 let logged_in = true;
 
