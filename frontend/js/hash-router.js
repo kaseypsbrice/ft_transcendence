@@ -61,7 +61,12 @@ const locationHandler = async () => {
     
     // Remove scripts from the previous route
     const previousScripts = document.querySelectorAll('script[data-route]');
-    previousScripts.forEach(script => script.remove());
+    previousScripts.forEach(script => {
+		cleanupPage();
+		window.cleanupPage = function() {}
+		script.remove();
+	});
+	
 
     // Fetch and load HTML template
     const html = await fetch(route.template).then((response) => response.text());

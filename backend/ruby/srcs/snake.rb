@@ -53,6 +53,7 @@ class SnakeGame
 		end
 	end
 
+	attr_accessor :winner
 	def initialize
 		@snakes = [Snake.new(4, GAME_HEIGHT / 2), Snake.new(GAME_WIDTH - 4, GAME_HEIGHT / 2)]
 		@food = []

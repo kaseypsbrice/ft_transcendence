@@ -25,8 +25,7 @@ get '/chat-history' do
 	messages.map { |message| 
 	  {
 		id: message.id,
-		sender_id: message.sender_id,
-		receiver_id: message.receiver_id,
+		sender: message.sender,
 		content: message.content,
 		created_at: message.created_at
 	  }

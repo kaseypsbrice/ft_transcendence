@@ -15,10 +15,10 @@ clean: down
 	docker system prune -a
 
 fclean:
-	docker stop $$(docker ps -qa)
-	docker system prune --all --force --volumes
-	docker network prune --force
-	docker volume prune --force
-	sudo rm -rf local/db/*
+	docker stop $$(docker ps -qa);\
+	docker system prune --all --force --volumes;\
+	docker network prune --force;\
+	docker volume prune --force;\
+	sudo rm -rf local/db/*;
 
 .PHONY	: all build down re clean fclean

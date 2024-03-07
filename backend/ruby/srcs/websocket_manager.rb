@@ -6,20 +6,26 @@ require_relative 'snake'
 require_relative 'client'
 require_relative 'chat/db_init'
 require_relative 'chat/models/chat_message'
+require_relative 'tournament'
+require_relative 'alert_manager'
 
 class WebSocketManager
+	attr_accessor :connections, :db
+
 	def initialize
 		@connections = {} # (websocket connection : client object)
 		@db = PG::Connection.new("db", "5432", nil, nil, "pong", "postgres", "password");
 		@rsa_private = OpenSSL::PKey::RSA.generate 2048
 		@rsa_public = @rsa_private.public_key
 		@user_manager = UserManager.new(@db, @rsa_private, @rsa_public)
+		@alert_manager = AlertManager.new(self)
 	end
 
 	def handle_open(ws, handshake)
 		puts "WebSocket connection open"
 		@connections[ws] = Client.new(ws)
 		ws.send({type: "welcome", message: "Welcome to Online Pong!"}.to_json)
+		@alert_manager.send_client_alerts(@connections[ws])
 	end
 
 	def handle_message(ws, msg)
@@ -55,6 +61,11 @@ class WebSocketManager
 			end
 		end
 		
+		user = @user_manager.get_user(client.user_id)
+		if user != nil
+			user.current_ws = ws
+		end
+
         # ... handle msg_data
 		case msg_data["type"]
 		when "ping"
@@ -84,7 +95,6 @@ class WebSocketManager
 				partner = find_partner(ws, "pong")
 				if partner != nil
 					start_game(partner, ws, "pong")
-					timer = EM.add_periodic_timer(0.016) {game_loop(ws, timer)}
 				end
 			end
 		when "find_snake"
@@ -94,8 +104,15 @@ class WebSocketManager
 				partner = find_partner(ws, "snake")
 				if partner != nil
 					start_game(partner, ws, "snake")
-					timer = EM.add_periodic_timer(0.1) {game_loop(ws, timer)}
 				end
+			end
+		when "find_tournament"
+			if !msg_data.key?("game")
+				ws.send({type: "FindTournamentError", message: "Game not provided"}.to_json)
+				return
+			end
+			if !@alert_manager.join_or_create_tournament(user, msg_data["game"])
+				ws.send({type: "FindTournamentError", message: "Game not found"}.to_json)
 			end
 		when "get_match_history"
 			history = @user_manager.get_match_history(client, msg_data["token"])
@@ -123,6 +140,7 @@ class WebSocketManager
 			@user_manager.login(client, msg_data["data"]["username"], msg_data["data"]["password"]);
 		when "chat_message"
 			# TODO: Extract sender_id and receiver_id from the message or session context
+			save_to_db = true
 			sender_id = client.user_id
 			receiver_id = -1
 			msg_data.delete("token")
@@ -135,7 +153,7 @@ class WebSocketManager
 			end
 
 			puts "2"
-			# Chat commands
+			#                               -------- CHAT COMMANDS --------
 			if msg_data["content"].start_with?("/")
 				msg_data["content"].slice!(0)
 				split_msg = msg_data["content"].split(' ', 3)
@@ -146,21 +164,51 @@ class WebSocketManager
 						return
 					end
 					begin
-						user = User.from_display_name(split_msg[1])
-						if !@user_manager.user?(user.id)
+						target = @user_manager.get_user_from_display_name(split_msg[1])
+						if !target
 							ws.send({type:"ChatMessageError", error:"UserOffline", message:"User #{split_msg[1]} is offline"}.to_json)
 							return
 						end
-						receiver_id = user.id
+						receiver_id = target.id
 						msg_data["content"] = split_msg[2]
 						
 						ws.send({type:"WhisperResponse", user: split_msg[1], message: msg_data["content"]}.to_json)
+						@connections.each { |client_ws, client| 
+							if client.user_id == receiver_id
+								client_ws.send({type: "Whisper", message: msg_data}.to_json)
+							end
+						}
 					rescue User::Error
 						ws.send({type:"ChatMessageError", error:"UserNotFound", message:"User #{split_msg[1]} does not exist"}.to_json)
 						return
 					end
+				when "invite"
+					if split_msg.size < 3
+						ws.send({type: "ChatMessageError", error: "InviteFormat", message: "Invite format error"}.to_json)
+						return
+					elsif split_msg[2] != "pong" && split_msg[2] != "snake"
+						ws.send({type: "ChatMessageError", error: "InviteFormat", message: "Invite game #{split_msg[2]} not recognised, try 'pong' or 'snake'"}.to_json)
+						return
+					end
+					user_from = @user_manager.get_user(client.user_id)
+					user_to = @user_manager.get_user_from_display_name(split_msg[1])
+					if (user_to == nil)
+						ws.send({type: "ChatMessageError", error:"UserNotFound", message: "User #{split_msg[1]} is not online"}.to_json)
+						return
+					end
+					if user_to.blocked?(user_from.id)
+						ws.send({type: "ChatMessageError", error:"Blocked", message: "Cannot invite #{split_msg[1]}, you are blocked"}.to_json)
+						return
+					end
+					if user_from.blocked?(user_to.id)
+						ws.send({type: "ChatMessageError", error:"Blocked", message: "Cannot invite #{split_msg[1]}, they are blocked"}.to_json)
+						return
+					end
+					@alert_manager.create_invite(user_from, user_to, split_msg[2])
+					ws.send({type: "InviteSuccess", user: split_msg[1]}.to_json)
+					return
 				when "help"
-					ws.send({type:"HelpResponse", message:"Commands\n\t/w {user} {msg} : whisper to a user"}.to_json)
+					ws.send({type: "HelpResponse", message:"Commands\n\t/w {user} {msg} : whisper to a user\n/invite {user} {game} : invite user to game"}.to_json)
 					return
 				end
 			end
@@ -168,23 +216,174 @@ class WebSocketManager
 			#TODO: check if client is in game and send to partner game websocket
 
 			# Save the message to the database
-			puts "creating chat message"
-			ChatMessage.create(sender_id: sender_id, receiver_id: receiver_id, content: msg_data["content"])
+			puts "creating chat message from #{msg_data["sender"]}"
+			ChatMessage.create(sender: msg_data["sender"], content: msg_data["content"])
 
 			# Broadcast the message to all clients (including the sender)
-			if receiver_id == -1
-				@connections.each { |client_ws, client| 
+			
+			@connections.each { |client_ws, client| 
 				client_ws.send({type: "ChatMessage", message: msg_data}.to_json)
-				}
-			else # Whisper to all clients logged in as correct user
-				@connections.each { |client_ws, client| 
-					if client.user_id == receiver_id
-						client_ws.send({type: "ChatMessage", message: msg_data}.to_json)
-					end
-				}
-			end
+			}
 		when "get_leaderboard"
 			ws.send({type: "GetLeaderboard", data: @user_manager.get_leaderboard()}.to_json)
+		when "get_alerts"
+			@alert_manager.send_client_alerts(client)
+		when "get_chat_history"
+			begin
+				chat_history = user.get_chat_history(@db)
+				ws.send({type: "ChatHistory", data: chat_history}.to_json)
+			rescue User::Error => e
+				ws.send({type: "ChatHistoryError", message: "Error fetching chat history"}.to_json)
+			end
+		when "block_user"
+			begin
+				b_user
+				if msg_data["id"] != nil
+					b_user = @user_manager.get_user_info(msg_data["id"])
+					if b_user == nil
+						ws.send({type: "BlockError", message: "Couldn't find user with id #{msg_data["id"]}"}.to_json)
+					elsif user.blocked?(b_user.id)
+						ws.send({type: "BlockReply", message: "User #{b_user.display_name} is already blocked"}.to_json)
+					else
+						user.block_user(b_user.id)
+						ws.send({type: "BlockReply", message: "User #{b_user.display_name} has been blocked"}.to_json)
+					end
+					return
+				elsif msg_data["name"] != nil
+					b_user = @user_manager.get_user_info(msg_data["name"])
+					if b_user == nil
+						ws.send({type: "BlockError", message: "Couldn't find user with display name #{msg_data["name"]}"}.to_json)
+					elsif user.blocked?(b_user.id)
+						ws.send({type: "BlockReply", message: "User #{b_user.display_name} is already blocked"}.to_json)
+					else
+						user.block_user(b_user.id)
+						ws.send({type: "BlockReply", message: "User #{b_user.display_name} has been blocked"}.to_json)
+					end
+					return
+				else
+					ws.send({type: "BlockError", message: "Error blocking user"}.to_json)
+				end
+			rescue User::Error
+				ws.send({type: "BlockError", message: "Error blocking user"}.to_json)
+			end
+		when "unblock_user"
+			begin
+				b_user
+				if msg_data["id"] != nil
+					b_user = @user_manager.get_user_info(msg_data["id"])
+					if b_user == nil
+						ws.send({type: "UnblockError", message: "Couldn't find user with id #{msg_data["id"]}"}.to_json)
+						return
+					end
+					if !user.blocked?(b_user.id)
+						ws.send({type: "UnblockReply", message: "User #{b_user.display_name} is not blocked"}.to_json)
+					else
+						user.block_user(b_user.id)
+						ws.send({type: "UnblockReply", message: "User #{b_user.display_name} has been blocked"}.to_json)
+					end
+					return
+				elsif msg_data["name"] != nil
+					b_user = @user_manager.get_user_info(msg_data["name"])
+					if b_user == nil
+						ws.send({type: "UnblockError", message: "Couldn't find user with display name #{msg_data["name"]}"}.to_json)
+						return
+					end
+					if !user.blocked?(b_user.id)
+						ws.send({type: "UnblockReply", message: "User #{b_user.display_name} is not blocked"}.to_json)
+					else
+						user.unblock_user(b_user.id)
+						ws.send({type: "UnblockReply", message: "User #{b_user.display_name} has been unblocked"}.to_json)
+					end
+				else
+					ws.send({type: "UnblockError", message: "Error unblocking user"}.to_json)
+				end
+			rescue User::Error
+				ws.send({type: "UnblockError", message: "Error unblocking user"}.to_json)
+			end
+		when "friend_user"
+			begin
+				f_user
+				if msg_data["id"] != nil
+					f_user = @user_manager.get_user_info(msg_data["id"])
+					if f_user == nil
+						ws.send({type: "FriendError", message: "Couldn't find user with id #{msg_data["id"]}"}.to_json)
+					elsif user.friend?(f_user.id)
+						ws.send({type: "FriendReply", message: "User #{f_user.display_name} is already your friend"}.to_json)
+					else
+						user.friend_user(f_user.id)
+						ws.send({type: "FriendReply", message: "User #{f_user.display_name} is now your friend"}.to_json)
+					end
+					return
+				elsif msg_data["name"] != nil
+					f_user = @user_manager.get_user_info(msg_data["name"])
+					if f_user == nil
+						ws.send({type: "FriendError", message: "Couldn't find user with display name #{msg_data["name"]}"}.to_json)
+					elsif user.friend?(f_user.id)
+						ws.send({type: "FriendReply", message: "User #{f_user.display_name} is already your friend"}.to_json)
+					else
+						user.friend_user(f_user.id)
+						ws.send({type: "FriendReply", message: "User #{f_user.display_name} is now your friend"}.to_json)
+					end
+					return
+				else
+					ws.send({type: "FriendError", message: "Error adding friend"}.to_json)
+				end
+			rescue User::Error
+				ws.send({type: "FriendError", message: "Error adding friend"}.to_json)
+			end
+		when "unfriend_user"
+			begin
+				f_user
+				if msg_data["id"] != nil
+					f_user = @user_manager.get_user_info(msg_data["id"])
+					if f_user == nil
+						ws.send({type: "UnfriendError", message: "Couldn't find user with id #{msg_data["id"]}"}.to_json)
+						return
+					end
+					if !user.friend?(f_user.id)
+						ws.send({type: "UnfriendReply", message: "User #{f_user.display_name} is not your friend"}.to_json)
+					else
+						user.unfriend_user(f_user.id)
+						ws.send({type: "UnfriendReply", message: "User #{f_user.display_name} is no longer your friend"}.to_json)
+					end
+					return
+				elsif msg_data["name"] != nil
+					f_user = @user_manager.get_user_info(msg_data["name"])
+					if f_user == nil
+						ws.send({type: "UnfriendError", message: "Couldn't find user with display name #{msg_data["name"]}"}.to_json)
+						return
+					end
+					if !user.friend?(f_user.id)
+						ws.send({type: "UnfriendReply", message: "User #{f_user.display_name} is not your friend"}.to_json)
+					else
+						user.unfriend_user(f_user.id)
+						ws.send({type: "UnfriendReply", message: "User #{f_user.display_name} is no longer your friend"}.to_json)
+					end
+				else
+					ws.send({type: "UnfriendError", message: "Error unfriending user"}.to_json)
+				end
+			rescue User::Error
+				ws.send({type: "UnfriendError", message: "Error unfriending user"}.to_json)
+			end
+		when "get_game_status"
+			#invite = @alert_manager.get_invite(user)
+			if user.tournament != nil
+				user.tournament.handle_status(user)
+				return
+			end
+			#if invite != nil
+			#	@alert_manager.handle_status(invite)
+			#	return
+			#end
+			ws.send({type: "game_status", data: {status: "none"}}.to_json)
+		when "get_tournament_info"
+			tournament = @alert_manager.get_tournament(user)
+			if tournament == nil
+				ws.send({type: "NoTournament"}.to_json)
+			else
+				t_info = tournament.tournament_hash
+				ws.send({type: "TournamentInfo", data: t_info}.to_json)
+			end
 		end
 		rescue JSON::ParserError => e
 			puts "Error parsing JSON: #{e.message}"
@@ -200,16 +399,28 @@ class WebSocketManager
 				partner.in_game = false
 				puts "client disconnected"
 				client.partner.send({type: "partner_disconnected"}.to_json)
+				if @user_manager.get_user(client.user_id).tournament_ws == ws
+					winner_user = @user_manager.get_user(partner.user_id)
+					loser_user = @user_manager.get_user(client.user_id)
+					loser_user.tournament.match_finished(winner_user, loser_user)
+					@user_manager.save_match(client.game_selected, winner_user.id, loser_user.id, "tournament")
+				else
+					@user_manager.save_match(client.game_selected, partner.user_d, client.user_id, "casual")
+				end
 			end
+		end
+		user = @user_manager.get_user(client.user_id)
+		if user != nil && user.tournament_ws == ws
+			user.tournament_ws = nil
 		end
 		puts "WebSocket connection closed"
     	@connections.delete(ws)
-		@connections.each_value do |other_client|
-			if client.user_id == other_client.user_id
-				return
-			end
-		end
-		@user_manager.delete_user(client.user_id)
+		#@connections.each_value do |other_client|
+		#	if client.user_id == other_client.user_id
+		#		return
+		#	end
+		#end
+		#@user_manager.delete_user(client.user_id)
 	end
 
 	def find_partner(ws, game)
@@ -217,12 +428,9 @@ class WebSocketManager
 		@connections.each {|partner_ws, partner|
 			if partner_ws == ws
 				next
-			#elsif @user_manager.get_user(client.user_id).id == @user_manager.get_user(partner.user_id).id # UNCOMMENT FOR RELEASE, MAKES IT SO YOU CAN"T PLAY AGAINST YOURSELF
-			#	puts "You can not play against yourself"
-			#	next
 			end
 			partner = @connections[partner_ws]
-			if partner.game_selected == game && partner.matchmaking && !partner.in_game
+			if partner.game_selected == game && partner.matchmaking && !partner.in_game && partner.user_id != client.user_id
 				return partner_ws
 			end
 		}
@@ -230,25 +438,30 @@ class WebSocketManager
 	end
 	
 	def start_game(player1_ws, player2_ws, game_name)
+		puts "starting game #{game_name}"
 		player1 = @connections[player1_ws]
 		player2 = @connections[player2_ws]
 	
 		player1.id = 0
 		player1.matchmaking = false
 		player1.in_game = true
+		player1.game_selected = game_name
 		player1.partner = player2_ws
 	
 		player2.id = 1
 		player2.matchmaking = false
 		player2.in_game = true
+		player2.game_selected = game_name
 		player2.partner = player1_ws
 	
 		if game_name == "pong"
 			player1.game = PongGame.new
 			player2.game = @connections[player1_ws].game
+			timer = EM.add_periodic_timer(0.016) {game_loop(player1_ws, timer)}
 		elsif game_name == "snake"
 			player1.game = SnakeGame.new
 			player2.game = @connections[player1_ws].game
+			timer = EM.add_periodic_timer(0.1) {game_loop(player1_ws, timer)}
 		end
 		player1_ws.send({type: "game_found", data: {player_id: player1.id}}.to_json);
 		player2_ws.send({type: "game_found", data: {player_id: player2.id}}.to_json);
@@ -275,18 +488,27 @@ class WebSocketManager
 			puts "partner nil"
 			return
 		end
-		
+
+
 		game.update_game_state
 		player_ws.send({type: "state", data: game.state_as_json}.to_json) 
 		player.partner.send({type: "state", data: game.state_as_json}.to_json)
 		if game.state_as_json["winner"] != nil && game.state_as_json["winner"] > -1
+			player_user = @user_manager.get_user(player.user_id)
 			winner_id = player.user_id
 			loser_id = partner.user_id
 			if game.state_as_json["winner"] != player.id
 				winner_id = partner.user_id
 				loser_id = player.user_id
 			end
-			@user_manager.save_match(player.game_selected, winner_id, loser_id, "INSERT MATCH TYPE HERE")
+			if player_ws == player_user.tournament_ws
+				winner_user = @user_manager.get_user(winner_id)
+				loser_user = @user_manager.get_user(loser_id)
+				player_user.tournament.match_finished(winner_user, loser_user)
+				@user_manager.save_match(player.game_selected, winner_id, loser_id, "tournament")
+			else
+				@user_manager.save_match(player.game_selected, winner_id, loser_id, "casual")
+			end
 			player.in_game = false
 			player.game = nil
 			partner.in_game = false

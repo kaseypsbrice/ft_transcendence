@@ -5,6 +5,8 @@ require 'openssl'
 require_relative 'user'
 
 class UserManager
+	attr_accessor :users
+	
 	def initialize (db, rsa_private, rsa_public)
 		@users = {}
 		@db = db
@@ -115,11 +117,13 @@ class UserManager
 
 	def save_match(game, winner_id, loser_id, info)
 		begin
+			if game != "pong" && game != "snake"
+				return
+			end
 			@db.exec_params(
 			'INSERT INTO matches (game, winner, loser, info) VALUES ($1, $2, $3, $4)',
 			[game, winner_id, loser_id, info]
 		)
-		# TODO: increment tournament wins
 		@db.exec_params(
 			"UPDATE users
 			SET #{game}_wins = #{game}_wins + 1
@@ -170,6 +174,33 @@ class UserManager
 		return @users[id]
 	end
 
+	def get_user_info(id_or_display) # id or display_name
+		begin
+			if id_or_display.is_a?(Integer)
+				if user?(id_or_display)
+					return get_user(id)
+				end
+				return User.from_id(id_or_display)
+			else
+				matches = users.select { |k, v| v.display_name == id_or_display }
+				if matches.size > 0
+					return matches.values[0]
+				end
+				return User.from_display_name(id_or_display)
+			end
+		rescue User::Error => e
+			return nil
+		end
+	end
+
+	def get_user_from_display_name(display_name)
+		searched = @users.select { |key, value| value.display_name == display_name }
+		if searched.size > 0
+			return @users[searched.keys[0]]
+		end
+		return nil
+	end
+
 	def add_user(user)
 		if !user?(user.id)
 			@users[user.id] = user
@@ -183,4 +214,9 @@ class UserManager
 			puts "User #{id} deleted, new user count #{@users.size}"
 		end
 	end
+
+	def handle_status(invite)
+
+	end
+
 end

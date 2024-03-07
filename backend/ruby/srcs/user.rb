@@ -2,7 +2,7 @@ require 'pg'
 require 'bcrypt'
 
 class User
-	attr_accessor :id, :username, :password, :display_name
+	attr_accessor :id, :username, :password, :display_name, :tournament, :current_ws, :tournament_ws
 
 	MAX_USERNAME = 50
 	MAX_DISPLAY_NAME = 30
@@ -22,6 +22,9 @@ class User
 		@snake_losses = snake_losses
 		@pong_tournament_wins = pong_tournament_wins
 		@snake_tournament_wins = snake_tournament_wins
+		@tournament = nil
+		@tournament_ws = nil
+		@current_ws = nil
 	end
 
 	class Error < StandardError
@@ -46,6 +49,12 @@ class User
 
 	class DisplayNameTooLong < Error
 		def initialize(message = "Display name too long")
+			super(message)
+		end
+	end
+
+	class DisplayNameInvalid < Error
+		def initialize(message = "Display name invalid")
 			super(message)
 		end
 	end
@@ -106,6 +115,11 @@ class User
 		if display_name.size >= MAX_DISPLAY_NAME
 			puts "Display name too long"
 			raise DisplayNameTooLong
+		end
+
+		if display_name.include?(" ")
+			puts "Display name invalid"
+			raise DisplayNameInvalid
 		end
 
 		encrypted_password = BCrypt::Password.create(password)
@@ -175,40 +189,177 @@ class User
 		end
 	end
 
-	def get_match_history(db)
+	def self.from_display_name(display_name, db)
 		begin
 		result = db.exec_params(
-			'SELECT * FROM matches
-			WHERE player1=$1 OR player2=$1',
-			[@id]
+			'SELECT * FROM users
+			WHERE display_name=$1',
+			[display_name]
 		)
-		ret = []
-		result.each do |match|
-			player1_id = match["player1"]
-			player2_id = match["player2"]
-			p1_lookup = db.exec_params(
-				'SELECT display_name FROM users
-				WHERE id=$1',
-				[player1_id]
-			)
-			p2_lookup = db.exec_params(
-				'SELECT display_name FROM users
-				WHERE id=$1',
-				[player2_id]
-			)
-			match["player1"] = p1_lookup[0]['display_name']
-			match["player2"] = p2_lookup[0]['display_name']
-			if match["winner"] == player1_id
-				match["winner"] = p1_lookup[0]['display_name']
-			else
-				match["winner"] = p2_lookup[0]['display_name']
-			end
-			ret.push(match)
+		if result.num_tuples < 1
+			puts "Could not find user in database"
+			raise UserNotFound
 		end
-		return ret
+		from_db_query(result)
+		rescue PG::Error => e
+			puts "An error occured while querying users: #{e.message}"
+			raise DatabaseError
+		end
+	end
+
+	def get_chat_history(db)
+		begin
+			result = db.exec_params(
+				'SELECT * FROM chat_messages
+				WHERE sender_id NOT IN $1
+				ORDER BY created_at DESC
+				LIMIT 50;',
+				[@blocked]
+			)
+			puts result
+			return result
 		rescue PG::Error => e
 			puts "An error occured while querying matches: #{e.message}"
 			raise DatabaseError
+		end
+	end
+
+	def get_match_history(db)
+		begin
+			result = db.exec_params(
+				'SELECT * FROM matches
+				WHERE player1=$1 OR player2=$1',
+				[@id]
+			)
+			ret = []
+			result.each do |match|
+				player1_id = match["player1"]
+				player2_id = match["player2"]
+				p1_lookup = db.exec_params(
+					'SELECT display_name FROM users
+					WHERE id=$1',
+					[player1_id]
+				)
+				p2_lookup = db.exec_params(
+					'SELECT display_name FROM users
+					WHERE id=$1',
+					[player2_id]
+				)
+				match["player1"] = p1_lookup[0]['display_name']
+				match["player2"] = p2_lookup[0]['display_name']
+				if match["winner"] == player1_id
+					match["winner"] = p1_lookup[0]['display_name']
+				else
+					match["winner"] = p2_lookup[0]['display_name']
+				end
+				ret.push(match)
+			end
+			return ret
+		rescue PG::Error => e
+			puts "An error occured while querying matches: #{e.message}"
+			raise DatabaseError
+		end
+	end
+
+	def blocked?(id)
+		if @blocked.include?(id)
+			return true
+		end
+		return false
+	end
+
+	def block_user(id, db)
+		if blocked?(id)
+			return
+		end
+		begin
+			db.exec_params(
+				'UPDATE users
+				SET blocked = array_append(blocked, $1)
+				WHERE id=$2;',
+				[id, @id]
+			)
+			blocked.push(id)
+		rescue PG::Error => e
+			puts "An error occured while blocking user: #{e.message}"
+			raise DatabaseError
+		end
+	end
+
+	def unblock_user(id, db)
+		if !blocked?(id)
+			return
+		end
+		begin
+			db.exec_params(
+				'UPDATE users
+				SET blocked = array_remove(blocked, $1)
+				WHERE id=$2;',
+				[id, @id]
+			)
+			blocked.delete(id)
+		rescue PG::Error => e
+			puts "An error occured while unblocking user: #{e.message}"
+			raise DatabaseError
+		end
+	end
+
+	def friend?(id)
+		if @friends.include?(id)
+			return true
+		end
+		return false
+	end
+
+	def friend_user(id, db)
+		if friend?(id)
+			return
+		end
+		begin
+			db.exec_params(
+				'UPDATE users
+				SET friends = array_append(friends, $1)
+				WHERE id=$2;',
+				[id, @id]
+			)
+			friends.push(id)
+		rescue PG::Error => e
+			puts "An error occured while friending user: #{e.message}"
+			raise DatabaseError
+		end
+	end
+
+	def unfriend_user(id, db)
+		if !friend?(id)
+			return
+		end
+		begin
+			db.exec_params(
+				'UPDATE users
+				SET friends = array_remove(friends, $1)
+				WHERE id=$2;',
+				[id, @id]
+			)
+			friends.delete(id)
+		rescue PG::Error => e
+			puts "An error occured while unfriending user: #{e.message}"
+			raise DatabaseError
+		end
+	end
+
+	def add_tournament_win(game, db)
+		begin
+			if (game != "pong" && game != "snake")
+				return
+			end
+			db.exec_params(
+				"UPDATE users
+				SET #{game}_tournament_wins = #{game}_tournament_wins + 1
+				WHERE id=$1",
+				[@id]
+			)
+		rescue PG::Error => e
+			puts "An error occured while adding tournament win #{game}: #{e.message}"
 		end
 	end
 end

@@ -1,51 +1,22 @@
-const ws = new WebSocket('wss://60.225.230.139:9001/ws');
+//const ws = new WebSocket('wss://127.0.0.1:9001/ws');
 
 let logged_in = true;
 
 // Overload these in future scripts
-function onOpen(ws, event) {}
-function onClose(ws, event) {}
-function onMessage(ws, event, msg) {}
+function onOpen(event) {}
+function onClose(event) {}
+function onMessage(event, msg) {}
 function onLogout() {}
 function onLogin() {}
+function cleanupPage() {}
 
-ws.onopen = function(event) {
-	console.log("Connected to websocket server");
-	onOpen(ws, event);
-};
-
-ws.onmessage = function(event) {
-    try {
-		console.log("message received from server:");
-        const msg = JSON.parse(event.data);
-        if(msg.type === 'welcome') {
-            console.log(msg.message);
-        }
-		else if (msg.type != null)
-		{
-			console.log(msg.type);
-			if (msg.type === 'authentication' && msg.token != null)
-			{
-				document.cookie = `access_token=${msg.token};SameSite=Strict;Secure;`;
-				logged_in = true;
-				onLogin();
-			}
-			if (msg.type === 'InvalidToken')
-			{
-				logged_in = false;
-				onLogout();
-			}
-		}
-		onMessage(ws, event, msg);
-    } catch (e) {
-        console.error('Error parsing message:', e);
-    }
-};
-
-ws.onclose = function(event) {
-	console.log('websocket connection closed', event.code, event.reason);
-	onClose(ws, event);
-};
+function is_logged_in()
+{
+	//console.log("is_logged_in ", logged_in)
+	if (logged_in)
+		return true;
+	return false;
+}
 
 function hasAccessToken()
 {
@@ -91,3 +62,57 @@ function sendWithToken(ws, data)
 	ws.send(JSON.stringify(data));
 	return false;
 }
+
+function connect()
+{
+	window.ws = new WebSocket('wss://127.0.0.1:9001/ws');
+	ws.onopen = function(event) {
+		console.log("Connected to websocket server");
+		if (logged_in)
+			sendWithToken(ws, {type:"connected"});
+		else
+			ws.send(JSON.stringify({type:"connected"}));
+		onOpen(event);
+	};
+
+	ws.onmessage = function(event) {
+		try {
+			console.log("message received from server:");
+			const msg = JSON.parse(event.data);
+			console.log(msg);	
+			if (msg.type != null)
+			{
+				console.log(msg.type);
+				if (msg.type === 'authentication' && msg.token != null)
+				{
+					document.cookie = `access_token=${msg.token};SameSite=Strict;Secure;`;
+					logged_in = true;
+					onLogin();
+				}
+				if (msg.type === 'InvalidToken')
+				{
+					logged_in = false;
+					onLogout();
+				}
+			}
+			onMessage(event, msg);
+		} catch (e) {
+			console.error('Error parsing message:', e);
+		}
+	};
+
+	ws.onclose = function(event) {
+		console.log('websocket connection closed', event.code, event.reason);
+		onClose(event);
+		setTimeout(function() {
+			connect();
+		}, 1000);
+	};
+
+	ws.onerror = function(err)
+	{
+		console.log("Websocket Error: ", err.message);
+		ws.close();
+	};
+}
+connect();

@@ -14,7 +14,9 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "pong" <<-EOSQL
 		snake_wins INT DEFAULT 0,
 		snake_losses INT DEFAULT 0,
 		pong_wins INT DEFAULT 0,
-		pong_losses INT DEFAULT 0
+		pong_losses INT DEFAULT 0,
+		pong_tournament_wins INT DEFAULT 0,
+		snake_tournament_wins INT DEFAULT 0
     );
 	CREATE TABLE IF NOT EXISTS matches (
 		time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
