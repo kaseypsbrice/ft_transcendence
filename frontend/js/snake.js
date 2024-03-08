@@ -349,9 +349,12 @@ window.onMessage = function(event, msg)
 			break;
 		case "game_found":
 			console.log("game found");
-			player_id = msg.data.player_id;
-			state = "game";
-			console.log("player_id: ", player_id);
+			if (msg.data != null && msg.data.game == "snake" && msg.data.player_id != null)
+			{
+				player_id = msg.data.player_id;
+				state = "game";
+				console.log("player_id: ", player_id);
+			}
 			break;
 		case "partner_disconnected":
 			menu_text = "Victory: opponent disconnected"

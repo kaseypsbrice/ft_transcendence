@@ -216,7 +216,10 @@ class WebSocketManager
 					ws.send({type: "InviteSuccess", user: split_msg[1]}.to_json)
 					return
 				when "help"
-					ws.send({type: "HelpResponse", message:"Commands\n\t/w {user} {msg} : whisper to a user\n/invite {user} {game} : invite user to game"}.to_json)
+					ws.send({type: "HelpResponse", message:"---Commands---"}.to_json)
+					ws.send({type: "HelpResponse", message:"/w {user} {msg} : whisper to a user"}.to_json)
+					ws.send({type: "HelpResponse", message:"/invite {user} {game} : invite user to game"}.to_json)
+					ws.send({type: "HelpResponse", message:"/tournament {game} : propose a tournament"}.to_json)
 					return
 				when "tournament"
 					if split_msg.size < 2
@@ -522,8 +525,8 @@ class WebSocketManager
 			player2.game = @connections[player1_ws].game
 			timer = EM.add_periodic_timer(0.1) {game_loop(player1_ws, timer)}
 		end
-		player1_ws.send({type: "game_found", data: {player_id: player1.id}}.to_json);
-		player2_ws.send({type: "game_found", data: {player_id: player2.id}}.to_json);
+		player1_ws.send({type: "game_found", data: {player_id: player1.id, game: game_name}}.to_json);
+		player2_ws.send({type: "game_found", data: {player_id: player2.id, game: game_name}}.to_json);
 	end
 	
 	def game_loop(player_ws, timer)
