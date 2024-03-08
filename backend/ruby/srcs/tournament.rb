@@ -1,14 +1,15 @@
 class Tournament
 	MAX_PLAYERS = 4
 
-	attr_accessor :game, :users
+	attr_accessor :game, :users, :id
 
-	def initialize(websocket_manager, game, user)
+	def initialize(websocket_manager, game, user, id)
 		@websocket_manager = websocket_manager
 		@game = game
 		@users_remaining = {} # user id: user
 		@users_registered = {} # user id: user
 		@matches = []
+		@id = id
 		add_player(user)
 	end
 	
@@ -63,8 +64,12 @@ class Tournament
 			winner: nil
 		}
 		@matches.push(new_match)
-		@users_registered[player1].current_ws.send({type: "TournamentMatchStarted", game: @game}.to_json)
-		@users_registered[player2].current_ws.send({type: "TournamentMatchStarted", game: @game}.to_json)
+		p_send = @websocket_manager.connections.select { |k, v| v.user_id == player1 || v.user_id == player2 }
+		p_send.each_key do |k|
+			k.send({type: "TournamentMatchStarted", game: @game}.to_json)
+		end
+		#@users_registered[player1].current_ws.send({type: "TournamentMatchStarted", game: @game}.to_json)
+		
 	end
 
 	def start()
@@ -83,8 +88,11 @@ class Tournament
 		end
 		puts "tournament match finished #{winner.display_name} beat #{loser.display_name}"
 		@users_remaining.delete(loser.id)
+		match = get_match(winner)
+		match[:status] = "finished"
+		match[:winner] = winner.id
 		loser.tournament_ws = nil
-		loser.tournament = nil
+		winner.tournament_ws = nil
 
 		@matches.each do |match|
 			if match[:player1] == winner.id
@@ -104,7 +112,6 @@ class Tournament
 
 		if @users_remaining.size == 1
 			winner.tournament = nil
-			winner.tournament_ws = nil
 			@users_remaining.delete(winner.id)
 			winner.add_tournament_win(@game, @websocket_manager.db)
 		end
@@ -172,7 +179,7 @@ class Tournament
 		@users_remaining[user.id] = user
 		user.current_ws.send({type: "TournamentJoined", data: tournament_hash}.to_json)
 		user.tournament = self
-		#user.tournament_ws = user.current_ws
+		user.tournament_ws = nil
 		if @users_registered.size == MAX_PLAYERS
 			start()
 		end

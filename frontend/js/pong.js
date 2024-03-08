@@ -315,7 +315,7 @@ function updateGame(data) {
 	drawScore(gameState.score_right, (canvas.width / 4) * 3, 50);
 }
 
-window.onMessage = function(ws, event, msg){
+window.onMessage = function(event, msg){
 
 	switch (msg.type)
 	{

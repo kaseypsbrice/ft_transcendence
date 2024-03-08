@@ -7,32 +7,76 @@ function validMessage(msg)
 	return true;
 }
 
-window.onMessage = function(ws, event, msg) {
+window.chatOnLogin = function () {
+	sendWithToken(ws, {type: "get_chat_history"});
+	sendWithToken(ws, {type: "get_alerts"});
+};
+
+window.chatOnMessage = function(event, msg) {
 	console.log(msg)
-	if (msg.type === "ChatMessage" && validMessage(msg))
+	switch (msg.type)
 	{
-		displayMessage(msg.message["sender"] + ": " + msg.message["content"]);
-	}
-	else if (msg.type === "Alert" && msg.data != null && msg.data.type != null)
-	{
-		if (msg.data.type === "invite" && msg.data.user_from != null && msg.data.game != null)
-		{
-			displayMessage(`${msg.data.user_from} invited you to a game of ${msg.data.game}!`, true, function() {
-				acceptInvite(msg.data.user_from);
-			});
-		}
-	}
-	else if (msg.type == "Whisper" && validMessage(msg))
-	{
-		displayMessage(`~${msg.message["sender"]} whispers~: ${msg.message["content"]}`)
-	}
-	else if (msg.type == "WhisperResponse" && msg["message"] != null && msg["user"] != null)
-	{
-		displayMessage(`~you whisper to ${msg.user}~: ${msg.message}`)
-	}
-	else if (msg.type == "ChatMessageError" && msg["message"] != null)
-	{
-		displayMessage(`Error! ${msg.message}`)
+		case "ChatMessage":
+			if (validMessage(msg))
+				displayMessage(msg.message["sender"] + ": " + msg.message["content"]);
+			break;
+		case "Alert":
+			if (msg.data != null && msg.data.type != null)
+			{
+				displayMessage(`${msg.data.user_from} invited you to a game of ${msg.data.game}!`, true, function() {
+					acceptInvite(msg.data.user_from);
+				});
+			}
+			break;
+		case "Whisper":
+			if (validMessage(msg))
+				displayMessage(`~${msg.message["sender"]} whispers~: ${msg.message["content"]}`);
+			break;
+		case "WhisperResponse":
+			if (msg["message"] != null && msg["user"] != null)
+				displayMessage(`~you whisper to ${msg.user}~: ${msg.message}`);
+			break;
+		case "ChatMessageError":
+			if (msg["message"] != null)
+			displayMessage(`Error! ${msg.message}`);
+			break;
+		case "ChatHistory":
+			if (msg["data"] != null)
+			{
+				for (i in msg.data)
+				{
+					if (validMessage(msg.data[i]))
+						displayMessage(msg.data[i].message.sender + ": " + msg.data[i].message.content);
+				}
+			}
+			break;
+		case "TournamentMatchStarted":
+			if (msg["game"] != null)
+			{
+				displayMessage("Tournament match ready! Click to join", true, function () {
+					window.location.hash = msg["game"];
+				});
+			}
+			break;
+		case "HelpResponse":
+			if (msg["message"] != null)
+				displayMessage(msg.message);
+			break;
+		case "ChatTournamentCreated":
+			if (msg["game"] != null && msg["user"] != null && msg["id"] != null)
+			{
+				displayMessage(`${msg.user} proposes a ${msg.game} tournament! Click to join!`, true, function() {
+					sendWithToken(ws, {type: "join_tournament_id", id: msg.id});
+				});
+			}
+			break
+		case "JoinTournamentSuccess":
+			displayMessage("Successfully joined tournament, waiting for players...");
+			break
+		case "TournamentSuccess":
+			if (msg["game"] != null)
+				displayMessage(`Successfully proposed ${msg.game} tournament`);
+			break;
 	}
 };
 
@@ -59,7 +103,12 @@ function displayMessage(str, clickable = false, clickHandler = null) {
 		const clickableSpan = document.createElement('span');
 		clickableSpan.classList.add('clickable');
 		clickableSpan.textContent = str;
-		clickableSpan.addEventListener('click', clickHandler);
+		clickableSpan.style.cursor = 'pointer';
+		clickableSpan.style.textDecoration = 'underline';
+		clickableSpan.addEventListener('click', function() {
+			clickHandler();
+			messageElement.remove();
+		});
 		messageElement.appendChild(clickableSpan);
 	} else {
 		messageElement.textContent = str;
@@ -72,17 +121,6 @@ function displayMessage(str, clickable = false, clickHandler = null) {
 const messageInput = document.getElementById('messageInput'); // input element for typing messages
 const messagesDiv = document.getElementById('messages'); // container where messages are displayed
 
-function fetchChatHistory() {
-	fetch('https://127.0.0.1:9001/chat-history')
-		.then(response => response.json())
-		.then(messages => {
-			messages.forEach(message => displayMessage(message.sender + ": " + message.content));
-		})
-		.catch(error => console.error('Error fetching chat history:', error));
-}
-fetchChatHistory();
-
-sendWithToken(ws, {type: "get_alerts"});
 
 document.getElementById('sendButton').addEventListener('click', function(event) {
 	event.preventDefault(); // Prevent the default button click behavior
@@ -95,5 +133,9 @@ messageInput.addEventListener("keypress", function(event){
 		event.preventDefault();
 		sendMessage();
 	}
-})
+});
+
+if (ws.readyState == ws.OPEN)
+	chatOnLogin();
+
 })();

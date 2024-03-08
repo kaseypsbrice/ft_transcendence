@@ -63,10 +63,16 @@ const locationHandler = async () => {
     const previousScripts = document.querySelectorAll('script[data-route]');
     previousScripts.forEach(script => {
 		cleanupPage();
-		window.cleanupPage = function() {}
 		script.remove();
 	});
-	
+
+	// Remove overloads for websocket.js
+	window.onOpen = function (event){}
+	window.onClose = function (event) {}
+	window.onMessage = function (event, msg) {}
+	window.onLogout = function () {}
+	window.onLogin = function () {}
+	window.cleanupPage = function () {}
 
     // Fetch and load HTML template
     const html = await fetch(route.template).then((response) => response.text());

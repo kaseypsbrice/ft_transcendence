@@ -9,6 +9,8 @@ function onMessage(event, msg) {}
 function onLogout() {}
 function onLogin() {}
 function cleanupPage() {}
+function chatOnMessage(event, msg) {}
+function chatOnLogin() {}
 
 function is_logged_in()
 {
@@ -40,6 +42,7 @@ function hasAccessToken()
 if (!hasAccessToken())
 {
 	logged_in = false;
+	onLogout();
 }
 
 function sendWithToken(ws, data)
@@ -86,8 +89,11 @@ function connect()
 				if (msg.type === 'authentication' && msg.token != null)
 				{
 					document.cookie = `access_token=${msg.token};SameSite=Strict;Secure;`;
-					logged_in = true;
-					onLogin();
+					if (!logged_in)
+					{
+						logged_in = true;
+						onLogin();
+					}
 				}
 				if (msg.type === 'InvalidToken')
 				{
@@ -96,6 +102,7 @@ function connect()
 				}
 			}
 			onMessage(event, msg);
+			chatOnMessage(event, msg);
 		} catch (e) {
 			console.error('Error parsing message:', e);
 		}

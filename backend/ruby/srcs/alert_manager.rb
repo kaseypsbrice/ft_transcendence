@@ -6,6 +6,7 @@ class AlertManager
 		@websocket_manager = websocket_manager
 		@alerts = []
 		@tournaments = []
+		@t_id = 0
 	end
 
 	def alert_json(alert)
@@ -69,8 +70,9 @@ class AlertManager
 		if game != "pong" && game != "snake"
 			return false
 		end
-		new_tournmanent = Tournament.new(@websocket_manager, game, user)
+		new_tournmanent = Tournament.new(@websocket_manager, game, user, @t_id)
 		@tournaments.push(new_tournmanent)
+		@t_id += 1
 		return true
 	end
 
@@ -86,6 +88,21 @@ class AlertManager
 			end
 		end
 		return create_tournament(user, game)
+	end
+
+	def join_tournament_by_id(user, id)
+		if user.tournament != nil
+			return false
+		end
+		selected = @tournaments.select { |t| t.id == id }
+		if selected.size == 0
+			return false
+		end
+		if selected[0].full?
+			return false
+		end
+		selected[0].add_player(user)
+		return true
 	end
 
 end
