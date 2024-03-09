@@ -535,48 +535,30 @@ p {
     letter-spacing: -0.2px;
 }
 
-.mh-tb-date {
+.mh-hd-txt {
     text-align: left;
     font-size: 20px;
     font-weight: 600;
     color: white;
     top: 22%;
+    position: absolute;
+    z-index: 3;
+}
+
+.mh-hd-date {
     left: 5%;
-    position: absolute;
-    z-index: 3;
 }
 
-.mh-tb-match-type {
-    text-align: left;
-    font-size: 20px;
-    font-weight: 600;
-    color: white;
-    top: 22%;
+.mh-hd-match-type {
     left: 27%;
-    position: absolute;
-    z-index: 3;
 }
 
-.mh-tb-opponent {
-    text-align: left;
-    font-size: 20px;
-    font-weight: 600;
-    color: white;
-    top: 22%;
+.mh-hd-opponent {
     left: 50%;
-    position: absolute;
-    z-index: 3;
 }
 
-.mh-tb-winner {
-    text-align: left;
-    font-size: 20px;
-    font-weight: 600;
-    color: white;
-    top: 22%;
+.mh-hd-winner {
     left: 73%;
-    position: absolute;
-    z-index: 3;
 }
 
 #data-mh-tb-date {
