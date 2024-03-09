@@ -1,5 +1,3 @@
 1. set ssl cert and key in .env
 2. run make
 3. go to https://127.0.0.1:9001 and do the same
-
-pong broken atm and probably chat too

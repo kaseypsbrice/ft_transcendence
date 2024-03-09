@@ -2,7 +2,7 @@ require 'pg'
 require 'bcrypt'
 
 class User
-	attr_accessor :id, :username, :password, :display_name, :tournament, :current_ws, :tournament_ws
+	attr_accessor :id, :username, :password, :display_name, :tournament, :current_ws, :tournament_ws, :blocked
 
 	MAX_USERNAME = 50
 	MAX_DISPLAY_NAME = 30
@@ -14,8 +14,8 @@ class User
 		@username = username
 		@password = password
 		@display_name = display_name
-		@friends = friends
-		@blocked = blocked
+		@friends = friends || []
+		@blocked = blocked || []
 		@pong_wins = pong_wins
 		@pong_losses = pong_losses
 		@snake_wins = snake_wins
@@ -84,19 +84,21 @@ class User
 	end
 
 	def self.from_db_query(result)
+		_blocked_values = result[0]['blocked'].scan(/\d+/)
+		_friends_values = result[0]['friends'].scan(/\d+/)
 		new(
-			id: result[0]['id'],
+			id: result[0]['id'].to_i,
 			username: result[0]['username'],
 			password: result[0]['password'],
 			display_name: result[0]['display_name'],
-			friends: result[0]['friends'],
-			blocked: result[0]['blocked'],
-			snake_wins: result[0]['snake_wins'],
-			snake_losses: result[0]['snake_losses'],
-			pong_wins: result[0]['pong_wins'],
-			pong_losses: result[0]['pong_losses'],
-			snake_tournament_wins: result[0]['snake_tournament_wins'],
-			pong_tournament_wins: result[0]['pong_tournament_wins']
+			friends: _friends_values.map(&:to_i),
+			blocked: _blocked_values.map(&:to_i),
+			snake_wins: result[0]['snake_wins'].to_i,
+			snake_losses: result[0]['snake_losses'].to_i,
+			pong_wins: result[0]['pong_wins'].to_i,
+			pong_losses: result[0]['pong_losses'].to_i,
+			snake_tournament_wins: result[0]['snake_tournament_wins'].to_i,
+			pong_tournament_wins: result[0]['pong_tournament_wins'].to_i
 		)
 	end
 
@@ -209,17 +211,25 @@ class User
 
 	def get_chat_history(db)
 		begin
-			result = db.exec_params(
-				'SELECT * FROM chat_messages
-				WHERE sender_id NOT IN $1
-				ORDER BY created_at DESC
-				LIMIT 50;',
-				[@blocked]
-			)
-			puts result
+			puts "blocked #{@blocked} #{@blocked.size}"
+			result = []
+			if @blocked.size > 0
+				result =  db.exec(
+					'SELECT * FROM chat_messages
+					WHERE sender_id NOT IN (' + @blocked.join(',') + ')
+					ORDER BY created_at DESC
+					LIMIT 50;'
+				)
+			else
+				result = db.exec(
+					'SELECT * FROM chat_messages
+					ORDER BY created_at DESC
+					LIMIT 50;'
+				)
+			end
 			return result
 		rescue PG::Error => e
-			puts "An error occured while querying matches: #{e.message}"
+			puts "An error occured while querying chat history: #{e.message}"
 			raise DatabaseError
 		end
 	end

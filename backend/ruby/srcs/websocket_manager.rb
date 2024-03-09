@@ -169,6 +169,14 @@ class WebSocketManager
 							ws.send({type:"ChatMessageError", error:"UserOffline", message:"User #{split_msg[1]} is offline"}.to_json)
 							return
 						end
+						if target.blocked?(user.id)
+							ws.send({type: "ChatMessageError", error:"Blocked", message: "Cannot whisper #{split_msg[1]}, you are blocked"}.to_json)
+							return
+						end
+						if user.blocked?(target.id)
+							ws.send({type: "ChatMessageError", error:"Blocked", message: "Cannot whisper #{split_msg[1]}, they are blocked"}.to_json)
+							return
+						end
 						receiver_id = target.id
 						msg_data["content"] = split_msg[2]
 						
@@ -178,6 +186,7 @@ class WebSocketManager
 								client_ws.send({type: "Whisper", message: msg_data}.to_json)
 							end
 						}
+						return
 					rescue User::Error
 						ws.send({type:"ChatMessageError", error:"UserNotFound", message:"User #{split_msg[1]} does not exist"}.to_json)
 						return
@@ -190,25 +199,49 @@ class WebSocketManager
 						ws.send({type: "ChatMessageError", error: "InviteFormat", message: "Invite game #{split_msg[2]} not recognised, try 'pong' or 'snake'"}.to_json)
 						return
 					end
-					user_from = @user_manager.get_user(client.user_id)
 					user_to = @user_manager.get_user_from_display_name(split_msg[1])
 					if (user_to == nil)
 						ws.send({type: "ChatMessageError", error:"UserNotFound", message: "User #{split_msg[1]} is not online"}.to_json)
 						return
 					end
-					if user_to.blocked?(user_from.id)
+					if user_to.blocked?(user.id)
 						ws.send({type: "ChatMessageError", error:"Blocked", message: "Cannot invite #{split_msg[1]}, you are blocked"}.to_json)
 						return
 					end
-					if user_from.blocked?(user_to.id)
+					if user.blocked?(user_to.id)
 						ws.send({type: "ChatMessageError", error:"Blocked", message: "Cannot invite #{split_msg[1]}, they are blocked"}.to_json)
 						return
 					end
-					@alert_manager.create_invite(user_from, user_to, split_msg[2])
+					@alert_manager.create_invite(user, user_to, split_msg[2])
 					ws.send({type: "InviteSuccess", user: split_msg[1]}.to_json)
 					return
 				when "help"
-					ws.send({type: "HelpResponse", message:"Commands\n\t/w {user} {msg} : whisper to a user\n/invite {user} {game} : invite user to game"}.to_json)
+					ws.send({type: "HelpResponse", message:"---Commands---"}.to_json)
+					ws.send({type: "HelpResponse", message:"/w {user} {msg} : whisper to a user"}.to_json)
+					ws.send({type: "HelpResponse", message:"/invite {user} {game} : invite user to game"}.to_json)
+					ws.send({type: "HelpResponse", message:"/tournament {game} : propose a tournament"}.to_json)
+					return
+				when "tournament"
+					if split_msg.size < 2
+						ws.send({type: "ChatMessageError", error:"TournamentFormatError", message: "Tournament format error"}.to_json)
+						return
+					end
+					if user.tournament != nil
+						ws.send({type: "ChatMessageError", error:"AlreadyInTournament", message: "You are already in a #{user.tournament.game} tournament"}.to_json)
+						return
+					end
+					if @alert_manager.create_tournament(user, split_msg[1])
+						ws.send({type: "TournamentSuccess", game: split_msg[1]}.to_json)
+						to_all = {type: "ChatTournamentCreated", user: user.display_name, game: split_msg[1], id: user.tournament.id}.to_json
+						@connections.each do |k, v|
+							to_user = @user_manager.get_user(v.user_id)
+							if (to_user && to_user.id != user.id && to_user.tournament == nil)
+								k.send(to_all)
+							end
+						end
+					else
+						ws.send({type: "ChatMessageError", error:"GameNotFound", message: "Cannot create #{split_msg[1]} tournament, game not found"}.to_json)
+					end
 					return
 				end
 			end
@@ -217,12 +250,19 @@ class WebSocketManager
 
 			# Save the message to the database
 			puts "creating chat message from #{msg_data["sender"]}"
-			ChatMessage.create(sender: msg_data["sender"], content: msg_data["content"])
+			ChatMessage.create(sender_id: sender_id, content: msg_data["content"])
 
 			# Broadcast the message to all clients (including the sender)
 			
-			@connections.each { |client_ws, client| 
-				client_ws.send({type: "ChatMessage", message: msg_data}.to_json)
+			@connections.each { |client_ws, client|
+			puts "user blocked #{user.blocked} #{user.blocked?(client.user_id)} has client #{client.user_id} #{@user_manager.user?(client.user_id)}"
+			if @user_manager.user?(client.user_id)
+				puts "client #{client.user_id} blocked #{@user_manager.get_user(client.user_id).blocked} #{@user_manager.get_user(client.user_id).blocked?(user.id)}"
+			end
+				if !user.blocked?(client.user_id) && @user_manager.user?(client.user_id) && !@user_manager.get_user(client.user_id).blocked?(user.id)
+					puts "sending"
+					client_ws.send({type: "ChatMessage", message: msg_data}.to_json)
+				end
 			}
 		when "get_leaderboard"
 			ws.send({type: "GetLeaderboard", data: @user_manager.get_leaderboard()}.to_json)
@@ -231,7 +271,18 @@ class WebSocketManager
 		when "get_chat_history"
 			begin
 				chat_history = user.get_chat_history(@db)
-				ws.send({type: "ChatHistory", data: chat_history}.to_json)
+				ret_chat_history = []
+				chat_history.each do |_msg|
+					_msg_new = {
+						message: {
+							sender: @user_manager.get_user_info(_msg['sender_id'].to_i).display_name,
+							content: _msg['content'],
+							created_at: _msg['created_at']
+						}
+					}
+					ret_chat_history.push(_msg_new)
+				end
+				ws.send({type: "ChatHistory", data: ret_chat_history}.to_json)
 			rescue User::Error => e
 				ws.send({type: "ChatHistoryError", message: "Error fetching chat history"}.to_json)
 			end
@@ -384,6 +435,17 @@ class WebSocketManager
 				t_info = tournament.tournament_hash
 				ws.send({type: "TournamentInfo", data: t_info}.to_json)
 			end
+		when "join_tournament_id"
+			if user.tournament != nil
+				ws.send({type: "ChatMessageError", error: "AlreadyInTournament", message: "You are already in a tournament"}.to_json);
+				return
+			end
+			if @alert_manager.join_tournament_by_id(user, msg_data["id"])
+				ws.send({type: "JoinTournamentSuccess"}.to_json)
+			else
+				ws.send({type: "ChatMessageError", error: "TournamentUnavailable", message: "Tournament unavailable"}.to_json)
+			end
+			return
 		end
 		rescue JSON::ParserError => e
 			puts "Error parsing JSON: #{e.message}"
@@ -405,7 +467,7 @@ class WebSocketManager
 					loser_user.tournament.match_finished(winner_user, loser_user)
 					@user_manager.save_match(client.game_selected, winner_user.id, loser_user.id, "tournament")
 				else
-					@user_manager.save_match(client.game_selected, partner.user_d, client.user_id, "casual")
+					@user_manager.save_match(client.game_selected, partner.user_id, client.user_id, "casual")
 				end
 			end
 		end
@@ -463,8 +525,8 @@ class WebSocketManager
 			player2.game = @connections[player1_ws].game
 			timer = EM.add_periodic_timer(0.1) {game_loop(player1_ws, timer)}
 		end
-		player1_ws.send({type: "game_found", data: {player_id: player1.id}}.to_json);
-		player2_ws.send({type: "game_found", data: {player_id: player2.id}}.to_json);
+		player1_ws.send({type: "game_found", data: {player_id: player1.id, game: game_name}}.to_json);
+		player2_ws.send({type: "game_found", data: {player_id: player2.id, game: game_name}}.to_json);
 	end
 	
 	def game_loop(player_ws, timer)

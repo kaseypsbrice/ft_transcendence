@@ -35,19 +35,17 @@ let menu_buttons = [
 		}
 	},
 	{
-		option: "option_1",
-		pos: {x: canvas.width * 0.7, y: canvas.height * 0.6},
-		size: {x: canvas.width * 0.05, y: canvas.width * 0.05},
+		on_click: find_tournament,
+		pos: {x: canvas.width * 0.35, y: canvas.height * 0.65},
+		size: {x: canvas.width * 0.3, y: canvas.height * 0.1},
 		color: "darkcyan",
-		color_selected: "gold",
 		color_hover: "darkslategray",
-		color_hover_selected: "goldenrod",
 		textBox: {
-			text: "Cool option that does stuff:",
+			text: "Find Tournament",
 			color: "white",
-			font: "20px Arial",
-			pos: {x: -canvas.width * 0.35, y: canvas.width * 0.05 - 12},
-			align: "left"
+			font: "24px Arial",
+			pos: {x: canvas.width * 0.15, y: 8 + canvas.height * 0.05},
+			align: "center"
 		}
 	}
 ];
@@ -58,7 +56,7 @@ let victory_buttons = [
 		size: {x: canvas.width * 0.3, y: canvas.height * 0.1},
 		color: "darkcyan",
 		color_hover: "darkslategray",
-		on_click: function() {state = "menu"},
+		on_click: function() {onOpen()},
 		textBox: {
 			text: "OK",
 			color: "white",
@@ -75,7 +73,7 @@ let defeat_buttons = [
 		size: {x: canvas.width * 0.3, y: canvas.height * 0.1},
 		color: "darkcyan",
 		color_hover: "darkslategray",
-		on_click: function() {state = "menu"},
+		on_click: function() {onOpen()},
 		textBox: {
 			text: "OK",
 			color: "white",
@@ -118,6 +116,13 @@ function start_game()
 {
 	state = "searching";
 	sendWithToken(ws, {type: "find_pong"});
+}
+
+function find_tournament()
+{
+	state = "searching";
+	sendWithToken(ws, {type: "find_tournament", game: "pong"});
+	sendWithToken(ws, {type: "get_game_status", game: "pong"});
 }
 
 function getMousePos(event)
@@ -247,6 +252,26 @@ function updateConnecting()
 	ctx.fillText("Connecting to server...", canvas.width / 2, canvas.height / 2);
 }
 
+function updateWaitingServer()
+{
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+	ctx.fillStyle = "white";
+	ctx.textAlign = "center";
+	ctx.font = "48px Arial";
+	ctx.fillText("Waiting for server response...", canvas.width / 2, canvas.height / 2);
+}
+
+function updateWaitingPartner()
+{
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+	ctx.fillStyle = "white";
+	ctx.textAlign = "center";
+	ctx.font = "48px Arial";
+	ctx.fillText("Waiting partner to connect...", canvas.width / 2, canvas.height / 2);
+}
+
 function updateDisconnected()
 {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -271,6 +296,8 @@ function updateVictory()
 
 function updateDefeat()
 {
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
 	ctx.fillStyle = "red";
 	ctx.textAlign = "center";
 	ctx.font = "64px Arial";
@@ -286,7 +313,7 @@ function updateLoggedOut()
 	ctx.fillStyle = "white";
 	ctx.textAlign = "center";
 	ctx.font = "32px Arial";
-	ctx.fillText("You are not logged in", canvas.width / 2, canvas.height / 2);
+	ctx.fillText("You are not logged in, log in at URL/login", canvas.width / 2, canvas.height / 2);
 
 	drawButtons();
 }
@@ -315,8 +342,8 @@ function updateGame(data) {
 	drawScore(gameState.score_right, (canvas.width / 4) * 3, 50);
 }
 
-window.onMessage = function(ws, event, msg){
-
+window.onMessage = function(event, msg) 
+{
 	switch (msg.type)
 	{
 		case "state":
@@ -339,13 +366,28 @@ window.onMessage = function(ws, event, msg){
 			break;
 		case "game_found":
 			console.log("game found");
-			player_id = msg.data.player_id;
-			state = "game";
-			console.log("player_id: ", player_id);
+			if (msg.data != null && msg.data.game == "pong" && msg.data.player_id != null)
+			{
+				player_id = msg.data.player_id;
+				state = "game";
+				console.log("player_id: ", player_id);
+			}
 			break;
 		case "partner_disconnected":
-			menu_text = "opponent disconnected"
+			menu_text = "Victory: opponent disconnected"
 			state = "menu";
+			break;
+		case "game_status":
+			if (msg.data.status == "WaitingPartner")
+				state = "waiting_partner";
+			else
+				state = "menu";
+			if (msg.data.status == "FoundTournament")
+				menu_text = "Searching for tournament players"
+			break;
+		case "TournamentMatchStarted":
+			if (state != "game" && state != "victory" && state != "defeat")
+				sendWithToken(ws, {type: "get_game_status"});
 			break;
 	}
 }
@@ -357,20 +399,24 @@ function movePaddle(paddle, direction) {
 }
 
 // listen for key presses to control the paddle
-document.addEventListener('keydown', function(event) {
+function handleKeyDown(event)
+{
 	if (player_id < 0)
 		return;
 	if (event.key === 'ArrowUp' && player_id == 0) movePaddle('left', 1);
 	if (event.key === 'ArrowDown' && player_id == 0) movePaddle('left', -1);
 	if (event.key === 'ArrowUp' && player_id == 1) movePaddle( 'right', 1); // Move up
 	if (event.key === 'ArrowDown' && player_id == 1) movePaddle('right', -1); // Move down
-});
+}
+document.addEventListener('keydown', handleKeyDown);
 
-document.addEventListener('mousemove', function(event) {
+function handleMouseMove(event)
+{
 	mouse_pos = getMousePos(event);
-});
+}
+document.addEventListener('mousemove', handleMouseMove);
 
-document.addEventListener('click', function(event)
+function handleMouseClick(event)
 {
 	let buttons = button_map[state] != null ? button_map[state] : []
 	for (i in buttons)
@@ -384,11 +430,21 @@ document.addEventListener('click', function(event)
 				options[button.option] = !options[button.option];
 		}
 	}
-});
+}
+document.addEventListener('click', handleMouseClick);
+
+window.cleanupPage = function() {
+	ws.close();
+	document.removeEventListener('keydown', handleKeyDown);
+	document.removeEventListener('mousemove', handleMouseMove);
+	document.removeEventListener('click', handleMouseClick);
+}
 
 function gameLoop() {
-	if (state == "menu" && !logged_in)
+	if (!is_logged_in() && (state == "game"))
+	{
 		state = "logged_out";
+	}
 	switch (state)
 	{
 		case "menu":
@@ -407,6 +463,11 @@ function gameLoop() {
 			updateDefeat(); break;
 		case "logged_out":
 			updateLoggedOut(); break;
+		case "waiting_server":
+			updateWaitingServer(); break;
+		case "waiting_partner":
+			updateWaitingPartner(); break;
+
 	}
 	requestAnimationFrame(gameLoop);
 }
@@ -422,12 +483,13 @@ window.onLogin = function()
 	state = "menu";
 }
 
-window.onOpen = function(ws, event)
+window.onOpen = function(event)
 {
-	state = "menu"
+	state = "waiting_server"
+	sendWithToken(ws, {type:"get_game_status"});
 }
 
-window.onClose = function(ws, event)
+window.onClose = function(event)
 {
 	state = "disconnected"
 }
@@ -438,10 +500,10 @@ switch(ws.readyState)
 	case ws.CONNECTING:
 		state = "connecting"; break;
 	case ws.OPEN:
-		onOpen(null, null); break;
+		onOpen(null); break;
 	case ws.CLOSING:
 	case ws.CLOSED:
-		onClosed(null, null); break;
+		onClose(null); break;
 }
 
 //start the game loop

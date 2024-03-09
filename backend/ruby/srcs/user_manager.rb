@@ -177,16 +177,18 @@ class UserManager
 	def get_user_info(id_or_display) # id or display_name
 		begin
 			if id_or_display.is_a?(Integer)
+				puts "get_user_info integer"
 				if user?(id_or_display)
-					return get_user(id)
+					return get_user(id_or_display)
 				end
-				return User.from_id(id_or_display)
+				return User.from_id(id_or_display, @db)
 			else
+				puts "get_user_info NOT integer"
 				matches = users.select { |k, v| v.display_name == id_or_display }
 				if matches.size > 0
 					return matches.values[0]
 				end
-				return User.from_display_name(id_or_display)
+				return User.from_display_name(id_or_display, @db)
 			end
 		rescue User::Error => e
 			return nil

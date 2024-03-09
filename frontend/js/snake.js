@@ -57,7 +57,7 @@ let victory_buttons = [
 		size: {x: canvas.width * 0.3, y: canvas.height * 0.1},
 		color: "darkcyan",
 		color_hover: "darkslategray",
-		on_click: function() {state = "menu"},
+		on_click: function() {onOpen()},
 		textBox: {
 			text: "OK",
 			color: "white",
@@ -74,7 +74,7 @@ let defeat_buttons = [
 		size: {x: canvas.width * 0.3, y: canvas.height * 0.1},
 		color: "darkcyan",
 		color_hover: "darkslategray",
-		on_click: function() {state = "menu"},
+		on_click: function() {onOpen()},
 		textBox: {
 			text: "OK",
 			color: "white",
@@ -326,6 +326,7 @@ function updateLoggedOut()
 
 window.onMessage = function(event, msg) 
 {
+	console.log("snake on message")
 	switch (msg.type)
 	{
 		case "state":
@@ -348,9 +349,12 @@ window.onMessage = function(event, msg)
 			break;
 		case "game_found":
 			console.log("game found");
-			player_id = msg.data.player_id;
-			state = "game";
-			console.log("player_id: ", player_id);
+			if (msg.data != null && msg.data.game == "snake" && msg.data.player_id != null)
+			{
+				player_id = msg.data.player_id;
+				state = "game";
+				console.log("player_id: ", player_id);
+			}
 			break;
 		case "partner_disconnected":
 			menu_text = "Victory: opponent disconnected"
@@ -358,14 +362,21 @@ window.onMessage = function(event, msg)
 			break;
 		case "game_status":
 			if (msg.data.status == "WaitingPartner")
+			{
+				console.log("waiting for partner")
 				state = "waiting_partner";
+			}
 			else
+			{
+				console.log("go menu")
 				state = "menu";
+			}
 			if (msg.data.status == "FoundTournament")
 				menu_text = "Searching for tournament players"
 			break;
 		case "TournamentMatchStarted":
-			sendWithToken(ws, {type: "get_game_status"});
+			if (state != "game" && state != "victory" && state != "defeat")
+				sendWithToken(ws, {type: "get_game_status"});
 			break;
 	}
 }
@@ -405,13 +416,14 @@ function handleMouseClick(event)
 document.addEventListener('click', handleMouseClick);
 
 window.cleanupPage = function() {
+	ws.close();
 	document.removeEventListener('keydown', handleKeyDown);
 	document.removeEventListener('mousemove', handleMouseMove);
 	document.removeEventListener('click', handleMouseClick);
 }
 
 function gameLoop() {
-	if (!is_logged_in() && state == "game")
+	if (!is_logged_in() && (state == "game"))
 	{
 		state = "logged_out";
 	}
@@ -455,6 +467,7 @@ window.onLogin = function()
 
 window.onOpen = function(event)
 {
+	console.log("snake on open")
 	state = "waiting_server"
 	sendWithToken(ws, {type:"get_game_status"});
 }
@@ -470,10 +483,10 @@ switch(ws.readyState)
 	case ws.CONNECTING:
 		state = "connecting"; break;
 	case ws.OPEN:
-		onOpen(null, null); break;
+		onOpen(null); break;
 	case ws.CLOSING:
 	case ws.CLOSED:
-		onClosed(null, null); break;
+		onClose(null); break;
 }
 
 //start the game loop
