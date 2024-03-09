@@ -19,6 +19,8 @@ let mouse_pos = {x: 0.0, y: 0.0};
 let state = "connecting";
 let menu_text = "";
 
+let in_tournament = false;
+
 let menu_buttons = [
 	{
 		pos: {x: canvas.width * 0.35, y: canvas.height * 0.8},
@@ -42,6 +44,23 @@ let menu_buttons = [
 		color_hover: "darkslategray",
 		textBox: {
 			text: "Find Tournament",
+			color: "white",
+			font: "24px Arial",
+			pos: {x: canvas.width * 0.15, y: 8 + canvas.height * 0.05},
+			align: "center"
+		}
+	}
+];
+
+let menu_buttons_tournament = [
+	{
+		on_click: leave_tournament,
+		pos: {x: canvas.width * 0.35, y: canvas.height * 0.65},
+		size: {x: canvas.width * 0.3, y: canvas.height * 0.1},
+		color: "darkcyan",
+		color_hover: "darkslategray",
+		textBox: {
+			text: "Leave Tournament",
 			color: "white",
 			font: "24px Arial",
 			pos: {x: canvas.width * 0.15, y: 8 + canvas.height * 0.05},
@@ -120,9 +139,15 @@ function start_game()
 
 function find_tournament()
 {
-	state = "searching";
+	state = "waiting_server";
 	sendWithToken(ws, {type: "find_tournament", game: "pong"});
 	sendWithToken(ws, {type: "get_game_status", game: "pong"});
+}
+
+function leave_tournament()
+{
+	state = "waiting_server"
+	sendWithToken(ws, {type: "leave_tournament"});
 }
 
 function getMousePos(event)
@@ -181,6 +206,8 @@ function drawScore(score, x, y) {
 function drawButtons()
 {
 	let buttons = button_map[state] != null ? button_map[state] : []
+	if (state == "menu" && in_tournament)
+		buttons = menu_buttons_tournament;
 	for (i in buttons)
 	{
 		let button = buttons[i];
@@ -379,11 +406,21 @@ window.onMessage = function(event, msg)
 			break;
 		case "game_status":
 			if (msg.data.status == "WaitingPartner")
+			{
+				in_tournament = true;
 				state = "waiting_partner";
+			}
 			else
+			{
+				in_tournament = false;
 				state = "menu";
+				menu_text = "";
+			}
 			if (msg.data.status == "FoundTournament")
+			{
+				in_tournament = true;
 				menu_text = "Searching for tournament players"
+			}
 			break;
 		case "TournamentMatchStarted":
 			if (state != "game" && state != "victory" && state != "defeat")
@@ -419,6 +456,8 @@ document.addEventListener('mousemove', handleMouseMove);
 function handleMouseClick(event)
 {
 	let buttons = button_map[state] != null ? button_map[state] : []
+	if (state == "menu" && in_tournament)
+		buttons = menu_buttons_tournament;
 	for (i in buttons)
 	{
 		let button = buttons[i];

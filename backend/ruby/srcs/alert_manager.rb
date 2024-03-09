@@ -47,11 +47,36 @@ class AlertManager
 		return alert_sent
 	end
 
+	def accept_invite(user_to, user_from)
+		@alerts.delete_if { |alert| alert[:expires] <= Time.now.to_i }
+		alert_found = nil
+		@alerts.each do |alert|
+			if alert[:user_from].id == user_from.id && alert[:user_to].id == user_to.id
+				alert_found = alert
+				break
+			end
+		end
+		if alert_found == nil
+			return nil
+		end
+		@websocket_manager.connections.each do |c_ws, c|
+			if c.user_id == user_to.id
+				c_ws.send({type: "InviteAccepted", user: user_from.display_name, game: alert_found[:game]}.to_json)
+			elsif c.user_id == user_from.id
+				c_ws.send({type: "InviteAccepted", user: user_from.display_name, game: alert_found[:game]}.to_json)
+			end
+		end
+		alert_found[:accepted] = true
+	end
+
 	def create_invite(user_inviting, user_invited, game)
 		@alerts.delete_if { |alert| alert[:user_from].id == user_inviting.id}
 		new_alert = {
 			user_from: user_inviting,
 			user_to: user_invited,
+			user_from_ready: false,
+			user_to_ready: false,
+			accepted: false,
 			type: "invite",
 			game: game,
 			expires: Time.now.to_i + 60
@@ -74,6 +99,38 @@ class AlertManager
 		@tournaments.push(new_tournmanent)
 		@t_id += 1
 		return true
+	end
+
+	def handle_status(user)
+		puts "handle_status invite #{user.display_name}"
+		alert_found = nil
+		@alerts.each do |alert|
+			if alert[:user_from].id == user.id || alert[:user_to].id == user.id \
+				&& (alert[:accepted] == true)
+				alert_found = alert
+				break
+			end
+		end
+		if alert_found == nil
+			user.current_ws.send({type: "game_status", data: {status: "error"}}.to_json)
+			return
+		end
+		user.invite_ws = user.current_ws
+		if user.id == alert_found[:user_from].id
+			alert_found[:user_from_ready] = true
+		else
+			alert_found[:user_to_ready] = true
+		end
+		if alert_found[:user_from_ready] == true && alert_found[:user_to_ready] == true
+			if alert_found[:user_from].invite_ws == nil || alert_found[:user_to].invite_ws == nil
+				user.current_ws.send({type: "game_status", data: {status: "WaitingPartner"}}.to_json)
+				return
+			end
+			@websocket_manager.start_game(alert_found[:user_from].invite_ws, alert_found[:user_to].invite_ws, alert_found[:game])
+			@alerts.delete(alert_found)
+		else
+			user.current_ws.send({type: "game_status", data: {status: "WaitingPartner"}}.to_json)
+		end
 	end
 
 	def join_or_create_tournament(user, game)
@@ -103,6 +160,15 @@ class AlertManager
 		end
 		selected[0].add_player(user)
 		return true
+	end
+
+	def leave_tournament(user)
+		if user.tournament == nil || user.tournament.full?
+			user.current_ws.send({type: "game_status", data: {status: "error"}}.to_json)
+			return
+		end
+		user.tournament.remove_player(user)
+		user.current_ws.send({type: "game_status", data: {status: "none"}}.to_json)
 	end
 
 end

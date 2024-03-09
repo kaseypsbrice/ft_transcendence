@@ -187,6 +187,13 @@ class Tournament
 		end
 	end
 
+	def remove_player(user)
+		user.tournament_ws = nil
+		user.tournament = nil
+		@users_registered.delete(user.id)
+		@users_remaining.delete(user.id)
+	end
+
 	def add_player(user)
 		if full? || player?(user) || user.tournament != nil
 			return

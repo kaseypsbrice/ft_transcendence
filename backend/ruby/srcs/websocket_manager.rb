@@ -441,17 +441,28 @@ class WebSocketManager
 			rescue User::Error
 				ws.send({type: "UnfriendError", message: "Error unfriending user"}.to_json)
 			end
+		when "accept_invite"
+			if msg_data["user_from"] == nil
+				ws.send({type: "ChatMessageError", error: "NoUser", message: "No user provided to accept invite"}.to_json)
+				return
+			end
+			user_from = @user_manager.get_user_from_display_name(msg_data["user_from"])
+			if !user_from
+				ws.send({type: "ChatMessageError", error: "UserNotFound", message: "Could not find user #{msg_data["user_from"]}"}.to_json)
+				return
+			end
+			@alert_manager.accept_invite(user, user_from)
+		when "leave_tournament"
+			@alert_manager.leave_tournament(user)
+			return
 		when "get_game_status"
-			#invite = @alert_manager.get_invite(user)
 			if user.tournament != nil && msg_data["game"] == user.tournament.game
 				user.tournament.handle_status(user)
 				return
+			else
+				@alert_manager.handle_status(user)
+				return
 			end
-			#if invite != nil
-			#	@alert_manager.handle_status(invite)
-			#	return
-			#end
-			ws.send({type: "game_status", data: {status: "none"}}.to_json)
 		when "get_tournament_info"
 			if user.tournament == nil
 				ws.send({type: "NoTournament"}.to_json)
@@ -483,6 +494,7 @@ class WebSocketManager
 
 	def handle_close(ws, code, reason)
 		client = @connections[ws]
+		user = @user_manager.get_user(client.user_id)
 		if (client.in_game && client.partner != nil)
 			partner = @connections[client.partner]
 			if (partner != nil)
@@ -490,19 +502,22 @@ class WebSocketManager
 				partner.in_game = false
 				puts "client disconnected"
 				client.partner.send({type: "partner_disconnected"}.to_json)
-				if @user_manager.get_user(client.user_id).tournament_ws == ws
+				if user.tournament_ws == ws
 					winner_user = @user_manager.get_user(partner.user_id)
-					loser_user = @user_manager.get_user(client.user_id)
+					loser_user = user
 					loser_user.tournament.match_finished(winner_user, loser_user)
 					@user_manager.save_match(client.game_selected, winner_user.id, loser_user.id, "tournament")
+				elsif user.invite_ws == ws
+					@user_manager.save_match(client.game_selected, partner.user_id, client.user_id, "friendly")
 				else
 					@user_manager.save_match(client.game_selected, partner.user_id, client.user_id, "casual")
 				end
 			end
 		end
-		user = @user_manager.get_user(client.user_id)
 		if user != nil && user.tournament_ws == ws
 			user.tournament_ws = nil
+		elsif user != nil && user.invite_ws == ws
+			user.invite_ws = nil
 		end
 		puts "WebSocket connection closed"
     	@connections.delete(ws)
@@ -597,6 +612,10 @@ class WebSocketManager
 				loser_user = @user_manager.get_user(loser_id)
 				player_user.tournament.match_finished(winner_user, loser_user)
 				@user_manager.save_match(player.game_selected, winner_id, loser_id, "tournament")
+			elsif player_ws == player_user.invite_ws
+				player_user.invite_ws = nil
+				@user_manager.get_user(partner.user_id).invite_ws = nil
+				@user_manager.save_match(player.game_selected, winner_id, loser_id, "friendly")
 			else
 				@user_manager.save_match(player.game_selected, winner_id, loser_id, "casual")
 			end

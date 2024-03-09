@@ -58,6 +58,14 @@ window.chatOnMessage = function(event, msg) {
 				});
 			}
 			break;
+		case "InviteAccepted":
+			if (msg["game"] != null)
+			{
+				displayMessage("Private match ready! Click to join", true, function () {
+					window.location.hash = msg["game"];
+				});
+			}
+			break;
 		case "HelpResponse":
 			if (msg["message"] != null)
 				displayMessage(msg.message);
@@ -77,12 +85,16 @@ window.chatOnMessage = function(event, msg) {
 			if (msg["game"] != null)
 				displayMessage(`Successfully proposed ${msg.game} tournament`);
 			break;
+		case "InviteSuccess":
+			if (msg["user"] != null)
+				displayMessage(`Successfully invited ${msg.user} to a game`);
+			break;
 	}
 };
 
 function acceptInvite(text)
 {
-	ws.sendWithToken({type: "accept_invite", user_from: text.split(" ")[0]});
+	sendWithToken(ws, {type: "accept_invite", user_from: text.split(" ")[0]});
 }
 
 function sendMessage() {

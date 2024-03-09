@@ -2,7 +2,7 @@ require 'pg'
 require 'bcrypt'
 
 class User
-	attr_accessor :id, :username, :password, :display_name, :tournament, :current_ws, :tournament_ws, :blocked
+	attr_accessor :id, :username, :password, :display_name, :tournament, :current_ws, :tournament_ws, :blocked, :invite_ws
 
 	MAX_USERNAME = 50
 	MAX_DISPLAY_NAME = 30
@@ -24,6 +24,7 @@ class User
 		@snake_tournament_wins = snake_tournament_wins
 		@tournament = nil
 		@tournament_ws = nil
+		@invite_ws = nil
 		@current_ws = nil
 	end
 
@@ -238,7 +239,9 @@ class User
 		begin
 			result = db.exec_params(
 				'SELECT * FROM matches
-				WHERE winner=$1 OR loser=$1',
+				WHERE winner=$1 OR loser=$1
+				ORDER BY created_at DESC
+				LIMIT 50;',
 				[@id]
 			)
 			ret = []
