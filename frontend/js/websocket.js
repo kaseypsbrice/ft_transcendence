@@ -1,6 +1,7 @@
 //const ws = new WebSocket('wss://127.0.0.1:9001/ws');
 
 let logged_in = true;
+let current_profile = "my profile";
 
 // Overload these in future scripts
 function onOpen(event) {}
@@ -64,6 +65,12 @@ function sendWithToken(ws, data)
 	data["token"] = token;
 	ws.send(JSON.stringify(data));
 	return false;
+}
+
+function view_my_profile()
+{
+	current_profile = "my profile";
+	window.location.hash = "#profile";
 }
 
 function connect()

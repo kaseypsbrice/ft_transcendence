@@ -1,3 +1,4 @@
+(function (){
 function insertMatchHistory(date, matchType, opponent, winner) {
     // Detects our header container
     const dataContainer = document.querySelector('.mh-tb-header');
@@ -38,3 +39,69 @@ insertMatchHistory('2024-02-26', '1v1', 'User932908', 'User932908');
  *   will be hidden until you click on some sort of see more button. 
  *   Shouldn't take that long to make, but I'm still drafting this.
  */
+
+function clearPage()
+{
+	document.getElementById('profile-display-name').textContent = "";
+	document.getElementById('profile-username').textContent = "";
+	containers = document.querySelectorAll('.data-mh-tb-container')
+	for (let i = 0; i < containers.length; i++)
+	{
+		let c = containers[i]
+		c.remove();
+	}
+}
+
+window.onMessage = function(event, msg)
+{
+	switch(msg.type)
+	{
+		case "Profile":
+			if (msg.data == null || msg.data.username == null || msg.data.matches == null ||
+			msg.data.display_name == null || msg.data.online == null || msg.data.you == null)
+			{
+				console.log("invalid profile")
+				break;
+			}
+			clearPage();
+			document.getElementById('profile-display-name').textContent = `${msg.data.display_name}`;
+			document.getElementById('profile-username').textContent = `${msg.data.username}`;
+			if (msg.data.online == true)
+				document.getElementById('profile-status').innerHTML = '&#x2022; Online';
+			else
+				document.getElementById('profile-status').innerHTML = '&#x2022 Offline';
+			for (let i = 0; i < msg.data.matches.length; i++)
+			{
+				let m = msg.data.matches[i];
+				if (m.winner == null || m.loser == null || m.game == null || m.time == null || m.info == null)
+				{
+					console.log("invalid match", m);
+					continue;
+				}
+				console.log(m)
+				if (m.winner == msg.data.display_name)
+					insertMatchHistory(m.time, `${m.game.charAt(0).toUpperCase() + m.game.slice(1)} ${m.info}`, m.loser, m.winner);
+				else
+					insertMatchHistory(m.time, `${m.game.charAt(0).toUpperCase() + m.game.slice(1)} ${m.info}`, m.winner, m.winner);
+			}
+			break;
+	}
+}
+
+window.onOpen = function(event)
+{
+	clearPage();
+	console.log(current_profile)
+	sendWithToken(ws, {type:"get_profile", profile: current_profile});
+};
+
+if (ws.readyState == ws.OPEN)
+{
+	onOpen(null);
+}
+else
+{
+	clearPage();
+}
+
+})();

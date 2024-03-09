@@ -221,4 +221,24 @@ class UserManager
 
 	end
 
+	def get_profile(display_name)
+		begin
+			user = get_user_info(display_name)
+			if !user
+				return nil
+			end
+			profile_data = {
+				username: user.username,
+				display_name: user.display_name,
+				matches: user.get_match_history(@db),
+				you: false,
+				online: false,
+				id: user.id
+			}
+			return profile_data
+		rescue User::Error
+			puts "failed to fetch match history for get_profile"
+			return nil
+		end
+	end
 end

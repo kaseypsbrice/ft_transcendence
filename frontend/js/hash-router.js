@@ -37,12 +37,12 @@ const routes = {
         description: "Sign up and become a member of the site",
         scripts: ["./js/register.js"]
     },
-    // profile: {
-    //     template: "./templates/profile.html",
-    //     title: pageTitle + " | Profile",
-    //     description: "View your user dashboard / profile",
-    //     scripts: []
-    // },
+    profile: {
+	    template: "./templates/profile.html",
+    	title: pageTitle + " | Profile",
+    	description: "View your user dashboard / profile",
+    	scripts: ["./js/profile.js"]
+    },
 	pong: {
         template: "./templates/pong.html",
         title: pageTitle + " | Pong",

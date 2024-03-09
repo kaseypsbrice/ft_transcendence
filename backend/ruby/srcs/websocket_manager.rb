@@ -286,6 +286,31 @@ class WebSocketManager
 			rescue User::Error => e
 				ws.send({type: "ChatHistoryError", message: "Error fetching chat history"}.to_json)
 			end
+		when "get_profile"
+			if msg_data["profile"] == nil
+				ws.send({type: "GetProfileError", message: "No display name provided"}.to_json)
+				return
+			end
+			profile = nil
+			if msg_data["profile"] == "my profile"
+				profile = @user_manager.get_profile(user.display_name)
+			else
+				profile = @user_manager.get_profile(msg_data["profile"])
+			end
+			if profile == nil
+				ws.send({type: "GetProfileError", message: "Could not find user #{msg_data["profile"]}"}.to_json)
+				return
+			end
+			if profile[:display_name] == user.display_name
+				profile[:you] = true
+			end
+			@connections.each_value do |c|
+				if c.user_id == profile[:id]
+					profile[:online] = true
+					break
+				end
+			end
+			ws.send({type: "Profile", data: profile}.to_json)
 		when "block_user"
 			begin
 				b_user

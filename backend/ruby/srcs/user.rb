@@ -238,30 +238,26 @@ class User
 		begin
 			result = db.exec_params(
 				'SELECT * FROM matches
-				WHERE player1=$1 OR player2=$1',
+				WHERE winner=$1 OR loser=$1',
 				[@id]
 			)
 			ret = []
 			result.each do |match|
-				player1_id = match["player1"]
-				player2_id = match["player2"]
-				p1_lookup = db.exec_params(
+				winner_id = match["winner"]
+				loser_id = match["loser"]
+				winner_lookup = db.exec_params(
 					'SELECT display_name FROM users
 					WHERE id=$1',
-					[player1_id]
+					[winner_id]
 				)
-				p2_lookup = db.exec_params(
+				loser_lookup = db.exec_params(
 					'SELECT display_name FROM users
 					WHERE id=$1',
-					[player2_id]
+					[loser_id]
 				)
-				match["player1"] = p1_lookup[0]['display_name']
-				match["player2"] = p2_lookup[0]['display_name']
-				if match["winner"] == player1_id
-					match["winner"] = p1_lookup[0]['display_name']
-				else
-					match["winner"] = p2_lookup[0]['display_name']
-				end
+				match["winner"] = winner_lookup[0]['display_name']
+				match["loser"] = loser_lookup[0]['display_name']
+				puts match
 				ret.push(match)
 			end
 			return ret
