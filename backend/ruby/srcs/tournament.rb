@@ -23,9 +23,13 @@ class Tournament
 			data = {
 				player1: @users_registered[m[:player1]].display_name,
 				player2: @users_registered[m[:player2]].display_name,
-				status: m[:status],
-				winner: m[:winner]
+				status: m[:status]
 			}
+			if (m[:winner] == nil)
+				data[:winner] = nil
+			else
+				data[:winner] = @users_registered[m[:winner]].display_name
+			end
 			to_send[:matches].push(data)
 		end
 		return to_send
@@ -52,6 +56,17 @@ class Tournament
 			return selected[0]
 		end
 		return nil
+	end
+
+	def match_ready?(user)
+		match = get_match(user)
+		if (match == nil)
+			return false
+		end
+		if match[:status] != "preparing"
+			return false
+		end
+		return true
 	end
 
 	def create_match(player1, player2)
@@ -92,6 +107,7 @@ class Tournament
 		match[:status] = "finished"
 		match[:winner] = winner.id
 		loser.tournament_ws = nil
+		loser.tournament = nil
 		winner.tournament_ws = nil
 
 		@matches.each do |match|

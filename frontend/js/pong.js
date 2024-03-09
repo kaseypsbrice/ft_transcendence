@@ -387,7 +387,7 @@ window.onMessage = function(event, msg)
 			break;
 		case "TournamentMatchStarted":
 			if (state != "game" && state != "victory" && state != "defeat")
-				sendWithToken(ws, {type: "get_game_status"});
+				sendWithToken(ws, {type: "get_game_status", game: "pong"});
 			break;
 	}
 }
@@ -486,7 +486,7 @@ window.onLogin = function()
 window.onOpen = function(event)
 {
 	state = "waiting_server"
-	sendWithToken(ws, {type:"get_game_status"});
+	sendWithToken(ws, {type:"get_game_status", game: "pong"});
 }
 
 window.onClose = function(event)

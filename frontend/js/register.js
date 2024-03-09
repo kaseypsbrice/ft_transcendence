@@ -13,8 +13,5 @@ function submitForm(event)
 		return;
 	var display_name = document.getElementById("display_name").value;
 
-	console.log("Username: ", username);
-	console.log("Password: ", password);
-	console.log("Display Name: ", display_name);
 	ws.send(JSON.stringify({"type": "register", "data": {"username": username, "password": password, "display_name": display_name}}));
 }

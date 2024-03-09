@@ -418,7 +418,7 @@ class WebSocketManager
 			end
 		when "get_game_status"
 			#invite = @alert_manager.get_invite(user)
-			if user.tournament != nil
+			if user.tournament != nil && msg_data["game"] == user.tournament.game
 				user.tournament.handle_status(user)
 				return
 			end
@@ -428,11 +428,15 @@ class WebSocketManager
 			#end
 			ws.send({type: "game_status", data: {status: "none"}}.to_json)
 		when "get_tournament_info"
-			tournament = @alert_manager.get_tournament(user)
-			if tournament == nil
+			if user.tournament == nil
 				ws.send({type: "NoTournament"}.to_json)
 			else
-				t_info = tournament.tournament_hash
+				t_info = user.tournament.tournament_hash
+				if user.tournament.match_ready?(user)
+					t_info[:in_game] = true
+				else
+					t_info[:in_game] = false
+				end
 				ws.send({type: "TournamentInfo", data: t_info}.to_json)
 			end
 		when "join_tournament_id"
