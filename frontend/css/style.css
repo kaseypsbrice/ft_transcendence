@@ -7,7 +7,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    /*border: grey 1px solid; /* Debugging */
+    /* border: grey 1px solid; /* Debugging */
 }
 
 body {
@@ -75,7 +75,7 @@ nav a:hover {
     top: 100%;
     left: 0;
     background-color: #1a1a1d;
-    z-index: 1;
+    z-index: 4;
 }
 .games-dropdown-content ul {
     list-style-type: none;
@@ -95,6 +95,7 @@ nav a:hover {
 .games-dropdown-content ul li a {
     color: white;
     text-decoration: none;
+    white-space: nowrap;
 }
 
 .games-dropdown:hover .games-dropdown-content {
@@ -396,4 +397,363 @@ p {
     background-color: #000;
     display: block;
     margin: auto;
+}
+
+/* ================================================================ */
+/* ========================= Profile CSS ========================== */
+/* ================================================================ */
+
+
+/* Profile divs for display name and username */
+
+.profile-container {
+    position: relative;
+    max-width: 889px;
+    min-width: 450px;
+}
+
+.profile-rectangle {
+    width: 100%;
+    height: 92px;
+    margin: 0 0 12px;
+    padding: 19px 18px 0 151px;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+    background-color: #d9d9d9;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    position: relative;
+    z-index: 2;
+}
+
+.profile-rectangle-bottom {
+    width: 100%;
+    height: 92px;
+    margin: 55px 15px 15px 0;
+    padding: 0 0 20px;
+    border-radius: 10px;
+    box-shadow: inset 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+    border: solid 1px rgba(255, 255, 255, 0.05);
+    background-color: #414141;
+    margin: -46px 15px 15px 0; /* Adjusted margin to overlap */
+    z-index: 1;
+}
+
+.profile-picture {
+    width: 105px;
+    height: 105px;
+    margin: 23px 26px 0px 20px;
+    background-color: #acacac;
+    border-radius: 50%;
+    position: absolute;
+    left: 10px;
+    z-index: 3;
+}
+
+.profile-display-name {
+    font-size: 36px;
+    font-weight: 600;
+    color: #292929;
+    top: 45px;
+    left: 170px;
+    position: absolute;
+    z-index: 3;
+    letter-spacing: -2px;
+}
+
+.profile-username {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.85);
+    top: 100px;
+    left: 172px;
+    position: absolute;
+    z-index: 3;
+}
+
+#profile-status {
+    font-size: 20px;
+    top: 100px;
+    left: 238px;
+    color: rgba(49, 255, 156, 0.85);
+    position: absolute;
+    z-index: 3;
+}
+
+.ic--round-settings {
+    top: 27%;
+    left: 93%;
+    position: absolute;
+    z-index: 3;
+    width: 30px;
+    height: 30px;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23060606' d='M19.5 12c0-.23-.01-.45-.03-.68l1.86-1.41c.4-.3.51-.86.26-1.3l-1.87-3.23a.987.987 0 0 0-1.25-.42l-2.15.91c-.37-.26-.76-.49-1.17-.68l-.29-2.31c-.06-.5-.49-.88-.99-.88h-3.73c-.51 0-.94.38-1 .88l-.29 2.31c-.41.19-.8.42-1.17.68l-2.15-.91c-.46-.2-1-.02-1.25.42L2.41 8.62c-.25.44-.14.99.26 1.3l1.86 1.41a7.343 7.343 0 0 0 0 1.35l-1.86 1.41c-.4.3-.51.86-.26 1.3l1.87 3.23c.25.44.79.62 1.25.42l2.15-.91c.37.26.76.49 1.17.68l.29 2.31c.06.5.49.88.99.88h3.73c.5 0 .93-.38.99-.88l.29-2.31c.41-.19.8-.42 1.17-.68l2.15.91c.46.2 1 .02 1.25-.42l1.87-3.23c.25-.44.14-.99-.26-1.3l-1.86-1.41c.03-.23.04-.45.04-.68m-7.46 3.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5s-1.57 3.5-3.5 3.5'/%3E%3C/svg%3E");
+  }
+
+  /* Match history div */
+
+.match-history-container {
+    position: relative;
+    max-width: 889px;
+    min-width: 450px;
+}
+
+.mh-rectangle {
+    width: 100%;
+    height: 58px;
+    margin: 0 0 12px;
+    padding: 19px 18px 0 151px;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+    background-color: #d9d9d9;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    position: relative;
+    z-index: 2;
+}
+
+.mh-rectangle-bottom {
+    width: 100%;
+    height: 340px; /* Or 300px? */
+    margin: 55px 15px 15px 0;
+    padding: 0 0 20px;
+    border-radius: 10px;
+    box-shadow: inset 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+    border: solid 1px rgba(255, 255, 255, 0.05);
+    background-color: #414141;
+    margin: -46px 15px 15px 0;
+    z-index: 1;
+}
+
+.mh-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #292929;
+    top: 20px;
+    left: 43px;
+    position: absolute;
+    z-index: 3;
+    letter-spacing: -0.2px;
+}
+
+.mh-tb-date {
+    text-align: left;
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+    top: 22%;
+    left: 5%;
+    position: absolute;
+    z-index: 3;
+}
+
+.mh-tb-match-type {
+    text-align: left;
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+    top: 22%;
+    left: 27%;
+    position: absolute;
+    z-index: 3;
+}
+
+.mh-tb-opponent {
+    text-align: left;
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+    top: 22%;
+    left: 50%;
+    position: absolute;
+    z-index: 3;
+}
+
+.mh-tb-winner {
+    text-align: left;
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+    top: 22%;
+    left: 73%;
+    position: absolute;
+    z-index: 3;
+}
+
+#data-mh-tb-date {
+    left: 5%;
+    text-align: left;
+    font-size: 20px;
+    color: white;
+    position: absolute;
+    z-index: 3;
+}
+
+#data-mh-tb-match-type {
+    left: 27%;
+    text-align: left;
+    font-size: 20px;
+    color: white;
+    position: absolute;
+    z-index: 3;
+}
+
+#data-mh-tb-opponent {
+    left: 50%;
+    text-align: left;
+    font-size: 20px;
+    color: white;
+    position: absolute;
+    z-index: 3;
+    white-space: pre-wrap;
+    max-width: 200px;
+}
+
+#data-mh-tb-winner {
+    left: 73%;
+    text-align: left;
+    font-size: 20px;
+    color: white;
+    position: absolute;
+    z-index: 3;
+}
+
+.data-mh-tb-container {
+    position: absolute;
+    left: 0;
+    width: 100%;
+}
+
+/* ================================================================ */
+/* ====================== Tournament CSS ========================== */
+/* ================================================================ */
+
+.tn-title {
+    margin-top: 30px;
+    text-align: center;
+    padding-right: 44px;
+}
+
+.tn-player-rectangle-1 {
+    font-size: 20px;
+    display: inline-block;
+    width: 250px;
+    height: 65px;
+    color: black;
+    background-color: #eef7ff;
+    border-radius: 10px;
+    margin-right: 5%;
+    line-height: 65px;
+    text-align: center;
+    z-index: 0;
+}
+
+.tn-centre-wrap {
+    margin-top: 4%;
+    display: flex;
+    justify-content: center;
+}
+
+.tn-line-1 {
+    width: 54px;
+    height: 5px;
+    background-color: #eef7ff;
+    position: absolute;
+    left: calc(250px + 15%);
+    top: 30.5%;
+    z-index: 1;
+}
+
+.tn-line-2 {
+    width: 54px;
+    height: 5px;
+    background-color: #eef7ff;
+    position: absolute;
+    left: calc(650px + 5% + 24.5%);
+    top: 30.5%;
+    z-index: 0;
+}
+
+
+.tn-player-rectangle-2 {
+    font-size: 20px;
+    display: inline-block;
+    width: 419px;
+    height: 109px;
+    color: black;
+    background-color: #eef7ff;
+    border-radius: 10px;
+    margin-right: 5%;
+    margin-top: 80px;
+    line-height: 109px;
+    text-align: center;
+    z-index: 0;
+}
+
+.tn-line {
+    position: absolute;
+    z-index: 0;
+    background-color: #eef7ff;
+}
+
+.tn-line-3 {
+    width: 5px;
+    height: 100px;
+    left: 556px;
+    top: 305px;
+}
+
+.tn-line-3-1 {
+    width: 87px;
+    height: 5px;
+    left: 556px;
+    top: 400px;
+}
+
+.tn-line-3-2 {
+    width: 5px;
+    height: 52px;
+    left: 642px;
+    top: 400px;
+}
+
+.tn-line-4 {
+    width: 5px;
+    height: 100px;
+    right: 640px;
+    top: 305px;
+}
+
+.tn-line-4-1 {
+    width: 87px;
+    height: 5px;
+    right: 640px;
+    top: 400px;
+}
+
+.tn-line-4-2 {
+    width: 5px;
+    height: 52px;
+    right: 725px;
+    top: 400px;
+}
+
+.join-game {
+    width: 397px;
+    height: 71px;
+    line-height: 71px;
+    text-align: center;
+    font-size: 20px;
+    background-color: #0077e5;
+    color: white;
+    border: none;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: background-color 0.2s ease-out;
+}
+
+.join-game:hover {
+    background-color: #1c47a5;
+    cursor: pointer;
+    box-shadow: inset 2px 2px 5px #1f0b77,
+                inset -2px -2px 5px #1f0b77;
 }

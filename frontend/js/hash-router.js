@@ -19,18 +19,30 @@ const routes = {
         description: "View leaderboard on this page",
         scripts: []
     },
-    login: {
-        template: "./templates/login.html",
-        title: pageTitle + " | Login",
+    login: {//Remove this and uncomment the below when finished testing (WIP)
+        template: "./templates/profile.html",
+        title: pageTitle + " | Profile",
         description: "Login if you're an existing member of the site",
-        scripts: ["./js/login.js"]
+        scripts: ["./js/profile.js"]
     },
+    // login: {
+    //     template: "./templates/login.html",
+    //     title: pageTitle + " | Login",
+    //     description: "Login if you're an existing member of the site",
+    //     scripts: ["./js/login.js"]
+    // },
     signup: {
         template: "./templates/signup.html",
         title: pageTitle + " | Sign Up",
         description: "Sign up and become a member of the site",
         scripts: ["./js/register.js"]
     },
+    // profile: {
+    //     template: "./templates/profile.html",
+    //     title: pageTitle + " | Profile",
+    //     description: "View your user dashboard / profile",
+    //     scripts: []
+    // },
 	pong: {
         template: "./templates/pong.html",
         title: pageTitle + " | Pong",
@@ -48,6 +60,18 @@ const routes = {
         title: pageTitle + " | Chat",
         description: "Chat",
         scripts: ["./js/chat.js"]
+    },
+    pongTournament: {
+        template: "./templates/pong-tournament.html",
+        title: pageTitle + " | Pong Tournament",
+        description: "Play pong tournament matches",
+        scripts: ["./js/tournament.js"]
+    },
+    snakeTournament: {
+        template: "./templates/snake-tournament.html",
+        title: pageTitle + " | Snake Tournament",
+        description: "Play snake tournament matches",
+        scripts: ["./js/tournament.js"]
     },
 };
 // Add other pages to the list
