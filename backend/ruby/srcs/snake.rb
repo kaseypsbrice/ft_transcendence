@@ -173,18 +173,18 @@ class SnakeGame
 
 	def state_as_json
 		data = {}
-		data["game"] = "snake"
-		data["snakes"] = []
-		data["food"] = @food
+		data[:game] = "snake"
+		data[:snakes] = []
+		data[:food] = @food
 		if (@winner != -1)
-			data["winner"] = @winner
+			data[:winner] = @winner
 		end
 		for i in 0..@snakes.size() - 1
 			snake = @snakes[i]
-			data["snakes"] << []
+			data[:snakes] << []
 			while snake != nil
-				data["snakes"][i] << snake.x
-				data["snakes"][i] << snake.y
+				data[:snakes][i] << snake.x
+				data[:snakes][i] << snake.y
 				snake = snake.next
 			end
 		end

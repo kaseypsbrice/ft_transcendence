@@ -109,6 +109,10 @@ void update_game(t_game *game)
 			}
 			break;
 		}
+		case pong:
+		{
+			
+		}
 		case victory:
 		{
 			if (game->first_update)
@@ -158,6 +162,10 @@ void update_game(t_game *game)
 			noecho();
 			nodelay(stdscr, 1);
 			break;
+		}
+		case chat:
+		{
+
 		}
 		case login:
 		{

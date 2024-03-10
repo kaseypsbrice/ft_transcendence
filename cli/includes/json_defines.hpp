@@ -18,6 +18,7 @@
 # define TOKEN "\"token\":\""
 
 # define FIND_SNAKE(token) ("{\"token\":\"" + token + "\",\"type\":\"find_snake\"}")
+# define FIND_PONG(token) ("{\"token\":\"" + token + "\",\"type\":\"find_pong\"}")
 
 # define LOGIN(username, password) ("{\"type\": \"login\", \"data\": {\"username\":\"" + username + \
 "\", \"password\":\"" + password + "\"}}")
@@ -26,3 +27,6 @@
 "\", \"display_name\":\"" + display_name + "\",\"password\":\"" + password + "\"}}")
 
 # define CHANGE_DIRECTION(token, dir) ("{\"token\":\"" + token + "\",\"type\":\"change_direction\",\"direction\":\"" + dir + "\"}")
+# define GET_CHAT_HISTORY(token) ("{\"token\":\"" + token + "\",\"type\":\"get_chat_history\"}")
+# define GET_GAME_STATUS(token, game) ("{\"token\":\"" + token + "\",\"type\":\"get_game_status\",\"game\":\"" + game + "\"}")
+# define FIND_TOURNAMENT(token, game) ("{\"token\":\"" + token + "\",\"type\":\"find_tournament\",\"game\":\"" + game + "\"}")

@@ -20,6 +20,8 @@ let state = "connecting";
 let menu_text = "";
 
 let in_tournament = false;
+let up_pressed = false;
+let down_pressed = false;
 
 let menu_buttons = [
 	{
@@ -438,14 +440,34 @@ function movePaddle(paddle, direction) {
 // listen for key presses to control the paddle
 function handleKeyDown(event)
 {
-	if (player_id < 0)
-		return;
-	if (event.key === 'ArrowUp' && player_id == 0) movePaddle('left', 1);
-	if (event.key === 'ArrowDown' && player_id == 0) movePaddle('left', -1);
-	if (event.key === 'ArrowUp' && player_id == 1) movePaddle( 'right', 1); // Move up
-	if (event.key === 'ArrowDown' && player_id == 1) movePaddle('right', -1); // Move down
+	if (event.key === 'w') up_pressed = true;
+	else if (event.key === 's') down_pressed = true;
+	checkMovement();
 }
 document.addEventListener('keydown', handleKeyDown);
+
+function handleKeyUp(event)
+{
+	if (event.key === 'w') up_pressed = false;
+	else if (event.key === 's') down_pressed = false;
+	checkMovement();
+}
+document.addEventListener('keyup', handleKeyUp);
+
+function checkMovement()
+{
+	if (player_id < 0)
+		return;
+	let paddle = "left";
+	if (player_id != 0)
+		paddle = "right";
+	if (up_pressed && !down_pressed)
+		movePaddle(paddle, 1.0);
+	else if (down_pressed && !up_pressed)
+		movePaddle(paddle, -1.0);
+	else
+		movePaddle(paddle, 0.0);
+}
 
 function handleMouseMove(event)
 {
@@ -477,6 +499,7 @@ window.cleanupPage = function() {
 	document.removeEventListener('keydown', handleKeyDown);
 	document.removeEventListener('mousemove', handleMouseMove);
 	document.removeEventListener('click', handleMouseClick);
+	document.removeEventListener('keyup', handleKeyUp);
 }
 
 function gameLoop() {

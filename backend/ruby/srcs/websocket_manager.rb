@@ -79,9 +79,9 @@ class WebSocketManager
 			if client.game != nil && msg_data.key?("direction")
 				direction = msg_data["direction"].to_i
 				if msg_data["type"] == "move_left_paddle"
-					client.game.move_left_paddle(direction)
+					client.game.set_left_paddle(direction)
 				elsif msg_data["type"] == "move_right_paddle"
-					client.game.move_right_paddle(direction)
+					client.game.set_right_paddle(direction)
 				end
 			end
 		when "change_direction"
@@ -563,7 +563,7 @@ class WebSocketManager
 		if game_name == "pong"
 			player1.game = PongGame.new
 			player2.game = @connections[player1_ws].game
-			timer = EM.add_periodic_timer(0.016) {game_loop(player1_ws, timer)}
+			timer = EM.add_periodic_timer(0.04) {game_loop(player1_ws, timer)}
 		elsif game_name == "snake"
 			player1.game = SnakeGame.new
 			player2.game = @connections[player1_ws].game
@@ -599,11 +599,12 @@ class WebSocketManager
 		game.update_game_state
 		player_ws.send({type: "state", data: game.state_as_json}.to_json) 
 		player.partner.send({type: "state", data: game.state_as_json}.to_json)
-		if game.state_as_json["winner"] != nil && game.state_as_json["winner"] > -1
+		if game.state_as_json[:winner] != nil && game.state_as_json[:winner] > -1
+			puts "match finished"
 			player_user = @user_manager.get_user(player.user_id)
 			winner_id = player.user_id
 			loser_id = partner.user_id
-			if game.state_as_json["winner"] != player.id
+			if game.state_as_json[:winner] != player.id
 				winner_id = partner.user_id
 				loser_id = player.user_id
 			end
