@@ -44,8 +44,34 @@
                 </div>
             </div>
 			<div id="content"></div>
+
+            <button class="open-btn" onclick="openChat()">Chat</button>
+            <div class="chat-popup" id="chat-form-container">
+                <form action="#" class="form-container">
+                    <div class="chat-window-head">
+                        <h4>Chat Window</h4>
+                        <span class="close-btn" onclick="closeChat()"><span class="mdi--close-outline"></span></span>
+                    </div>
+
+                    <div class="msg-container">
+                        <div class="msg">
+                            <p>Hey, how's it going?</p>
+                            <span>9:34pm</span>
+                        </div>
+                    </div>
+
+                    <div class="chat-box-container"></div>
+                        <div class="chat-box">
+                            <input type="text" placeholder="Type your message..." name="msg" required>
+                            <button type="submit" class="btn"><span class="material-symbols--send-outline"></span></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
 		</div>
 		<script src="./js/websocket.js"></script>
 		<script src="./js/hash-router.js"></script>
+        <script src="./js/pop-up.js"></script>
 	</body>
 </html>
