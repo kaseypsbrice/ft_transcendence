@@ -58,9 +58,7 @@ void handle_pong_state(t_game *game)
 	{
 		int i = game->msg.find(WINNER);
 		i += strlen(WINNER);
-		printw("%s\n", game->msg.c_str() + i);
 		int winner = atoi(game->msg.c_str() + i);
-		printw("char %c winner %d\n", game->msg[i], winner);
 		if (game->msg[i] >= '0' && game->msg[i] <= '9')
 		{
 			if (winner == game->player_id)
@@ -68,7 +66,6 @@ void handle_pong_state(t_game *game)
 			else
 				change_state(game, defeat);
 			game->msg.clear();
-			printw("state: %d\n", game->state);
 			return;
 		}
 	}

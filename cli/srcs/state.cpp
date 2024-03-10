@@ -119,7 +119,42 @@ void update_game(t_game *game)
 		}
 		case pong:
 		{
-
+			if (game->first_update == true)
+			{
+				game->first_update = false;
+				game->moving_dir = "0";
+			}
+			int c = getch();
+			std::string old_dir = game->moving_dir;
+			switch (c)
+			{
+			case 'w':
+				if (game->moving_dir == "0")
+					game->moving_dir = "1";
+				else
+					game->moving_dir = "0";
+				break;
+			case 's':
+				if (game->moving_dir == "0")
+					game->moving_dir = "-1";
+				else
+					game->moving_dir = "0";
+				break;
+			}
+			if (game->moving_dir != old_dir)
+			{
+				if (game->player_id == 0)
+				{
+					game->write_buf = MOVE_LEFT_PADDLE(game->token, game->moving_dir);
+					lws_callback_on_writable(game->web_socket);
+				}
+				else
+				{
+					game->write_buf = MOVE_RIGHT_PADDLE(game->token, game->moving_dir);
+					lws_callback_on_writable(game->web_socket);
+				}
+			}
+			break;
 		}
 		case victory:
 		{

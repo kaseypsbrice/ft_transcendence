@@ -37,3 +37,5 @@
 # define GET_CHAT_HISTORY(token) ("{\"token\":\"" + token + "\",\"type\":\"get_chat_history\"}")
 # define GET_GAME_STATUS(token, game) ("{\"token\":\"" + token + "\",\"type\":\"get_game_status\",\"game\":\"" + game + "\"}")
 # define FIND_TOURNAMENT(token, game) ("{\"token\":\"" + token + "\",\"type\":\"find_tournament\",\"game\":\"" + game + "\"}")
+# define MOVE_LEFT_PADDLE(token, direction) ("{\"token\":\"" + token + "\",\"type\":\"move_left_paddle\",\"direction\":" + direction + "}")
+# define MOVE_RIGHT_PADDLE(token, direction) ("{\"token\":\"" + token + "\",\"type\":\"move_right_paddle\",\"direction\":" + direction + "}")

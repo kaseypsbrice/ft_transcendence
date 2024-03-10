@@ -46,6 +46,7 @@ typedef struct s_game
 	int	searching_for;
 	bool first_update;
 	bool awaiting_auth;
+	std::string	moving_dir;
 	std::string msg;
 	std::string login_status;
 	std::string register_status;
