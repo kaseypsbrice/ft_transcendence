@@ -407,6 +407,7 @@ p {
 /* Profile divs for display name and username */
 
 .profile-container {
+    grid-area: profile-container;
     position: relative;
     max-width: 889px;
     min-width: 450px;
@@ -493,6 +494,7 @@ p {
   /* Match history div */
 
 .match-history-container {
+    grid-area: match-history-container;
     position: relative;
     max-width: 889px;
     min-width: 450px;
@@ -529,7 +531,7 @@ p {
     height: 46px;
     z-index: 3;
     position: absolute;
-    bottom: 0;
+    bottom: 19px;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
     background-color: none;
@@ -627,6 +629,7 @@ p {
 /* Statistics Container */
 
 .stats-container {
+    grid-area: stats-container;
     position: relative;
     max-width: 889px;
     min-width: 450px;
@@ -711,6 +714,7 @@ p {
 /* Friends list containers */
 
 .friends-container {
+    grid-area: friends-container;
     position: relative;
     max-width: 400px;
     min-width: 350px;
@@ -732,7 +736,7 @@ p {
 .friends-rectangle-bottom {
     display: inline-block;
     width: 100%;
-    height: 766px;
+    height: 798px;
     margin: 55px 15px 15px 0;
     padding: 0 0 20px;
     border-radius: 10px;
@@ -779,12 +783,18 @@ p {
     margin-left: 43px;
 }
 
-/* 
 .user-profile-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-} */
+    display: grid;
+    grid-template-columns: auto auto auto;
+    grid-template-rows: auto auto auto;
+    gap: 0px 0px;
+    grid-template-areas: 
+        "profile-container profile-container friends-container"
+        "match-history-container match-history-container friends-container"
+        "stats-container stats-container friends-container";
+    width: 83.4%;
+    translate: 14%; /* On so many levels I consider this dodgy */
+}
 
 /* ================================================================ */
 /* ====================== Tournament CSS ========================== */
