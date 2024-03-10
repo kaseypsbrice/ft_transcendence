@@ -66,7 +66,7 @@ window.onMessage = function(event, msg)
 			if (msg.data.online == true)
 				document.getElementById('profile-status').innerHTML = '&#x2022; Online';
 			else
-				document.getElementById('profile-status').innerHTML = '&#x2022 Offline';
+				document.getElementById('profile-status').innerHTML = '&#x2022; Offline';
 			for (let i = 0; i < msg.data.matches.length; i++)
 			{
 				let m = msg.data.matches[i];

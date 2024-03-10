@@ -19,18 +19,18 @@ const routes = {
         description: "View leaderboard on this page",
         scripts: []
     },
-    login: {//Remove this and uncomment the below when finished testing (WIP)
-      template: "./templates/profile.html",
-      title: pageTitle + " | Profile",
-      description: "Login if you're an existing member of the site",
-      scripts: ["./js/profile.js"]
+    //login: {//Remove this and uncomment the below when finished testing (WIP)
+     // template: "./templates/profile.html",
+    //  title: pageTitle + " | Profile",
+    //  description: "Login if you're an existing member of the site",
+    //  scripts: ["./js/profile.js"]
+    //},
+	   login: {
+           template: "./templates/login.html",
+           title: pageTitle + " | Login",
+           description: "Login if you're an existing member of the site",
+           scripts: ["./js/login.js"]
     },
-    //   login: {
-    //       template: "./templates/login.html",
-    //       title: pageTitle + " | Login",
-    //       description: "Login if you're an existing member of the site",
-    //       scripts: ["./js/login.js"]
-    // },
     signup: {
         template: "./templates/signup.html",
         title: pageTitle + " | Sign Up",

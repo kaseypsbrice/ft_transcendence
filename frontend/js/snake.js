@@ -10,6 +10,7 @@ const UP = 3;
 const TILE = 20;
 
 let player_id = -1;
+let opponent = "";
 let snakes = [];
 let mouse_pos = {x: 0.0, y: 0.0};
 let state = "connecting";
@@ -207,6 +208,10 @@ function updateGame(data)
 
 	drawFood(gameState.food);
     drawSnakes(gameState.snakes);
+	ctx.fillStyle = "white";
+	ctx.font = "16px Arial";
+	ctx.textAlign = "center";
+	ctx.fillText(`Opponent: ${opponent}`, canvas.width / 2, 12);
 }
 
 function drawButtons()
@@ -381,6 +386,10 @@ window.onMessage = function(event, msg)
 				player_id = msg.data.player_id;
 				state = "game";
 				console.log("player_id: ", player_id);
+				if (msg.data.opponent != null)
+					opponent = msg.data.opponent
+				else
+					opponent = "";
 			}
 			break;
 		case "partner_disconnected":

@@ -22,6 +22,7 @@ let menu_text = "";
 let in_tournament = false;
 let up_pressed = false;
 let down_pressed = false;
+let opponent = "";
 
 let menu_buttons = [
 	{
@@ -369,6 +370,10 @@ function updateGame(data) {
 	drawPaddle(gameState.right_paddle, 'right'); 
 	drawScore(gameState.score_left, canvas.width / 4, 50);
 	drawScore(gameState.score_right, (canvas.width / 4) * 3, 50);
+	ctx.fillStyle = "white";
+	ctx.font = "16px Arial";
+	ctx.textAlign = "center";
+	ctx.fillText(`Opponent: ${opponent}`, canvas.width / 2, 12);
 }
 
 window.onMessage = function(event, msg) 
@@ -400,6 +405,10 @@ window.onMessage = function(event, msg)
 				player_id = msg.data.player_id;
 				state = "game";
 				console.log("player_id: ", player_id);
+				if (msg.data.opponent != null)
+					opponent = msg.data.opponent
+				else
+					opponent = "";
 			}
 			break;
 		case "partner_disconnected":

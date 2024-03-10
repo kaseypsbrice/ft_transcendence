@@ -1,2 +1,22 @@
 requires libwebsockets, ncurses and libssl-dev
-apt-get install libwebsockets-dev libncurses5-dev libncursesw5-dev libssl-dev
+
+To Play:
+	1: install dependencies: sudo apt-get install libwebsockets-dev libncurses5-dev libncursesw5-dev libssl-dev0
+	2: run make
+	3: ./cli
+
+Upon opening the Command Line Interface you will be prompted to login or register an account.
+You must be logged into an account to be able to play against other users.
+
+There are currently 2 options for games to play: "snake" or "pong".
+These options will be presented to you after you login.
+Once you press the number corresponding to the game of your choice you will begin finding a match.
+When a match is found the game will start immediately.
+
+Snake functions identically to the web version, use the 'WASD' keys to change direction.
+Pick up food represented by an 'x' and avoid crashing into your opponent.
+
+Pong is almost identical to the web version however it is (nearly) impossible to track key-down and key-up events in the terminal.
+So for this reason when you press 'W' or 'S' to move your paddle up or down respectively, you must press either key again to stop the paddle.
+
+That is all, have fun playing :)
