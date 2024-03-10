@@ -486,6 +486,33 @@ class WebSocketManager
 				ws.send({type: "ChatMessageError", error: "TournamentUnavailable", message: "Tournament unavailable"}.to_json)
 			end
 			return
+		when "change_settings"
+			begin
+				if msg_data["password"] == nil
+					ws.send({type: "ChangeSettingsError", message: "no password provided"}.to_json)
+				end
+				if msg_data["display_name"] == nil && msg_data["new_password"] == nil && 
+					msg_data["username"] == nil && msg_data["profile_picture"] == nil
+					ws.send({type: "ChangeSettingsError", message: "No settings provided"}.to_json)
+					return
+				end
+				user.verify_password(msg_data["password"])
+				if msg_data["display_name"] != nil
+					user.change_display_name(msg_data["display_name"], @db)
+				end
+				if msg_data["new_password"] != nil
+					user.change_password(msg_data["new_password"], @db)
+				end
+				if msg_data["username"] != nil
+					user.change_username(msg_data["username"], @db)
+				end
+				if msg_data["profile_picture"] != nil
+					user.change_profile_picture(msg_data["profile_picture"], @db)
+				end
+				ws.send({type: "ChangeSettingsSuccess"}.to_json)
+			rescue User::Error => e
+				ws.send({type: "ChangeSettingsError", message: e.message}.to_json)
+			end
 		end
 		rescue JSON::ParserError => e
 			puts "Error parsing JSON: #{e.message}"

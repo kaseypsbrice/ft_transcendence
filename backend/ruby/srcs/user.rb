@@ -79,7 +79,7 @@ class User
 	end
 
 	class DatabaseError < Error
-		def initialize(message = "Error accessing database")
+		def initialize(message = "Internal error")
 			super(message)
 		end
 	end
@@ -158,11 +158,7 @@ class User
 			puts "Could not find user in database"
 			raise UserNotFound
 		end
-		#puts result[0]['username']
-		#puts result[0]['id']
-		#puts result[0]['password']
 		encrypted_password = BCrypt::Password.new(result[0]['password'])
-		#puts encrypted_password == password
 		if encrypted_password != password
 			puts "Incorrect password"
 			raise PasswordIncorrect
@@ -172,6 +168,90 @@ class User
 			puts "An error occured while querying users: #{e.message}"
 			raise DatabaseError
 		end
+	end
+
+	def verify_password(password)
+		puts password
+		encrypted_password = BCrypt::Password.new(@password)
+		if encrypted_password != password
+			raise PasswordIncorrect
+		end
+	end
+
+	def change_display_name(new_display_name, db)
+		if display_name.size >= MAX_DISPLAY_NAME
+			puts "Display name too long"
+			raise DisplayNameTooLong
+		end
+
+		if display_name.include?(" ")
+			puts "Display name invalid"
+			raise DisplayNameInvalid
+		end
+
+		begin
+			db.exec_params(
+				'UPDATE users
+				SET display_name=$1
+				WHERE id=$2;',
+				[new_display_name, @id]
+			)
+			@display_name = new_display_name
+		rescue PG::UniqueViolation => e
+			puts "Display Name taken"
+			raise DisplayNameTaken
+		rescue PG::Error => e
+			puts "An error occured while inserting into db: #{e.message}"
+			raise DatabaseError
+		end
+	end
+
+	def change_username(new_username, db)
+		if new_username.size >= MAX_USERNAME
+			puts "Username too long"
+			raise UsernameTooLong
+		end
+
+		begin
+			db.exec_params(
+				'UPDATE users
+				SET username=$1
+				WHERE id=$2;',
+				[new_username, @id]
+			)
+			@username = new_username
+		rescue PG::UniqueViolation => e
+			puts "Username taken"
+			raise UsernameTaken
+		rescue PG::Error => e
+			puts "An error occured while inserting into db: #{e.message}"
+			raise DatabaseError
+		end
+	end
+
+	def change_password(new_password, db)
+		if new_password.size < 8
+			puts "Password too short"
+			raise PasswordTooShort
+		end
+		encrypted_password = BCrypt::Password.create(new_password)
+
+		begin
+			db.exec_params(
+				'UPDATE users
+				SET password=$1
+				WHERE id=$2',
+				[encrypted_password, @id]
+			)
+			@password = encrypted_password
+		rescue PG::Error => e
+			puts "An error occured while changing password #{e.message}"
+			raise User::DatabaseError
+		end
+	end
+
+	def change_profile_picture(new_profile_picture, db)
+		#TODO: this
 	end
 
 	def self.from_id(id, db)

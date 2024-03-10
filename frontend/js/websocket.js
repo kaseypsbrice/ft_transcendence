@@ -48,6 +48,11 @@ if (!hasAccessToken())
 
 function sendWithToken(ws, data)
 {
+	if (!ws || ws.readyState != ws.OPEN)
+	{
+		console.log("Not connected to server, remember to handle disconnection!");
+		return;
+	}
 	var token = null;
 	const cookies = document.cookie.split(';');
 	for (let cookie of cookies) {
@@ -95,8 +100,18 @@ function connect()
 				console.log(msg.type);
 				if (msg.type === 'authentication' && msg.token != null)
 				{
+					var token = null;
+					const cookies = document.cookie.split(';');
+					for (let cookie of cookies) {
+						const [name, value] = cookie.trim().split('=');
+						if (name === 'access_token') {
+
+							token = value;
+							break;
+						}
+					}
 					document.cookie = `access_token=${msg.token};SameSite=Strict;Secure;`;
-					if (!logged_in)
+					if (!logged_in || msg.token != token)
 					{
 						logged_in = true;
 						onLogin();
