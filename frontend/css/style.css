@@ -147,6 +147,7 @@ nav a:hover {
 .navbar-rightside-wrapper {
     display: flex;
     align-items: center;
+    margin-right: 65px;
 }
 
 .navbar-rightside-wrapper a {
