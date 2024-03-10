@@ -12,7 +12,7 @@ ActiveRecord::Base.establish_connection(
 
 # Test the database connection
 # begin
-#   puts "Testing database connection..."
+#    "Testing database connection..."
 #   ActiveRecord::Base.connection
 
 #   if ActiveRecord::Base.connected?

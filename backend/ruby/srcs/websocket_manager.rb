@@ -147,12 +147,10 @@ class WebSocketManager
 			msg_data.delete("type")
 			msg_data["sender"] = @user_manager.get_user(client.user_id).display_name
 			msg_data["content"] = msg_data["content"].lstrip.rstrip
-			puts "1"
 			if !msg_data["content"] || msg_data["content"].empty?
 				return
 			end
 
-			puts "2"
 			#                               -------- CHAT COMMANDS --------
 			if msg_data["content"].start_with?("/")
 				msg_data["content"].slice!(0)
@@ -255,12 +253,9 @@ class WebSocketManager
 			# Broadcast the message to all clients (including the sender)
 			
 			@connections.each { |client_ws, client|
-			puts "user blocked #{user.blocked} #{user.blocked?(client.user_id)} has client #{client.user_id} #{@user_manager.user?(client.user_id)}"
 			if @user_manager.user?(client.user_id)
-				puts "client #{client.user_id} blocked #{@user_manager.get_user(client.user_id).blocked} #{@user_manager.get_user(client.user_id).blocked?(user.id)}"
 			end
 				if !user.blocked?(client.user_id) && @user_manager.user?(client.user_id) && !@user_manager.get_user(client.user_id).blocked?(user.id)
-					puts "sending"
 					client_ws.send({type: "ChatMessage", message: msg_data}.to_json)
 				end
 			}

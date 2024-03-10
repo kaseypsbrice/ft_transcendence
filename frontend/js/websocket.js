@@ -117,6 +117,7 @@ function connect()
 					{
 						logged_in = true;
 						onLogin();
+						chatOnLogin();
 					}
 				}
 				if (msg.type === 'InvalidToken')
