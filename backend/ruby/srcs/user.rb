@@ -85,8 +85,14 @@ class User
 	end
 
 	def self.from_db_query(result)
-		_blocked_values = result[0]['blocked'].scan(/\d+/)
-		_friends_values = result[0]['friends'].scan(/\d+/)
+		_blocked_values = []
+		_friends_values = []
+		if result[0]['blocked'] != nil
+			_blocked_values = result[0]['blocked'].scan(/\d+/)
+		end
+		if result[0]['friends'] != nil
+			_friends_values = result[0]['friends'].scan(/\d+/)
+		end
 		new(
 			id: result[0]['id'].to_i,
 			username: result[0]['username'],
