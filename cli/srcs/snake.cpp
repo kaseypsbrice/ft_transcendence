@@ -66,16 +66,20 @@ void handle_snake_state(t_game *game)
 	{
 		int i = game->msg.find(WINNER);
 		i += strlen(WINNER);
-		if (atoi(game->msg.substr(i, 1).c_str()) == game->player_id)
-			game->state = victory;
-		else
-			game->state = defeat;
-		game->msg.clear();
-		return;
+		int winner = atoi(game->msg.c_str() + i);
+		if (game->msg[i] >= '0' && game->msg[i] <= '9')
+		{
+			if (winner == game->player_id)
+				change_state(game, victory);
+			else
+				change_state(game, defeat);
+			game->msg.clear();
+			return;
+		}
 	}
 	else if (game->msg.find(PARTNER_DISCONNECTED) != std::string::npos)
 	{
-		game->state = victory;
+		change_state(game, victory);
 		game->msg.clear();
 		return;
 	}

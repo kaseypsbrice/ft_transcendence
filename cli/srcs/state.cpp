@@ -67,16 +67,24 @@ void update_game(t_game *game)
 			{
 				clear();
 
-				printw("Press Enter to search for a game of snake!\n");
+				printw("Press 0 to search for a game of snake\n");
+				printw("Press 1 to search for a game of pong\n");
 				refresh();
 				game->first_update = false;
 			}
 			int c = getch();
-			if (c == K_ENTER)
+			if (c == '0')
 			{
 				change_state(game, searching);
 				game->write_buf = FIND_SNAKE(game->token);
 				game->searching_for = snake;
+				lws_callback_on_writable(game->web_socket);
+			}
+			else if (c == '1')
+			{
+				change_state(game, searching);
+				game->write_buf = FIND_PONG(game->token);
+				game->searching_for = pong;
 				lws_callback_on_writable(game->web_socket);
 			}
 			break;
@@ -111,7 +119,7 @@ void update_game(t_game *game)
 		}
 		case pong:
 		{
-			
+
 		}
 		case victory:
 		{
@@ -162,10 +170,6 @@ void update_game(t_game *game)
 			noecho();
 			nodelay(stdscr, 1);
 			break;
-		}
-		case chat:
-		{
-
 		}
 		case login:
 		{
