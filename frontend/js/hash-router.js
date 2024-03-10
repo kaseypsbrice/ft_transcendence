@@ -67,6 +67,12 @@ const routes = {
         description: "Play tournament matches",
         scripts: ["./js/tournament.js"]
     },
+    profileSettings: {
+        template: "./templates/profile-settings.html",
+        title: pageTitle + " | Profile Settings",
+        description: "Profile settings that allow you to change your display name and password.",
+        scripts: ["./js/profile-settings.js"]
+    },
 };
 // Add other pages to the list
 

@@ -1,29 +1,68 @@
-<div class="profile-container">
-    <div id="profile-picture" class="profile-picture"></div>
-    <!-- User's display name -->
-    <div id="profile-display-name" class="profile-display-name">Kasey Brice</div>
-    <!-- User's username -->
-    <div id="profile-username" class="profile-username">kbrice</div>
-    <!-- User's online or offline status -->
-    <!-- &#x2022 is a dot point in html -->
-    <div id="profile-status">&#x2022 Online</div>
-    <span class="ic--round-settings"></span>
-    <div class="profile-rectangle"></div>
-    <div class="profile-rectangle-bottom"></div>
+<div class="user-profile-wrap">
+
+    <div class="profile-container">
+        <div class="profile-picture"></div>
+        <!-- Uncomment ** when finished testing -->
+        <!-- ** <div id="profile-picture" class="profile-picture"></div> -->
+        <!-- User's display name -->
+        <div class="profile-display-name">Kasey Brice</div>
+        <!-- ** <div id="profile-display-name" class="profile-display-name">Kasey Brice</div> -->
+        <!-- User's username -->
+        <div id="profile-username" class="profile-username">kbrice</div>
+        <!-- User's online or offline status -->
+        <!-- &#x2022 is a dot point in html -->
+        <div id="profile-status">&#x2022 Online</div>
+        <a href="#profileSettings"><span class="ic--round-settings"></span></a>
+        <div class="profile-rectangle"></div>
+        <div class="profile-rectangle-bottom"></div>
+    </div>
+
+    <div class="match-history-container">
+        <div class="mh-tb-header">
+            <div class="container-title">Match History</div>
+            <div class="hd-txt hd-date">Date</div>
+            <div class="hd-txt hd-match-type">Match Type</div>
+            <div class="hd-txt hd-opponent">Opponent</div>
+            <div class="hd-txt hd-winner">Winner</div>
+        </div>
+        <!-- [!] ATTENTION -->
+        <!-- The match history data will be inserted here dynamically
+            by the profile.js file. -->
+        <div class="mh-rectangle"></div>
+        <div class="mh-rectangle-bottom"></div>
+        <div class="mh-extend"><span class="solar--double-alt-arrow-down-linear"></span></div>
+    </div>
+
+    <div class="stats-container">
+        <div class="stats-tb-header">
+            <div class="container-title">Statistics</div>
+            <div class="hd-txt hd-date stats">Game</div>
+            <div class="hd-txt hd-match-type stats">Wins</div>
+            <div class="hd-txt hd-opponent stats">Losses</div>
+            <div class="hd-txt hd-winner stats">Tournament Wins</div>
+        </div>
+            <!-- [!] ATTENTION -->
+        <!-- Script for inserting stat data hasn't be created yet -->
+        <!-- Data container name: .data-stats-tb-container -->
+        <div class="stats-rectangle"></div>
+        <div class="stats-rectangle-bottom"></div>
+    </div>
+
 </div>
 
-<div class="match-history-container">
-    <div class="mh-tb-header">
-        <div class="mh-title">Match History</div>
-        <div class="mh-hd-txt mh-hd-date">Date</div>
-        <div class="mh-hd-txt mh-hd-match-type">Match Type</div>
-        <div class="mh-hd-txt mh-hd-opponent">Opponent</div>
-        <div class="mh-hd-txt mh-hd-winner">Winner</div>
+    <div class="friends-container">
+        <div class="container-title">Friends List</div>
+        <div class="wrap-friend-elements">
+            <!-- Friends' names  -->
+            <!-- Remove the examples -->
+            <div class="friend">User932908</div>
+            <!-- Their statuses -->
+            <div id="friend-status">&#x2022</div>
+        </div>
+        <div class="friends-rectangle"></div>
+        <div class="friends-rectangle-bottom"></div>
     </div>
-    <!-- [!] ATTENTION -->
-    <!-- The match history data will be inserted here dynamically
-        by the profile.js file. -->
-    <div class="mh-rectangle"></div>
-    <div class="mh-rectangle-bottom"></div>
-    <div class="mh-extend"></div>
-</div>
+
+    <!-- Option 1: Use CSS grids to do this. There's generators for grids online.
+         Option 2: Just centre all of the containers and make the friends list container
+                   full-length.-->

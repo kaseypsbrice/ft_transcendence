@@ -524,18 +524,37 @@ p {
     z-index: 1;
 }
 
-.mh-title {
-    font-size: 20px;
-    font-weight: bold;
-    color: #292929;
-    top: 20px;
-    left: 43px;
-    position: absolute;
+.mh-extend {
+    width: 100%;
+    height: 46px;
     z-index: 3;
-    letter-spacing: -0.2px;
+    position: absolute;
+    bottom: 0;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    background-color: none;
+    transition: background-color 0.2s ease-in;
+    border-top: rgb(90, 90, 90) 1px solid;
 }
 
-.mh-hd-txt {
+.mh-extend:hover {
+    background-color: rgba(217, 217, 217, 0.2);
+    cursor: pointer;
+}
+
+.solar--double-alt-arrow-down-linear {
+    z-index: 3;
+    position: absolute;
+    margin-left: 430px;
+    bottom: 0;
+    width: 2.5em;
+    height: 2.5em;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='1'%3E%3Cpath d='m19 11l-7 6l-7-6'/%3E%3Cpath d='m19 7l-7 6l-7-6'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.hd-txt {
     text-align: left;
     font-size: 20px;
     font-weight: 600;
@@ -545,19 +564,19 @@ p {
     z-index: 3;
 }
 
-.mh-hd-date {
+.hd-date {
     left: 5%;
 }
 
-.mh-hd-match-type {
+.hd-match-type {
     left: 27%;
 }
 
-.mh-hd-opponent {
+.hd-opponent {
     left: 50%;
 }
 
-.mh-hd-winner {
+.hd-winner {
     left: 73%;
 }
 
@@ -604,6 +623,168 @@ p {
     left: 0;
     width: 100%;
 }
+
+/* Statistics Container */
+
+.stats-container {
+    position: relative;
+    max-width: 889px;
+    min-width: 450px;
+}
+
+.stats-rectangle {
+    width: 100%;
+    height: 58px;
+    margin: 0 0 12px;
+    padding: 19px 18px 0 151px;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+    background-color: #d9d9d9;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    position: relative;
+    z-index: 2;
+}
+
+.stats-rectangle-bottom {
+    width: 100%;
+    height: 246px;
+    margin: 55px 15px 15px 0;
+    padding: 0 0 20px;
+    border-radius: 10px;
+    box-shadow: inset 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+    border: solid 1px rgba(255, 255, 255, 0.05);
+    background-color: #414141;
+    margin: -46px 15px 15px 0;
+    z-index: 1;
+}
+
+.stats {
+    margin-top: 25px;
+}
+
+/* Stats data containers */
+
+#data-stats-tb-date {
+    left: 5%;
+    text-align: left;
+    font-size: 20px;
+    color: white;
+    position: absolute;
+    z-index: 3;
+}
+
+#data-stats-tb-match-type {
+    left: 27%;
+    text-align: left;
+    font-size: 20px;
+    color: white;
+    position: absolute;
+    z-index: 3;
+}
+
+#data-stats-tb-opponent {
+    left: 50%;
+    text-align: left;
+    font-size: 20px;
+    color: white;
+    position: absolute;
+    z-index: 3;
+    white-space: pre-wrap;
+    max-width: 200px;
+}
+
+#data-stats-tb-winner {
+    left: 73%;
+    text-align: left;
+    font-size: 20px;
+    color: white;
+    position: absolute;
+    z-index: 3;
+}
+
+.data-stats-tb-container {
+    position: absolute;
+    left: 0;
+    width: 100%;
+}
+
+/* Friends list containers */
+
+.friends-container {
+    position: relative;
+    max-width: 400px;
+    min-width: 350px;
+}
+
+.friends-rectangle {
+    width: 100%;
+    height: 58px;
+    margin: 0 0 12px;
+    padding: 19px 18px 0 151px;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+    background-color: #d9d9d9;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    position: relative;
+    z-index: 2;
+}
+
+.friends-rectangle-bottom {
+    display: inline-block;
+    width: 100%;
+    height: 766px;
+    margin: 55px 15px 15px 0;
+    padding: 0 0 20px;
+    border-radius: 10px;
+    box-shadow: inset 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+    border: solid 1px rgba(255, 255, 255, 0.05);
+    background-color: #414141;
+    margin: -46px 15px 15px 0;
+    z-index: 1;
+}
+
+.container-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #292929;
+    top: 20px;
+    left: 43px;
+    position: absolute;
+    z-index: 3;
+    letter-spacing: -0.2px;
+}
+
+.friend {
+    margin-top: 76px;
+    /* margin-left: 43px; */
+    text-align: left;
+    font-size: 20px;
+    color: white;
+    position: absolute;
+    z-index: 3;
+}
+
+#friend-status {
+    display: inline-block;
+    margin-top: 76px;
+    font-size: 20px;
+    left: calc(35% + 10px);
+    color: rgba(49, 255, 156, 0.85);
+    position: absolute;
+    z-index: 3;
+}
+
+.wrap-friend-elements {
+    position: relative;
+    margin-left: 43px;
+}
+
+/* 
+.user-profile-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+} */
 
 /* ================================================================ */
 /* ====================== Tournament CSS ========================== */
