@@ -797,6 +797,57 @@ p {
 }
 
 /* ================================================================ */
+/* ================ Profile Settings CSS ========================== */
+/* ================================================================ */
+
+/* .settings-body-container {
+    grid-area: settings-container;
+    position: relative;
+    max-width: 889px;
+    min-width: 450px;
+} */
+
+.settings-container {
+    position: relative;
+    max-width: 889px;
+    min-width: 450px;
+    margin: auto;
+}
+
+.settings-header {
+    width: 100%;
+    height: 58px;
+    margin: 0 0 12px;
+    padding: 19px 18px 0 151px;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+    background-color: #d9d9d9;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    position: relative;
+    z-index: 2;
+}
+
+.settings-body {
+    width: 100%;
+    height: 774px;
+    margin: 55px 15px 15px 0;
+    padding: 0 0 20px;
+    border-radius: 10px;
+    box-shadow: inset 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+    border: solid 1px rgba(255, 255, 255, 0.05);
+    background-color: #cacaca;
+    margin: -46px 15px 15px 0;
+    z-index: 1;
+}
+
+.settings-form {
+    z-index: 2;
+    position: relative;
+    margin-top: 58px;
+    margin-left: 40px;
+}
+
+/* ================================================================ */
 /* ====================== Tournament CSS ========================== */
 /* ================================================================ */
 
