@@ -171,7 +171,6 @@ class User
 	end
 
 	def verify_password(password)
-		puts password
 		encrypted_password = BCrypt::Password.new(@password)
 		if encrypted_password != password
 			raise PasswordIncorrect
@@ -320,7 +319,7 @@ class User
 			result = db.exec_params(
 				'SELECT * FROM matches
 				WHERE winner=$1 OR loser=$1
-				ORDER BY created_at DESC
+				ORDER BY time DESC
 				LIMIT 50;',
 				[@id]
 			)
