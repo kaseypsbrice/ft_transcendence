@@ -27,9 +27,6 @@ function insertMatchHistory(date, matchType, opponent, winner) {
 
 // This can obviously be done better, but it's a quick draft to give you an idea of
 // how things could be done.
-insertMatchHistory('2024-02-26', '1v1', 'User932908', 'User932908');
-insertMatchHistory('2024-02-26', '1v1', 'User932908', 'User932908');
-insertMatchHistory('2024-02-26', '1v1', 'User932908', 'User932908');
 // This I'm not sure how to do yet. I've probably got to make the containers relative to each other.
 // Otherwise the multiple users will appear over the top of other containers.
 // insertMatchHistory('2024-02-26', 'Tournament', 'User932908, User932908, User932908', 'kbrice');
@@ -80,9 +77,9 @@ window.onMessage = function(event, msg)
 				}
 				console.log(m)
 				if (m.winner == msg.data.display_name)
-					insertMatchHistory(m.time, `${m.game.charAt(0).toUpperCase() + m.game.slice(1)} ${m.info}`, m.loser, m.winner);
+					insertMatchHistory(m.time.split(' ', 1)[0], `${m.game.charAt(0).toUpperCase() + m.game.slice(1)} ${m.info}`, m.loser, m.winner);
 				else
-					insertMatchHistory(m.time, `${m.game.charAt(0).toUpperCase() + m.game.slice(1)} ${m.info}`, m.winner, m.winner);
+					insertMatchHistory(m.time.split(' ', 1)[0], `${m.game.charAt(0).toUpperCase() + m.game.slice(1)} ${m.info}`, m.winner, m.winner);
 			}
 			break;
 	}

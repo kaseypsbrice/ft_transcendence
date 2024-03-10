@@ -18,7 +18,7 @@ window.chatOnMessage = function(event, msg) {
 	{
 		case "ChatMessage":
 			if (validMessage(msg))
-				displayMessage(msg.message["sender"] + ": " + msg.message["content"]);
+				displayUserMessage(msg.message["sender"], msg.message["content"]);
 			break;
 		case "Alert":
 			if (msg.data != null && msg.data.type != null)
@@ -30,7 +30,7 @@ window.chatOnMessage = function(event, msg) {
 			break;
 		case "Whisper":
 			if (validMessage(msg))
-				displayMessage(`~${msg.message["sender"]} whispers~: ${msg.message["content"]}`);
+				displayUserMessage(msg.message["sender"], msg.message["content"], true);
 			break;
 		case "WhisperResponse":
 			if (msg["message"] != null && msg["user"] != null)
@@ -46,7 +46,7 @@ window.chatOnMessage = function(event, msg) {
 				for (i in msg.data)
 				{
 					if (validMessage(msg.data[i]))
-						displayMessage(msg.data[i].message.sender + ": " + msg.data[i].message.content);
+						displayUserMessage(msg.data[i].message.sender, msg.data[i].message.content);
 				}
 			}
 			break;
@@ -89,6 +89,11 @@ window.chatOnMessage = function(event, msg) {
 			if (msg["user"] != null)
 				displayMessage(`Successfully invited ${msg.user} to a game`);
 			break;
+		case "InvalidToken":
+				displayMessage(`Please login to view chat`, true, function () {
+					window.location.hash = "#login";
+				});
+			break;
 	}
 };
 
@@ -98,6 +103,11 @@ function acceptInvite(text)
 }
 
 function sendMessage() {
+	if (!ws || ws.readyState != ws.OPEN)
+	{
+		displayMessage("Error! Not connected to server");
+		return;
+	}
     message = {
 		type: "chat_message",
         content: document.getElementById('messageInput').value
@@ -105,6 +115,35 @@ function sendMessage() {
     console.log('Sending message:', message);
     sendWithToken(ws, message);
     document.getElementById('messageInput').value = '';
+}
+
+function displayNameClicked(display_name)
+{
+	current_profile = display_name;
+	window.location.hash = "#profile";
+}
+
+function displayUserMessage(display_name, msg, whisper = false)
+{
+	const messageElement = document.createElement('div');
+	messageElement.classList.add('chat-message');
+
+	const clickableSpan = document.createElement('span');
+	const textNode = document.createTextNode(`: ${msg}`);
+	if (whisper)
+		clickableSpan.textContent = `~${display_name} whispers~`;
+	else
+		clickableSpan.textContent = display_name;
+	clickableSpan.classList.add('clickable');
+	clickableSpan.style.cursor = 'pointer';
+	clickableSpan.style.textDecoration = 'underline';
+	clickableSpan.addEventListener('click', function() {
+		displayNameClicked(display_name);
+    });
+	messageElement.appendChild(clickableSpan);
+	messageElement.appendChild(textNode);
+	document.getElementById('messages').appendChild(messageElement);
+	document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
 }
 
 function displayMessage(str, clickable = false, clickHandler = null) {
