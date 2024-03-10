@@ -67,16 +67,24 @@ void update_game(t_game *game)
 			{
 				clear();
 
-				printw("Press Enter to search for a game of snake!\n");
+				printw("Press 0 to search for a game of snake\n");
+				printw("Press 1 to search for a game of pong\n");
 				refresh();
 				game->first_update = false;
 			}
 			int c = getch();
-			if (c == K_ENTER)
+			if (c == '0')
 			{
 				change_state(game, searching);
 				game->write_buf = FIND_SNAKE(game->token);
 				game->searching_for = snake;
+				lws_callback_on_writable(game->web_socket);
+			}
+			else if (c == '1')
+			{
+				change_state(game, searching);
+				game->write_buf = FIND_PONG(game->token);
+				game->searching_for = pong;
 				lws_callback_on_writable(game->web_socket);
 			}
 			break;
@@ -111,7 +119,42 @@ void update_game(t_game *game)
 		}
 		case pong:
 		{
-			
+			if (game->first_update == true)
+			{
+				game->first_update = false;
+				game->moving_dir = "0";
+			}
+			int c = getch();
+			std::string old_dir = game->moving_dir;
+			switch (c)
+			{
+			case 'w':
+				if (game->moving_dir == "0")
+					game->moving_dir = "1";
+				else
+					game->moving_dir = "0";
+				break;
+			case 's':
+				if (game->moving_dir == "0")
+					game->moving_dir = "-1";
+				else
+					game->moving_dir = "0";
+				break;
+			}
+			if (game->moving_dir != old_dir)
+			{
+				if (game->player_id == 0)
+				{
+					game->write_buf = MOVE_LEFT_PADDLE(game->token, game->moving_dir);
+					lws_callback_on_writable(game->web_socket);
+				}
+				else
+				{
+					game->write_buf = MOVE_RIGHT_PADDLE(game->token, game->moving_dir);
+					lws_callback_on_writable(game->web_socket);
+				}
+			}
+			break;
 		}
 		case victory:
 		{
@@ -162,10 +205,6 @@ void update_game(t_game *game)
 			noecho();
 			nodelay(stdscr, 1);
 			break;
-		}
-		case chat:
-		{
-
 		}
 		case login:
 		{

@@ -7,7 +7,8 @@ srcs/websocket.cpp \
 srcs/state.cpp \
 srcs/snake.cpp \
 srcs/utils.cpp \
-srcs/message.cpp
+srcs/message.cpp \
+srcs/pong.cpp
 
 CERTS = temp.key temp.crt
 

@@ -5,14 +5,13 @@ void handle_message(t_game *game, char *msg)
 	game->msg = msg;
 	if (game->msg.find(STATE) != std::string::npos)
 	{
-		handle_snake_state(game);
 		if (game->msg.find(GAME_PONG) != std::string::npos)
 		{
-			//
+			handle_pong_state(game);
 		}
 		else if (game->msg.find(GAME_SNAKE) != std::string::npos)
 		{
-			//
+			handle_snake_state(game);
 		}
 	}
 	else if (game->msg.find(GAME_FOUND) != std::string::npos)

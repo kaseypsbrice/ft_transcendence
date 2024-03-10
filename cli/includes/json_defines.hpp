@@ -13,9 +13,16 @@
 # define REGISTER_FORMAT_ERROR "\"type\":\"RegisterFormatError\""
 # define PONG "\"type\":\"pong\""
 # define GAME_PONG "\"game\":\"pong\""
-# define GAME_SNAKE "\"game\":\"pong\""
+# define GAME_SNAKE "\"game\":\"snake\""
 # define AUTHENTICATION "\"type\":\"authentication\""
 # define TOKEN "\"token\":\""
+# define LEFT_PADDLE_Y "\"left_paddle\":{\"y\":"
+# define RIGHT_PADDLE_Y "\"right_paddle\":{\"y\":"
+# define BALL_POS "\"ball_position\":{"
+# define BALL_X "\"x\":"
+# define BALL_Y "\"y\":"
+# define SCORE_LEFT "\"score_left\":"
+# define SCORE_RIGHT "\"score_right\":"
 
 # define FIND_SNAKE(token) ("{\"token\":\"" + token + "\",\"type\":\"find_snake\"}")
 # define FIND_PONG(token) ("{\"token\":\"" + token + "\",\"type\":\"find_pong\"}")
@@ -30,3 +37,5 @@
 # define GET_CHAT_HISTORY(token) ("{\"token\":\"" + token + "\",\"type\":\"get_chat_history\"}")
 # define GET_GAME_STATUS(token, game) ("{\"token\":\"" + token + "\",\"type\":\"get_game_status\",\"game\":\"" + game + "\"}")
 # define FIND_TOURNAMENT(token, game) ("{\"token\":\"" + token + "\",\"type\":\"find_tournament\",\"game\":\"" + game + "\"}")
+# define MOVE_LEFT_PADDLE(token, direction) ("{\"token\":\"" + token + "\",\"type\":\"move_left_paddle\",\"direction\":" + direction + "}")
+# define MOVE_RIGHT_PADDLE(token, direction) ("{\"token\":\"" + token + "\",\"type\":\"move_right_paddle\",\"direction\":" + direction + "}")

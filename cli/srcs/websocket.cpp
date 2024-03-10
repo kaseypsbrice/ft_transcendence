@@ -90,6 +90,7 @@ int websocket_init(t_game *game)
 	game->login_status.clear();
 	game->menu_message.clear();
 	game->awaiting_auth = false;
+	game->moving_dir = "0";
 	struct lws_context_creation_info info;
 	memset( &info, 0, sizeof(info) );
 

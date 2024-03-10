@@ -46,6 +46,7 @@ typedef struct s_game
 	int	searching_for;
 	bool first_update;
 	bool awaiting_auth;
+	std::string	moving_dir;
 	std::string msg;
 	std::string login_status;
 	std::string register_status;
@@ -58,6 +59,7 @@ void 		handle_message(t_game *game, char *msg);
 int 		websocket_init(t_game *game);
 void 		websocket_connect(t_game *game);
 void		handle_snake_state(t_game *game);
+void		handle_pong_state(t_game *game);
 void		update_game(t_game *game);
 void 		change_state(t_game *game, int state);
 std::string extract_json_string(std::string msg, std::string field);
