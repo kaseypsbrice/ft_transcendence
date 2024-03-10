@@ -524,9 +524,12 @@ p {
     background-color: #414141;
     margin: -46px 15px 15px 0;
     z-index: 1;
+    /* overflow: scroll; */
 }
 
-.mh-extend {
+/* If I had more time I would've done this with some js script
+ * to handle overflow. */
+/* .mh-extend {
     width: 100%;
     height: 46px;
     z-index: 3;
@@ -542,7 +545,7 @@ p {
 .mh-extend:hover {
     background-color: rgba(217, 217, 217, 0.2);
     cursor: pointer;
-}
+} 
 
 .solar--double-alt-arrow-down-linear {
     z-index: 3;
@@ -555,6 +558,7 @@ p {
     background-size: 100% 100%;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='1'%3E%3Cpath d='m19 11l-7 6l-7-6'/%3E%3Cpath d='m19 7l-7 6l-7-6'/%3E%3C/g%3E%3C/svg%3E");
 }
+*/
 
 .hd-txt {
     text-align: left;
@@ -621,9 +625,15 @@ p {
 }
 
 .data-mh-tb-container {
-    position: absolute;
+    position: relative;
     left: 0;
     width: 100%;
+}
+
+.scrollable-mh-data {
+    margin-top: 100px;
+    height: 235px;
+    overflow: scroll;
 }
 
 /* Statistics Container */

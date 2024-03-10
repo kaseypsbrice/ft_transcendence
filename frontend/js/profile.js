@@ -1,7 +1,7 @@
 (function (){
 function insertMatchHistory(date, matchType, opponent, winner) {
     // Detects our header container
-    const dataContainer = document.querySelector('.mh-tb-header');
+    const dataContainer = document.querySelector('.scrollable-mh-data');
     // Creates a new div element and sets it's class element
     const newDataContainer = document.createElement('div');
     newDataContainer.classList.add('data-mh-tb-container');
@@ -14,7 +14,7 @@ function insertMatchHistory(date, matchType, opponent, winner) {
     `;
 
     const containerCount = document.querySelectorAll('.data-mh-tb-container').length;
-    const topPosition = `calc(22% + 45px + ${containerCount * 40}px)`;
+    const topPosition = `calc(10px + ${containerCount * 40}px)`;
     // Calculates the position is should be from the top because our header is 22% from the top
     // and our data containers need to be below that.
     // 45px is the initial spacing from the header, every subsequent spacing is 40px.
@@ -27,9 +27,9 @@ function insertMatchHistory(date, matchType, opponent, winner) {
 
 // This can obviously be done better, but it's a quick draft to give you an idea of
 // how things could be done.
-insertMatchHistory('2024-02-26', '1v1', 'User932908', 'User932908');
-insertMatchHistory('2024-02-26', '1v1', 'User932908', 'User932908');
-insertMatchHistory('2024-02-26', '1v1', 'User932908', 'User932908');
+// insertMatchHistory('2024-02-26', '1v1', 'User932908', 'User932908');
+// insertMatchHistory('2024-02-26', '1v1', 'User932908', 'User932908');
+// insertMatchHistory('2024-02-26', '1v1', 'User932908', 'User932908');
 // This I'm not sure how to do yet. I've probably got to make the containers relative to each other.
 // Otherwise the multiple users will appear over the top of other containers.
 // insertMatchHistory('2024-02-26', 'Tournament', 'User932908, User932908, User932908', 'kbrice');
