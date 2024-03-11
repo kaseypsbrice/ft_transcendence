@@ -17,7 +17,8 @@ class Tournament
 		to_send = {
 			game: @game,
 			status: "null",
-			matches: []
+			matches: [],
+			players: []
 		}
 		@matches.each do |m|
 			data = {
@@ -31,6 +32,9 @@ class Tournament
 				data[:winner] = @users_registered[m[:winner]].display_name
 			end
 			to_send[:matches].push(data)
+		end
+		@users_registered.each_value do |user|
+			to_send[:players].push(user.display_name)
 		end
 		return to_send
 	end
@@ -79,12 +83,12 @@ class Tournament
 			winner: nil
 		}
 		@matches.push(new_match)
-		p_send = @websocket_manager.connections.select { |k, v| v.user_id == player1 || v.user_id == player2 }
-		p_send.each_key do |k|
-			k.send({type: "TournamentMatchStarted", game: @game}.to_json)
-		end
 		#@users_registered[player1].current_ws.send({type: "TournamentMatchStarted", game: @game}.to_json)
-		
+		@websocket_manager.connections.each do |ws, client|
+			if (client.user_id == player1 || client.user_id == player2)
+				ws.send({type: "TournamentMatchStarted", game: @game}.to_json);
+			end
+		end
 	end
 
 	def start()
@@ -94,6 +98,7 @@ class Tournament
 		shuffled = @users_remaining.keys.shuffle
 		create_match(shuffled[0], shuffled[1])
 		create_match(shuffled[2], shuffled[3])
+		broadcast_tournament_info()
 	end
 
 	def match_finished(winner, loser) # users not clients
@@ -124,6 +129,7 @@ class Tournament
 			puts "tournament final match"
 			users_remaining = @users_remaining.keys
 			create_match(users_remaining[0], users_remaining[1])
+			broadcast_tournament_info()
 		end
 
 		if @users_remaining.size == 1
@@ -145,13 +151,27 @@ class Tournament
 		return true
 	end
 
+	def get_tournament_info(user)
+		t_info = tournament_hash
+		if match_ready?(user)
+			t_info[:status] = "MatchReady"
+		else
+			if full?
+				t_info[:status] = "Full"
+			else
+				t_info[:status] = "NotFull"
+			end
+		end
+		return t_info
+	end
+
 	def handle_status(user)
 		puts "handle_status #{user.display_name}"
 		if full?
 			puts "full"
 			match = get_match(user)
 			if match == nil
-				user.current_ws.send({type: "game_status", data: {status: "error"}}.to_json)
+				user.current_ws.send({type: "game_status", data: get_tournament_info(user)}.to_json)
 				return
 			end
 			if match[:status] == "preparing"
@@ -166,24 +186,25 @@ class Tournament
 					match[:p2ready] = true
 				end
 				if match[:p1ready] && match[:p2ready]
-					if !start_match(match)
-						puts "failed to start match, ws probably not set"
-						t_hash = tournament_hash
-						t_hash[:status] = "WaitingPartner"
-						user.current_ws.send({type: "game_status", data: t_hash}.to_json)
+					if start_match(match)
+						return
 					end
-				else
-					puts "partner not ready"
-					t_hash = tournament_hash
-					t_hash[:status] = "WaitingPartner"
-					user.current_ws.send({type: "game_status", data: t_hash}.to_json)
 				end
+				user.current_ws.send({type: "game_status", data: get_tournament_info(user)}.to_json)
 			end
 		else
-			puts "not full"
-			t_hash = tournament_hash
-			t_hash[:status] = "FoundTournament"
-			user.current_ws.send({type: "game_status", data: t_hash}.to_json)
+			user.current_ws.send({type: "game_status", data: get_tournament_info(user)}.to_json)
+		end
+	end
+
+	def broadcast_tournament_info()
+		@websocket_manager.connections.each do |ws, client|
+			@users_remaining.each do |id, user|
+				if id == client.user_id
+					ws.send({type: "game_status", data: get_tournament_info(user)}.to_json)
+					break
+				end
+			end
 		end
 	end
 
@@ -192,17 +213,25 @@ class Tournament
 		user.tournament = nil
 		@users_registered.delete(user.id)
 		@users_remaining.delete(user.id)
+		broadcast_tournament_info()
 	end
 
 	def add_player(user)
 		if full? || player?(user) || user.tournament != nil
 			return
 		end
+
 		@users_registered[user.id] = user
 		@users_remaining[user.id] = user
-		user.current_ws.send({type: "TournamentJoined", data: tournament_hash}.to_json)
 		user.tournament = self
 		user.tournament_ws = nil
+		t_hash = tournament_hash
+		if full?
+			t_hash[:status] = "ready"
+		else
+			t_hash[:status] = "waiting for players"
+		end
+		broadcast_tournament_info()
 		if @users_registered.size == MAX_PLAYERS
 			start()
 		end

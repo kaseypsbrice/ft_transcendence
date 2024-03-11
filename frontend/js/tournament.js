@@ -10,33 +10,50 @@ window.onMessage = function(msg)
 			clearPage();
 			document.getElementById('tn-title').textContent = "You are not in a tournament!";
 			break;
-		case "TournamentInfo":
+		case "game_status":
 			if (msg.data == null || msg.data.status == null || msg.data.status == "error" || 
-			!msg.data.game || !msg.data.matches)
+			!msg.data.game || !msg.data.matches || !msg.data.players)
 			{
 				in_game = false;
 				clearPage();
 				document.getElementById('tn-title').textContent = "You are not in a tournament!";
 				break;
 			}
-			if (msg.data.in_game != null)
-				in_game = msg.data.in_game;
-			clearPage();
-			let t_hash = msg.data;
-			game = t_hash.game
-			document.getElementById('tn-title').textContent = `${game} TOURNAMENT`.toUpperCase();
-			for (let i = 0; i < t_hash.matches.length; i++)
+			switch (msg.data.status)
 			{
-				let match = t_hash.matches[i];
-				document.getElementById(`tn-player-${i * 2 + 1}`).textContent = match.player1;
-				document.getElementById(`tn-player-${i * 2 + 2}`).textContent = match.player2;
+				case "NotFull":
+					in_game = false;
+					clearPage();
+					document.getElementById('tn-title').textContent = `${msg.data.game.toUpperCase()} WAITING FOR PLAYERS...`;
+					for (let i = 0; i < msg.data.players.length; i++)
+					{
+						let player = msg.data.players[i];
+						document.getElementById(`tn-player-${i + 1}`).textContent = player;
+					}
+					break;
+				case "Full":
+					in_game = false;
+					clearPage();
+					document.getElementById('tn-title').textContent = `${msg.data.game.toUpperCase()} TOURNAMENT`;
+					for (let i = 0; i < msg.data.matches.length; i++)
+					{
+						let match = msg.data.matches[i];
+						document.getElementById(`tn-player-${i * 2 + 1}`).textContent = match.player1;
+						document.getElementById(`tn-player-${i * 2 + 2}`).textContent = match.player2;
+					}
+					break;
+				case "MatchReady":
+					in_game = true;
+					clearPage();
+					document.getElementById('tn-title').textContent = `${msg.data.game.toUpperCase()} TOURNAMENT`;
+					for (let i = 0; i < msg.data.matches.length; i++)
+					{
+						let match = msg.data.matches[i];
+						document.getElementById(`tn-player-${i * 2 + 1}`).textContent = match.player1;
+						document.getElementById(`tn-player-${i * 2 + 2}`).textContent = match.player2;
+					}
+					break;
 			}
-			break;
-		case "TournamentMatchStarted":
-			document.getElementById('tn-join-game').style.display = '';
-			in_game = true;
-			game = msg.game;
-			sendWithToken(ws, {type:"get_tournament_info"});
 			break;
 	}
 };

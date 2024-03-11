@@ -397,26 +397,39 @@ window.onMessage = function(msg)
 			state = "menu";
 			break;
 		case "game_status":
-			if (msg.data.status == "WaitingPartner")
+			if (!msg.data || !msg.data.status || state == "game" || state == "victory" || state == "defeat")
+				return;
+			switch (msg.data.status)
 			{
-				in_tournament = true;
-				state = "waiting_partner";
-			}
-			else
-			{
-				in_tournament = false;
-				state = "menu";
-				menu_text = "";
-			}
-			if (msg.data.status == "FoundTournament")
-			{
-				in_tournament = true;
-				menu_text = "Searching for tournament players"
+				case "NotFull":
+					in_tournament = true;
+					state = "menu";
+					menu_text = "Waiting for players...";
+					break;
+				case "Full":
+					in_tournament = true;
+					state = "menu";
+					menu_text = "Waiting for other matches to finish...";
+					break;
+				case "MatchReady":
+					in_tournament = true;
+					state = "menu";
+					menu_text = "Waiting for opponent to connect...";
+					break
+				case "WaitingPartner":
+					in_tournament = false;
+					state = "menu";
+					menu_text = "Waiting for opponent to connect...";
+					break;
+				default:
+					in_tournament = false;
+					state = "menu";
+					menu_text = "";
+					break;
 			}
 			break;
 		case "TournamentMatchStarted":
-			if (state != "game" && state != "victory" && state != "defeat")
-				sendWithToken(ws, {type: "get_game_status", game: "snake"});
+			sendWithToken(ws, {type: "get_game_status", game: "snake"});
 			break;
 	}
 }

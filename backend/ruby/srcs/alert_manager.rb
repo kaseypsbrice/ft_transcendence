@@ -14,7 +14,6 @@ class AlertManager
 			game: alert[:game],
 			type: alert[:type]
 		}
-		puts alert
 		if alert.key?(:user_from)
 			puts "adding user from"
 			to_send[:user_from] = alert[:user_from].display_name
@@ -163,8 +162,10 @@ class AlertManager
 	end
 
 	def leave_tournament(user)
-		if user.tournament == nil || user.tournament.full?
+		if user.tournament == nil
 			user.current_ws.send({type: "game_status", data: {status: "error"}}.to_json)
+			return
+		elsif user.tournament.full?
 			return
 		end
 		user.tournament.remove_player(user)

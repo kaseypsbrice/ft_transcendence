@@ -253,10 +253,12 @@ class WebSocketManager
 			# Broadcast the message to all clients (including the sender)
 			
 			@connections.each { |client_ws, client|
-			if @user_manager.user?(client.user_id)
-			end
 				if !user.blocked?(client.user_id) && @user_manager.user?(client.user_id) && !@user_manager.get_user(client.user_id).blocked?(user.id)
-					client_ws.send({type: "ChatMessage", message: msg_data}.to_json)
+					you = false
+					if client.user_id == user.id
+						you = true
+					end
+					client_ws.send({type: "ChatMessage", message: msg_data, you: you}.to_json)
 				end
 			}
 		when "get_leaderboard"
@@ -273,8 +275,12 @@ class WebSocketManager
 							sender: @user_manager.get_user_info(_msg['sender_id'].to_i).display_name,
 							content: _msg['content'],
 							created_at: _msg['created_at']
-						}
+						},
+						you: false
 					}
+					if _msg['sender_id'] == user.id
+						_msg_new[:you] = true
+					end
 					ret_chat_history.push(_msg_new)
 				end
 				ws.send({type: "ChatHistory", data: ret_chat_history}.to_json)
@@ -462,13 +468,13 @@ class WebSocketManager
 			if user.tournament == nil
 				ws.send({type: "NoTournament"}.to_json)
 			else
-				t_info = user.tournament.tournament_hash
-				if user.tournament.match_ready?(user)
-					t_info[:in_game] = true
-				else
-					t_info[:in_game] = false
-				end
-				ws.send({type: "TournamentInfo", data: t_info}.to_json)
+				t_info = user.tournament.get_tournament_info(user)
+				#if user.tournament.match_ready?(user)
+				#	t_info[:in_game] = true
+				#else
+				#	t_info[:in_game] = false
+				#end
+				ws.send({type: "game_status", data: t_info, info: true}.to_json)
 			end
 		when "join_tournament_id"
 			if user.tournament != nil

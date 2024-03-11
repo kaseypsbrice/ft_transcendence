@@ -28,8 +28,11 @@ window.chatOnMessage = function(msg) {
 	switch (msg.type)
 	{
 		case "ChatMessage":
+			let you = false;
+			if (msg.you != null)
+				you = msg.you;
 			if (validMessage(msg))
-				displayUserMessage(msg.message["sender"], msg.message["content"]);
+				displayUserMessage(msg.message["sender"], msg.message["content"], false, you);
 			break;
 		case "Alert":
 			if (msg.data != null && msg.data.type != null)
@@ -56,16 +59,19 @@ window.chatOnMessage = function(msg) {
 			{
 				for (i in msg.data)
 				{
+					let you = false;
+					if (msg.data.you != null)
+						you = msg.data.you;
 					if (validMessage(msg.data[i]))
-						displayUserMessage(msg.data[i].message.sender, msg.data[i].message.content);
+						displayUserMessage(msg.data[i].message.sender, msg.data[i].message.content, false, you);
 				}
 			}
 			break;
-		case "TournamentMatchStarted":
-			if (msg["game"] != null)
+		case "TournamentInfo":
+			if (msg.data && msg.data.status && msg.data.game && msg.data.status == "MatchReady")
 			{
 				displayMessage("Tournament match ready! Click to join", true, function () {
-					window.location.hash = msg["game"];
+					window.location.hash = msg.data.game;
 				});
 			}
 			break;
@@ -90,11 +96,15 @@ window.chatOnMessage = function(msg) {
 			}
 			break
 		case "JoinTournamentSuccess":
-			displayMessage("Successfully joined tournament, waiting for players...");
+			displayMessage("Successfully joined tournament, waiting for players...", true, function() {
+				window.location.hash = "#tournament";
+			});
 			break
 		case "TournamentSuccess":
 			if (msg["game"] != null)
-				displayMessage(`Successfully proposed ${msg.game} tournament`);
+				displayMessage(`Successfully proposed ${msg.game} tournament`, true, function() {
+			window.location.hash = "#tournament";
+		});
 			break;
 		case "InviteSuccess":
 			if (msg["user"] != null)
@@ -134,21 +144,22 @@ function displayNameClicked(display_name)
 	window.location.hash = "#profile";
 }
 
-function displayUserMessage(display_name, msg, whisper = false)
+function displayUserMessage(display_name, msg, whisper = false, you = false)
 {
 	const messageContainer = document.getElementById('msg-container')
 	const messageElement = document.createElement('div');
 	messageElement.classList.add('msg');
+	if (you)
+		messageElement.classList.add('our-msg');
+	else
+		messageElement.classList.add('other-msg');
 	const messageParagraph = document.createElement('p');
-	const messageSpan = document.createElement('span')
 	if (whisper)
 		messageParagraph.innerHTML = `~<span id=clickable-name-${message_id}>${display_name}</span> whispers~: ${msg}`
 	else
 		messageParagraph.innerHTML = `<span id=clickable-name-${message_id}>${display_name}</span>: ${msg}`
 
-	messageSpan.textContent = '9:34pm';
 	messageElement.appendChild(messageParagraph);
-	messageElement.appendChild(messageSpan);
 	messageContainer.appendChild(messageElement);
 	const clickableSpan = document.getElementById(`clickable-name-${message_id}`);
 	clickableSpan.classList.add('clickable');
@@ -163,20 +174,19 @@ function displayUserMessage(display_name, msg, whisper = false)
 function displayMessage(str, clickable = false, clickHandler = null) {
 	const messageElement = document.createElement('div');
 	messageElement.classList.add('msg');
+	messageElement.classList.add('server-msg');
+	const messageParagraph = document.createElement('p');
+	messageParagraph.textContent = str;
 	if (clickable) {
-		const clickableParagraph = document.createElement('p');
-		clickableParagraph.classList.add('clickable');
-		clickableParagraph.textContent = str;
-		clickableParagraph.style.cursor = 'pointer';
-		clickableParagraph.style.textDecoration = 'underline';
-		clickableParagraph.addEventListener('click', function() {
+		messageParagraph.classList.add('clickable');
+		messageParagraph.style.cursor = 'pointer';
+		messageParagraph.style.textDecoration = 'underline';
+		messageParagraph.addEventListener('click', function() {
 			clickHandler();
 			messageElement.remove();
 		});
-		messageElement.appendChild(clickableParagraph);
-	} else {
-		messageElement.textContent = str;
 	}
+	messageElement.appendChild(messageParagraph);
 	document.getElementById('msg-container').appendChild(messageElement);
 }
 
