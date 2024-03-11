@@ -19,18 +19,18 @@ const routes = {
         description: "View leaderboard on this page",
         scripts: []
     },
-    // login: {//Remove this and uncomment the below when finished testing (WIP)
-    //  template: "./templates/profile.html",
-    //  title: pageTitle + " | Profile",
-    //  description: "Login if you're an existing member of the site",
-    //  scripts: ["./js/profile.js"]
-    // },
-	   login: {
-           template: "./templates/login.html",
-           title: pageTitle + " | Login",
-           description: "Login if you're an existing member of the site",
-           scripts: ["./js/login.js"]
+    login: {//Remove this and uncomment the below when finished testing (WIP)
+     template: "./templates/profile.html",
+     title: pageTitle + " | Profile",
+     description: "Login if you're an existing member of the site",
+     scripts: ["./js/profile.js"]
     },
+	//    login: {
+    //        template: "./templates/login.html",
+    //        title: pageTitle + " | Login",
+    //        description: "Login if you're an existing member of the site",
+    //        scripts: ["./js/login.js"]
+    // },
     signup: {
         template: "./templates/signup.html",
         title: pageTitle + " | Sign Up",
@@ -72,6 +72,12 @@ const routes = {
         title: pageTitle + " | Profile Settings",
         description: "Profile settings that allow you to change your display name and password.",
         scripts: ["./js/profile-settings.js"]
+    },
+    friendsList: {
+        template: "./templates/friends-list.html",
+        title: pageTitle + " | Friends List",
+        description: "Go here to remove or block friends that you have on your friends list.",
+        scripts: ["./js/friends-list.js"]
     },
 };
 // Add other pages to the list
