@@ -480,6 +480,34 @@ p {
     z-index: 3;
 }
 
+.profile-button {
+    color: white;
+    font-size: 16px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 10px;
+    top: 100px;
+    height: 30px;
+    position: absolute;
+    background-color: rgb(14, 14, 14);
+    border: 1px solid rgb(143, 143, 143);
+}
+
+.pf-add-friend {
+    width: 140px;
+    right: 130px;
+}
+
+.pf-block {
+    width: 100px;
+    right: 20px;
+}
+
+.profile-button:hover {
+    background-color: rgb(46, 46, 46);
+    border: 1px solid rgb(226, 226, 226);
+}
+
 .ic--round-settings {
     top: 27%;
     left: 93%;
@@ -639,7 +667,8 @@ p {
 .scrollable-mh-data {
     margin-top: 100px;
     height: 235px;
-    overflow: scroll;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 /* Statistics Container */
