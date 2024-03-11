@@ -722,7 +722,7 @@ p {
     z-index: 3;
 }
 
-#data-stats-tb-match-type {
+#data-stats-tb-wins {
     left: 27%;
     text-align: left;
     font-size: 20px;
@@ -731,7 +731,7 @@ p {
     z-index: 3;
 }
 
-#data-stats-tb-opponent {
+#data-stats-tb-losses {
     left: 50%;
     text-align: left;
     font-size: 20px;
@@ -742,8 +742,8 @@ p {
     max-width: 200px;
 }
 
-#data-stats-tb-winner {
-    left: 73%;
+#data-stats-tb-tn-wins {
+    left: 73.5%;
     text-align: left;
     font-size: 20px;
     color: white;
@@ -751,7 +751,15 @@ p {
     z-index: 3;
 }
 
-.data-stats-tb-container {
+.data-stats-pong-container {
+    margin-top: 135px;
+    position: absolute;
+    left: 0;
+    width: 100%;
+}
+
+.data-stats-snake-container {
+    margin-top: 180px;
     position: absolute;
     left: 0;
     width: 100%;
