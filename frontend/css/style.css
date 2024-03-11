@@ -313,7 +313,7 @@ p {
     border-color: black;
 }
 
-::placeholder {
+.input-container ::placeholder {
     color: #949494;
 }
 
@@ -859,8 +859,88 @@ p {
 .settings-form {
     z-index: 2;
     position: relative;
-    margin-top: 58px;
+    margin-top: 70px;
     margin-left: 40px;
+    /* Grid details here */
+}
+
+.settings-input-container label {
+    font-size: 18px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.settings-input {
+    width: 512px;
+    height: 47px;
+    background-color: transparent;
+    border: solid 1px black;
+    border-radius: 10px;
+}
+
+.settings-input-container input {
+    font-size: 16px;
+    color: black;
+    margin-bottom: 34px;
+    padding-left: 15px;
+}
+
+.settings-btn {
+    width: 287px;
+    height: 53px;
+    color: black;
+    font-size: 18px;
+    font-weight: 600;
+    background-color: #d9d9d9;
+    border: 1px solid rgb(156, 156, 156);
+    border-radius: 10px;
+    margin-top: 20px;
+    transition: background-color 0.3s ease-in;
+}
+
+.settings-btn:hover {
+    background-color: #b0bbce;
+    cursor: pointer;
+}
+
+.settings-cancel {
+    float: right;
+    margin-right: 43px;
+}
+
+.settings-profile-pic {
+    width: 197px;
+    height: 197px;
+    border-radius: 50%;
+    background-color: rgb(167, 167, 167);
+    border: 1px solid black;
+    z-index: 5;
+}
+
+.settings-profile-container {
+    position: absolute;
+    top:0;
+    right: 0;
+    margin-right: 60px;
+    width: 200px;
+    height: 80%;
+    /* background-color: lightblue; */
+    z-index: 4;
+}
+
+.settings-profile-container label {
+    font-size: 18px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 5px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#img-upload {
+    display: block;
+    margin-top: 10px;
 }
 
 /* ================================================================ */
