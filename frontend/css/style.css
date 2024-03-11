@@ -113,7 +113,7 @@ nav a:hover {
     border-radius: 10px;
 }
 
-.signup-login-button {
+.navbar-button {
     width: 120px;
     height: 38px;
     background-color: #1a1a1d;
@@ -127,7 +127,7 @@ nav a:hover {
     transition: background-color 0.3s ease-in;
 }
 
-.signup-login-button:hover {
+.navbar-button:hover {
     background-color: #4d4d4d;
 }
 
