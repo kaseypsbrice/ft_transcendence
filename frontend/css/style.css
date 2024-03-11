@@ -128,6 +128,7 @@ nav a:hover {
 }
 
 .navbar-button:hover {
+    cursor: pointer;
     background-color: #4d4d4d;
 }
 
@@ -474,7 +475,7 @@ p {
 #profile-status {
     font-size: 20px;
     top: 100px;
-    left: 238px;
+    padding-left: 350px;
     color: rgba(49, 255, 156, 0.85);
     position: absolute;
     z-index: 3;
@@ -828,7 +829,7 @@ p {
 }
 
 #friend-status {
-    margin-left: 120px;
+    padding-left: 200px;
     font-size: 20px;
     left: calc(35% + 10px);
     color: rgba(49, 255, 156, 0.85);
@@ -842,6 +843,7 @@ p {
     margin-bottom: 20px;
 }
 
+/* Default style */
 .user-profile-wrap {
     display: grid;
     grid-template-columns: auto auto auto;
@@ -853,6 +855,20 @@ p {
         "stats-container stats-container friends-container";
     width: 83.4%;
     translate: 14%; /* On so many levels I consider this dodgy */
+}
+
+/* For screens smaller than X px */
+@media screen and (max-width: 1920px) {
+    .user-profile-wrap {
+        /* Alternative styling */
+    }
+}
+
+/* For screens greater than X px */
+@media screen and (min-width: 1920px) {
+    .user-profile-wrap {
+        /* Alternative styling */
+    }
 }
 
 .bx--edit {
@@ -999,6 +1015,7 @@ p {
 }
 
 #img-upload {
+    border-radius: 50%; /* Will have to test this */
     display: block;
     margin-top: 10px;
 }

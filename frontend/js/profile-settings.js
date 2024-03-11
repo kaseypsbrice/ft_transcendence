@@ -1,5 +1,3 @@
-/* Profile settings */
-
 function profileSettingsDisplayError(msg)
 {
 	console.log(msg)
