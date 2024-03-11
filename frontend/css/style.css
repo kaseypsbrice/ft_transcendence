@@ -1122,12 +1122,12 @@ p {
     z-index: 0;
 }
 
-/* .tn-centre-wrap {
+.tn-centre-wrap {
     margin-top: 4%;
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-} */
+}
 
 .tn-wrap {
     justify-content: center;
