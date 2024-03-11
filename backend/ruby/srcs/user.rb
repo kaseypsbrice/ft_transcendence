@@ -2,7 +2,8 @@ require 'pg'
 require 'bcrypt'
 
 class User
-	attr_accessor :id, :username, :password, :display_name, :tournament, :current_ws, :tournament_ws, :blocked, :invite_ws
+	attr_accessor :id, :username, :password, :display_name, :tournament, :current_ws, :tournament_ws, :blocked, :invite_ws, :friends, 
+	:pong_wins, :pong_losses, :snake_wins, :snake_losses, :pong_tournament_wins, :snake_tournament_wins
 
 	MAX_USERNAME = 50
 	MAX_DISPLAY_NAME = 30

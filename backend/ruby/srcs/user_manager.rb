@@ -233,7 +233,14 @@ class UserManager
 				matches: user.get_match_history(@db),
 				you: false,
 				online: false,
-				id: user.id
+				id: user.id,
+				friends: user.friends,
+				pong_wins: user.pong_wins,
+				pong_losses: user.pong_losses,
+				snake_wins: user.snake_wins,
+				snake_losses: user.snake_losses,
+				pong_tournament_wins: user.pong_tournament_wins,
+				snake_tournament_wins: user.snake_tournament_wins
 			}
 			return profile_data
 		rescue User::Error

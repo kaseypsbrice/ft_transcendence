@@ -305,6 +305,21 @@ class WebSocketManager
 			if profile[:display_name] == user.display_name
 				profile[:you] = true
 			end
+			friends = []
+			profile[:friends].each do |friend|
+				new_friend = {
+					name: @user_manager.get_user_info(friend),
+					online: false
+				}
+				@connections.each_value do |c|
+					if c.user_id == friend
+						new_friend[:online] = true
+						break
+					end
+				end
+				friends.push(new_friend)
+			end
+			profile[:friends] = friends
 			@connections.each_value do |c|
 				if c.user_id == profile[:id]
 					profile[:online] = true
