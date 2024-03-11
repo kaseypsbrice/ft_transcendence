@@ -27,7 +27,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "pong" <<-EOSQL
     );
 	CREATE TABLE IF NOT EXISTS profile_pictures (
 		id INT NOT NULL,
-		image BYTEA
+		image TEXT,
+		timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	);
 EOSQL
 

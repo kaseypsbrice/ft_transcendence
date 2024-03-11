@@ -36,6 +36,7 @@ function submitProfileSettings()
 	let new_password_confirm = document.getElementById('settings-new-password-confirm').value
 	let display_name = document.getElementById('settings-display-name').value
 	let username = document.getElementById('settings-username').value
+	var fileInput = document.getElementById('img-upload');
 
 	let settings_send = {type: "change_settings"}
 	console.log("clicked")
@@ -58,6 +59,37 @@ function submitProfileSettings()
 		settings_send["display_name"] = display_name;
 	if (username.length > 0)
 		settings_send["username"] = username;
+
+	
+	let file = fileInput.files[0];
+	
+	if (file)
+	{
+		if (file.size > 10 * 1024 * 1024)
+		{
+			profileSettingsDisplayError("File exceeds 10MB");
+			return;
+		}
+		else
+		{
+			var reader = new FileReader();
+			
+			reader.onload = function(event) {
+				var imageData = event.target.result;
+				settings_send["profile_picture"] = imageData;
+				if (!ws || ws.readyState != ws.OPEN)
+				{
+					profileSettingsDisplayError("Could not connect to server");
+					return;
+				}
+				sendWithToken(ws, settings_send);
+			};
+			
+			reader.readAsDataURL(file);
+			return;
+		}
+	}
+
 	if (!ws || ws.readyState != ws.OPEN)
 	{
 		profileSettingsDisplayError("Could not connect to server");

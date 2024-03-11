@@ -20,6 +20,11 @@ window.chatOnLogin = function () {
 	sendWithToken(ws, {type: "get_alerts"});
 };
 
+window.chatOnOpen = function () {
+	if (is_logged_in())
+		window.chatOnLogin();
+};
+
 let message_id = 0;
 const messageInput = document.getElementById('message-input');
 
@@ -140,8 +145,7 @@ function sendMessage() {
 
 function displayNameClicked(display_name)
 {
-	current_profile = display_name;
-	window.location.hash = "#profile";
+	viewProfile(display_name);
 }
 
 function displayUserMessage(display_name, msg, whisper = false, you = false)

@@ -117,12 +117,6 @@ function sendMessage() {
     document.getElementById('messageInput').value = '';
 }
 
-function displayNameClicked(display_name)
-{
-	current_profile = display_name;
-	window.location.hash = "#profile";
-}
-
 function displayUserMessage(display_name, msg, whisper = false)
 {
 	const messageElement = document.createElement('div');
@@ -138,7 +132,7 @@ function displayUserMessage(display_name, msg, whisper = false)
 	clickableSpan.style.cursor = 'pointer';
 	clickableSpan.style.textDecoration = 'underline';
 	clickableSpan.addEventListener('click', function() {
-		displayNameClicked(display_name);
+		viewProfile(display_name);
     });
 	messageElement.appendChild(clickableSpan);
 	messageElement.appendChild(textNode);

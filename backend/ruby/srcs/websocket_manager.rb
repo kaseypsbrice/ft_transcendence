@@ -529,6 +529,23 @@ class WebSocketManager
 			rescue User::Error => e
 				ws.send({type: "ChangeSettingsError", message: e.message}.to_json)
 			end
+		when "get_profile_picture"
+			begin
+				if msg_data["display_name"] == nil || msg_data["timestamp"] == nil
+					ws.send({type: "GetProfilePictureError", message: "No display_name or timestamp provided"}.to_json)
+					return
+				end
+				profile_user = @user_manager.get_user_info(msg_data["display_name"])
+				if !profile_user
+					ws.send({type: "GetProfilePictureError", message: "Cannot find user #{msg_data["display_name"]}"}.to_json)
+					return
+				end
+				ws.send({type: "ProfilePicture", data: profile_user.get_profile_picture(msg_data["timestamp"], @db)}.to_json)
+				return
+			rescue User::Error
+				puts "Get profile picture error"
+				return
+			end
 		end
 		rescue JSON::ParserError => e
 			puts "Error parsing JSON: #{e.message}"
