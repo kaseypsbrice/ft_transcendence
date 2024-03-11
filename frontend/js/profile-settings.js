@@ -15,7 +15,7 @@ window.onLogin = function()
 	profileSettingsDisplayError("");
 }
 
-window.onMessage = function(event, msg)
+window.onMessage = function(msg)
 {
 	switch (msg.type)
 	{

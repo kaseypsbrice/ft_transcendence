@@ -91,9 +91,9 @@ const locationHandler = async () => {
 	});
 
 	// Remove overloads for websocket.js
-	window.onOpen = function (event){}
-	window.onClose = function (event) {}
-	window.onMessage = function (event, msg) {}
+	window.onOpen = function (){}
+	window.onClose = function () {}
+	window.onMessage = function (msg) {}
 	window.onLogout = function () {}
 	window.onLogin = function () {}
 	window.cleanupPage = function () {}

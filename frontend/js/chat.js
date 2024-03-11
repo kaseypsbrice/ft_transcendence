@@ -12,7 +12,7 @@ window.chatOnLogin = function () {
 	sendWithToken(ws, {type: "get_alerts"});
 };
 
-window.chatOnMessage = function(event, msg) {
+window.chatOnMessage = function(msg) {
 	console.log(msg)
 	switch (msg.type)
 	{

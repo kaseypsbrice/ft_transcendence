@@ -9,7 +9,7 @@ window.onLogin = function()
 	window.location.hash = "#home";
 }
 
-window.onMessage = function(event, msg)
+window.onMessage = function(msg)
 {
 	switch (msg.type)
 	{

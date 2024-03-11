@@ -49,7 +49,7 @@ function clearPage()
 	}
 }
 
-window.onMessage = function(event, msg)
+window.onMessage = function(msg)
 {
 	switch(msg.type)
 	{
@@ -85,7 +85,7 @@ window.onMessage = function(event, msg)
 	}
 }
 
-window.onOpen = function(event)
+window.onOpen = function()
 {
 	clearPage();
 	console.log(current_profile)

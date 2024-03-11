@@ -4,14 +4,37 @@ let logged_in = true;
 let current_profile = "my profile";
 
 // Overload these in future scripts
-function onOpen(event) {}
-function onClose(event) {}
-function onMessage(event, msg) {}
+function onOpen() {}
+function onClose() {}
+function onMessage(msg) {}
 function onLogout() {}
 function onLogin() {}
 function cleanupPage() {}
-function chatOnMessage(event, msg) {}
+function chatOnMessage(msg) {}
 function chatOnLogin() {}
+function homeOnLogin() {}
+function homeOnLogout() {}
+
+
+function onOpenWrapper(){
+	onOpen();
+}
+function onCloseWrapper(){
+	onClose();
+}
+function onMessageWrapper(msg){
+	onMessage(msg);
+	chatOnMessage(msg);
+}
+function onLoginWrapper(){
+	onLogin();
+	chatOnLogin();
+	homeOnLogin();
+}
+function onLogoutWrapper(){
+	onLogout();
+	homeOnLogout();
+}
 
 function is_logged_in()
 {
@@ -43,7 +66,7 @@ function hasAccessToken()
 if (!hasAccessToken())
 {
 	logged_in = false;
-	onLogout();
+	onLogoutWrapper();
 }
 
 function sendWithToken(ws, data)
@@ -87,7 +110,7 @@ function connect()
 			sendWithToken(ws, {type:"connected"});
 		else
 			ws.send(JSON.stringify({type:"connected"}));
-		onOpen(event);
+		onOpenWrapper();
 	};
 
 	ws.onmessage = function(event) {
@@ -116,18 +139,16 @@ function connect()
 					if (!logged_in || msg.token != token)
 					{
 						logged_in = true;
-						onLogin();
-						chatOnLogin();
+						onLoginWrapper();
 					}
 				}
 				if (msg.type === 'InvalidToken')
 				{
 					logged_in = false;
-					onLogout();
+					onLogoutWrapper();
 				}
 			}
-			onMessage(event, msg);
-			chatOnMessage(event, msg);
+			onMessageWrapper(msg);
 		} catch (e) {
 			console.error('Error parsing message:', e);
 		}
@@ -135,7 +156,7 @@ function connect()
 
 	ws.onclose = function(event) {
 		console.log('websocket connection closed', event.code, event.reason);
-		onClose(event);
+		onCloseWrapper();
 		setTimeout(function() {
 			connect();
 		}, 1000);

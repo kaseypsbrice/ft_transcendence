@@ -356,7 +356,7 @@ function updateLoggedOut()
 	drawButtons();
 }
 
-window.onMessage = function(event, msg) 
+window.onMessage = function(msg) 
 {
 	console.log("snake on message")
 	switch (msg.type)
@@ -507,14 +507,14 @@ window.onLogin = function()
 	state = "menu";
 }
 
-window.onOpen = function(event)
+window.onOpen = function()
 {
 	console.log("snake on open")
 	state = "waiting_server"
 	sendWithToken(ws, {type:"get_game_status", game: "snake"});
 }
 
-window.onClose = function(event)
+window.onClose = function()
 {
 	state = "disconnected"
 }

@@ -8,7 +8,7 @@ function registerDisplayError(msg)
 	console.log(msg);
 }
 
-window.onMessage = function(event, msg)
+window.onMessage = function(msg)
 {
 	switch(msg.type)
 	{

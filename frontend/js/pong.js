@@ -376,7 +376,7 @@ function updateGame(data) {
 	ctx.fillText(`Opponent: ${opponent}`, canvas.width / 2, 12);
 }
 
-window.onMessage = function(event, msg) 
+window.onMessage = function(msg) 
 {
 	switch (msg.type)
 	{
@@ -554,13 +554,13 @@ window.onLogin = function()
 	state = "menu";
 }
 
-window.onOpen = function(event)
+window.onOpen = function()
 {
 	state = "waiting_server"
 	sendWithToken(ws, {type:"get_game_status", game: "pong"});
 }
 
-window.onClose = function(event)
+window.onClose = function()
 {
 	state = "disconnected"
 }

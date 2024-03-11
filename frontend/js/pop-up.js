@@ -23,7 +23,7 @@ window.chatOnLogin = function () {
 let message_id = 0;
 const messageInput = document.getElementById('message-input');
 
-window.chatOnMessage = function(event, msg) {
+window.chatOnMessage = function(msg) {
 	console.log(msg)
 	switch (msg.type)
 	{

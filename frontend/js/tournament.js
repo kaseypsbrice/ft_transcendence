@@ -1,7 +1,7 @@
 (function () {
 let game = "";
 let in_game = false;
-window.onMessage = function(event,  msg)
+window.onMessage = function(msg)
 {
 	switch (msg.type)
 	{
@@ -61,7 +61,7 @@ function clearPage()
 	}
 }
 
-window.onOpen = function(event)
+window.onOpen = function()
 {
 	clearPage();
 	sendWithToken(ws, {type:"get_tournament_info"});
