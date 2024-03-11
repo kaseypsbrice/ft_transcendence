@@ -1027,14 +1027,14 @@ p {
 
 .open-btn {
     position: fixed;
-    background-color: whitesmoke;
+    background-color: rgb(44, 44, 44);
     border-radius: 10px;
     bottom: 20px;
     width: 350px;
     height: 50px;
     right: 20px;
     cursor: pointer;
-    color: black;
+    color: white;
     line-height: 50px;
     text-align: center;
     font-size: 16px;
@@ -1057,15 +1057,14 @@ p {
     flex-direction: column;
     align-items: stretch;
     max-width: 400px;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    background-color: white;
+    border-radius: 10px;
+    background-color: rgb(20, 20, 20);
 }
 
 .chat-window-head {
     display: flex;
     justify-content: space-between;
-    background-color: blue;
+    background-color: rgb(44, 44, 44);
     padding: 16px 14px;
     border-radius: 10px 10px 0px 0px;
 }
@@ -1087,7 +1086,8 @@ p {
 }
 
 .msg {
-    background-color: darkblue;
+    margin-bottom: 5px;
+    background-color: rgb(126, 59, 70);
     padding: 10px 16px;
     border-radius: 10px;
     width: 80%;
@@ -1096,6 +1096,7 @@ p {
 }
 
 .msg p {
+    margin: 0;
     font-size: 12px;
     line-height: 1.5em;
 }
@@ -1119,8 +1120,8 @@ p {
     width: 97%;
     overflow: hidden;
     border-radius: 10px;
-    background-color: blue;
-    border: 4px solid orange;
+    background-color: rgb(59, 59, 59);
+    border: 4px solid rgb(46, 46, 46);
 }
 
 .form-container input {
@@ -1140,7 +1141,7 @@ p {
 
 .send-btn, .btn {
     width: 60px;
-    background-color: yellow;
+    background-color: rgb(226, 226, 226);
     color: white;
     /* height: 100%; */
     justify-content: center;
@@ -1171,49 +1172,5 @@ p {
     height: 1.5em;
     background-repeat: no-repeat;
     background-size: 100% 100%;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M3 16.74L7.76 12L3 7.26L7.26 3L12 7.76L16.74 3L21 7.26L16.24 12L21 16.74L16.74 21L12 16.24L7.26 21zm9-3.33l4.74 4.75l1.42-1.42L13.41 12l4.75-4.74l-1.42-1.42L12 10.59L7.26 5.84L5.84 7.26L10.59 12l-4.75 4.74l1.42 1.42z'/%3E%3C/svg%3E");
-}
-
-/* #chat {
-    width: 350px;
-}
-
-.chat-button {
-    position: fixed;
-    background-color: whitesmoke;
-    border-radius: 10px;
-    bottom: 20px;
-    width: 350px;
-    height: 50px;
-    right: 20px;
-    cursor: pointer;
-    color: black;
-    line-height: 50px;
-    text-align: center;
-    font-size: 16px;
-    font-weight: 600;
-    z-index: 4;
-    border: none;
-}
-
-.chat-button:hover {
-    background-color: #949494;
-}
-
-.chat-button:hover ~ .chat-box {
-    display: block;
-}
-
-.chat-box {
-    display: none;
-    position: fixed;
-    bottom: 0;
-    right: 15px;
-    /* height: 700px; */
-    /* width: 100%;
-    z-index: 5;
-} */
-
-/* .recv-message {
-
-} */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M3 16.74L7.76 12L3 7.26L7.26 3L12 7.76L16.74 3L21 7.26L16.24 12L21 16.74L16.74 21L12 16.24L7.26 21zm9-3.33l4.74 4.75l1.42-1.42L13.41 12l4.75-4.74l-1.42-1.42L12 10.59L7.26 5.84L5.84 7.26L10.59 12l-4.75 4.74l1.42 1.42z'/%3E%3C/svg%3E");
+  }
