@@ -812,9 +812,14 @@ p {
     letter-spacing: -0.2px;
 }
 
+.pf-friends {
+    display: inline-block;
+    position: absolute;
+    z-index: 4;
+    margin-top: 85px;
+}
+
 .friend {
-    margin-top: 76px;
-    /* margin-left: 43px; */
     text-align: left;
     font-size: 20px;
     color: white;
@@ -823,18 +828,18 @@ p {
 }
 
 #friend-status {
-    display: inline-block;
-    margin-top: 76px;
+    margin-left: 120px;
     font-size: 20px;
     left: calc(35% + 10px);
     color: rgba(49, 255, 156, 0.85);
-    position: absolute;
+    position: relative;
     z-index: 3;
 }
 
 .wrap-friend-elements {
     position: relative;
     margin-left: 43px;
+    margin-bottom: 20px;
 }
 
 .user-profile-wrap {
@@ -1034,7 +1039,6 @@ p {
     margin: -46px 15px 15px 0;
     z-index: 1;
 }
-
 
 .frlst-friend {
     /* margin-top: 76px; */
