@@ -506,6 +506,7 @@ p {
 .profile-button:hover {
     background-color: rgb(46, 46, 46);
     border: 1px solid rgb(226, 226, 226);
+    cursor: pointer;
 }
 
 .ic--round-settings {
