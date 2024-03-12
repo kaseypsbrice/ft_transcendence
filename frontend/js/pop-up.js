@@ -173,6 +173,7 @@ function displayUserMessage(display_name, msg, whisper = false, you = false)
 	const clickableSpan = document.getElementById(`clickable-name-${message_id}`);
 	clickableSpan.classList.add('clickable');
 	clickableSpan.style.cursor = 'pointer';
+    clickableSpan.style.color = 'white';
 	clickableSpan.style.textDecoration = 'underline';
 	clickableSpan.addEventListener('click', function() {
 		displayNameClicked(display_name);
@@ -189,6 +190,7 @@ function displayMessage(str, clickable = false, clickHandler = null) {
 	if (clickable) {
 		messageParagraph.classList.add('clickable');
 		messageParagraph.style.cursor = 'pointer';
+        clickableSpan.style.color = 'white';
 		messageParagraph.style.textDecoration = 'underline';
 		messageParagraph.addEventListener('click', function() {
 			clickHandler();
