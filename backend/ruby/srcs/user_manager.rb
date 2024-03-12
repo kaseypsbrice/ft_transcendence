@@ -200,7 +200,7 @@ class UserManager
 	def get_user_from_display_name(display_name)
 		searched = @users.select { |key, value| value.display_name == display_name }
 		if searched.size > 0
-			return @users[searched.keys[0]]
+			return @users[searched.values[0]]
 		end
 		return nil
 	end
@@ -244,7 +244,8 @@ class UserManager
 				pong_tournament_wins: user.pong_tournament_wins,
 				snake_tournament_wins: user.snake_tournament_wins,
 				is_blocked: user_requesting.blocked?(user.id),
-				is_friend: user_requesting.friend?(user.id)
+				is_friend: user_requesting.friend?(user.id),
+				friend_pending: false
 			}
 			puts "profile data"
 			puts profile_data

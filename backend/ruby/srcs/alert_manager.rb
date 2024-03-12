@@ -10,13 +10,14 @@ class AlertManager
 	end
 
 	def alert_json(alert)
-		to_send = {
-			game: alert[:game],
-			type: alert[:type]
-		}
-		if alert.key?(:user_from)
+		to_send = alert.clone
+		if to_send.key?(:user_from)
 			puts "adding user from"
-			to_send[:user_from] = alert[:user_from].display_name
+			to_send[:user_from] = to_send[:user_from].display_name
+		end
+		if to_send.key?(:user_to)
+			puts "adding user from"
+			to_send[:user_to] = to_send[:user_to].display_name
 		end
 		return {type: "Alert", data: to_send}.to_json
 	end
@@ -50,7 +51,7 @@ class AlertManager
 		@alerts.delete_if { |alert| alert[:expires] <= Time.now.to_i }
 		alert_found = nil
 		@alerts.each do |alert|
-			if alert[:user_from].id == user_from.id && alert[:user_to].id == user_to.id
+			if alert[:user_from].id == user_from.id && alert[:user_to].id == user_to.id && alert[:type] == "invite"
 				alert_found = alert
 				break
 			end
@@ -68,8 +69,27 @@ class AlertManager
 		alert_found[:accepted] = true
 	end
 
+	def pending_friend(user_to, user_from)
+		selected = @alerts.select { |a| a[:user_to].id == user_to.id && a[:user_from].id == user_from.id && a[:type] == "friend"}
+		if selected.size == 0
+			return false
+		end
+		return true
+	end
+
+	def accept_friend(user_to, user_from)
+		selected = @alerts.select { |a| a[:user_to].id == user_to.id && a[:user_from].id == user_from.id && a[:type] == "friend"}
+		if selected.size == 0
+			return false
+		end
+		user_to.friend_user(user_from.id, @websocket_manager.db)
+		user_from.friend_user(user_to.id, @websocket_manager.db)
+		@alerts.delete_if { |a| a[:user_to].id == user_to.id && a[:user_from].id == user_from.id && a[:type] == "friend"}
+		return true
+	end
+
 	def create_invite(user_inviting, user_invited, game)
-		@alerts.delete_if { |alert| alert[:user_from].id == user_inviting.id}
+		@alerts.delete_if { |alert| alert[:user_from].id == user_inviting.id && alert[:type] == "invite"}
 		new_alert = {
 			user_from: user_inviting,
 			user_to: user_invited,
@@ -78,11 +98,26 @@ class AlertManager
 			accepted: false,
 			type: "invite",
 			game: game,
-			expires: Time.now.to_i + 60
+			expires: Time.now.to_i + 600
 		}
 		@alerts.push(new_alert)
 		@websocket_manager.connections.each_value do |client|
-			puts client
+			if client.user_id == user_invited.id
+				client.ws.send(alert_json(new_alert))
+			end
+		end
+	end
+
+	def create_friend(user_inviting, user_invited)
+		@alerts.delete_if { |alert| alert[:user_from] == user_inviting.id && alert[:user_to] == user_invited.id && alert[:type] == "friend"}
+		new_alert = {
+			user_from: user_inviting,
+			user_to: user_invited,
+			type: "friend",
+			expires: Time.now.to_i + 604800 # one week
+		}
+		@alerts.push(new_alert)
+		@websocket_manager.connections.each_value do |client|
 			if client.user_id == user_invited.id
 				client.ws.send(alert_json(new_alert))
 			end
@@ -105,7 +140,7 @@ class AlertManager
 		alert_found = nil
 		@alerts.each do |alert|
 			if alert[:user_from].id == user.id || alert[:user_to].id == user.id \
-				&& (alert[:accepted] == true)
+				&& alert[:type] == "invite" && (alert[:accepted] == true)
 				alert_found = alert
 				break
 			end

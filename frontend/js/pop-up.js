@@ -42,9 +42,19 @@ window.chatOnMessage = function(msg) {
 		case "Alert":
 			if (msg.data != null && msg.data.type != null)
 			{
-				displayMessage(`${msg.data.user_from} invited you to a game of ${msg.data.game}!`, true, function() {
-					acceptInvite(msg.data.user_from);
-				});
+				switch (msg.data.type)
+				{
+					case "invite":
+						displayMessage(`${msg.data.user_from} invited you to a game of ${msg.data.game}!`, true, function() {
+							acceptInvite(msg.data.user_from);
+						});
+						break;
+					case "friend":
+						displayMessage(`${msg.data.user_from} wants to be your friend!`, true, function() {
+							sendWithToken(ws, {type: "accept_friend", name: msg.data.user_from});
+						});
+						break;
+				}
 			}
 			break;
 		case "Whisper":

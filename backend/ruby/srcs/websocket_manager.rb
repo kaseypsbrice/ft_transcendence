@@ -340,6 +340,9 @@ class WebSocketManager
 					break
 				end
 			end
+			if @alert_manager.pending_friend(user, @user_manager.get_user_info(profile[:display_name]))
+				profile[:pending_friend] = true
+			end
 			puts "final profile"
 			puts profile
 			ws.send({type: "Profile", data: profile}.to_json)
@@ -354,6 +357,12 @@ class WebSocketManager
 						ws.send({type: "BlockReply", message: "User #{b_user.display_name} is already blocked"}.to_json)
 					else
 						user.block_user(b_user.id, @db)
+						user.unfriend_user(b_user.id, @db)
+						if @user_manager.user?(b_user.id)
+							@user_manager.get_user(b_user.id).unfriend_user(user.id, @db)
+						else
+							b_user.unfriend_user(user.id, @db)
+						end
 						ws.send({type: "BlockReply", message: "User #{b_user.display_name} has been blocked"}.to_json)
 					end
 					return
@@ -365,6 +374,12 @@ class WebSocketManager
 						ws.send({type: "BlockReply", message: "User #{b_user.display_name} is already blocked"}.to_json)
 					else
 						user.block_user(b_user.id, @db)
+						user.unfriend_user(b_user.id, @db)
+						if @user_manager.user?(b_user.id)
+							@user_manager.get_user(b_user.id).unfriend_user(user.id, @db)
+						else
+							b_user.unfriend_user(user.id, @db)
+						end
 						ws.send({type: "BlockReply", message: "User #{b_user.display_name} has been blocked"}.to_json)
 					end
 					return
@@ -418,8 +433,8 @@ class WebSocketManager
 					elsif user.friend?(f_user.id)
 						ws.send({type: "FriendReply", message: "User #{f_user.display_name} is already your friend"}.to_json)
 					else
-						user.friend_user(f_user.id, @db)
-						ws.send({type: "FriendReply", message: "User #{f_user.display_name} is now your friend"}.to_json)
+						@alert_manager.create_friend(user, f_user)
+						ws.send({type: "FriendReply", message: "User #{f_user.display_name} friend request sent"}.to_json)
 					end
 					return
 				elsif msg_data["name"] != nil
@@ -429,8 +444,8 @@ class WebSocketManager
 					elsif user.friend?(f_user.id)
 						ws.send({type: "FriendReply", message: "User #{f_user.display_name} is already your friend"}.to_json)
 					else
-						user.friend_user(f_user.id, @db)
-						ws.send({type: "FriendReply", message: "User #{f_user.display_name} is now your friend"}.to_json)
+						@alert_manager.create_friend(user, f_user)
+						ws.send({type: "FriendReply", message: "User #{f_user.display_name} friend request sent"}.to_json)
 					end
 					return
 				else
@@ -452,6 +467,11 @@ class WebSocketManager
 						ws.send({type: "UnfriendReply", message: "User #{f_user.display_name} is not your friend"}.to_json)
 					else
 						user.unfriend_user(f_user.id, @db)
+						if @user_manager.user?(f_user.id)
+							@user_manager.get_user(f_user.id).unfriend_user(user.id, @db)
+						else
+							f_user.unfriend_user(user.id, @db)
+						end
 						ws.send({type: "UnfriendReply", message: "User #{f_user.display_name} is no longer your friend"}.to_json)
 					end
 					return
@@ -465,6 +485,11 @@ class WebSocketManager
 						ws.send({type: "UnfriendReply", message: "User #{f_user.display_name} is not your friend"}.to_json)
 					else
 						user.unfriend_user(f_user.id, @db)
+						if @user_manager.user?(f_user.id)
+							@user_manager.get_user(f_user.id).unfriend_user(user.id, @db)
+						else
+							f_user.unfriend_user(user.id, @db)
+						end
 						ws.send({type: "UnfriendReply", message: "User #{f_user.display_name} is no longer your friend"}.to_json)
 					end
 				else
@@ -472,6 +497,29 @@ class WebSocketManager
 				end
 			rescue User::Error
 				ws.send({type: "UnfriendError", message: "Error unfriending user"}.to_json)
+			end
+		when "accept_friend"
+			if msg["name"] == nil
+				ws.send({type: "AcceptFriendError", message: "No display name provided"}.to_json)
+				return
+			end
+			f_user = @user_manager.get_user_from_display_name(msg_data["name"])
+			if f_user == nil
+				f_user = @user_manager.get_user_info(msg_data["name"])
+			end
+			if f_user == nil
+				ws.send({type: "AcceptFriendError", message: "Could not user #{msg["name"]}"}.to_json)
+				return
+			end
+			begin
+				if @alert_manager.accept_friend(user, f_user)
+					ws.send({type: "AcceptFriendReply", message: "User #{msg["name"]} is now your friend"}.to_json)
+				else
+					ws.send({type: "AcceptFriendError", message: "Could not find friend request from #{msg["name"]}"}.to_json)
+				end
+			return
+			rescue User::Error
+				ws.send({type: "AcceptFriendError", message: "Internal"}.to_json)
 			end
 		when "accept_invite"
 			if msg_data["user_from"] == nil

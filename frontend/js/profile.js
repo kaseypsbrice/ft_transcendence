@@ -115,6 +115,16 @@ function setBlock(blockButton)
 	};
 }
 
+function setAcceptFriend(friendButton)
+{
+	friendButton.style.display = '';
+	friendButton.textContent = "Accept Friend Request";
+	friendButton.onclick = function() {
+		sendWithToken(ws, {type: "accept_friend", name: current_profile});
+		friendButton.style.display = 'none';
+	}
+}
+
 window.onMessage = function(msg)
 {
 	switch(msg.type)
@@ -173,6 +183,8 @@ window.onMessage = function(msg)
 			{
 				if (msg.data.is_friend)
 					setUnfriend(friendButton);
+				else if (msg.data.friend_pending)
+					setAcceptFriend(friendButton);
 				else
 					setFriend(friendButton);
 				if (msg.data.is_blocked)
@@ -234,14 +246,15 @@ window.onMessage = function(msg)
 		case "BlockError":
 			setBlock(document.getElementById('pf-block'));
 			break;
-		case "FriendReply":
 		case "UnfriendError":
 			setUnfriend(document.getElementById('pf-add-friend'));
 			break;
 		case "UnfriendReply":
+		case "AcceptFriendReply":
 		case "FriendError":
 			setFriend(document.getElementById('pf-add-friend'));
 			break;
+		
 	}
 }
 
