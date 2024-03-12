@@ -29,11 +29,19 @@ function onMessageWrapper(msg){
 	chatOnMessage(msg);
 }
 function onLoginWrapper(){
+	document.getElementById('login-button').style.display = 'none';
+	document.getElementById('profile-button').style.display = '';
+	document.getElementById('logout-button').style.display = '';
+	document.getElementById('signup-button').style.display = 'none';
 	onLogin();
 	chatOnLogin();
 	homeOnLogin();
 }
 function onLogoutWrapper(){
+	document.getElementById('login-button').style.display = '';
+	document.getElementById('profile-button').style.display = 'none';
+	document.getElementById('logout-button').style.display = 'none';
+	document.getElementById('signup-button').style.display = '';
 	onLogout();
 	homeOnLogout();
 }
@@ -63,6 +71,12 @@ function hasAccessToken()
 		return false;
 	}
 	return true;
+}
+
+
+function setPictureDisplayName(div, name)
+{
+	div.setAttribute("data-display-name", name);
 }
 
 if (!hasAccessToken())
@@ -107,9 +121,31 @@ function viewProfile(profile)
 		window.location.hash = "#profile";
 }
 
+function logout()
+{
+	document.cookie = `access_token=null;SameSite=Strict;Secure;`;
+	sendWithToken(ws, {type: "logout"});
+}
+
 function viewMyProfile()
 {
 	viewProfile("my profile");
+}
+
+function displayGlobalError(msg)
+{
+	let newDiv = document.createElement('div');
+	newDiv.classList.add('error', 'animation');
+	newDiv.textContent = msg;
+	document.getElementById('content').appendChild(newDiv);
+}
+
+function displayGlobalMessage(msg)
+{
+	let newDiv = document.createElement('div');
+	newDiv.classList.add('confirmation', 'animation');
+	newDiv.textContent = msg;
+	document.getElementById('content').appendChild(newDiv);
 }
 
 function connect()
@@ -134,33 +170,71 @@ function connect()
 			if (msg.type != null)
 			{
 				console.log(msg.type);
-				if (msg.type === 'authentication' && msg.token != null)
+				switch (msg.type)
 				{
-					var token = null;
-					const cookies = document.cookie.split(';');
-					for (let cookie of cookies) {
-						const [name, value] = cookie.trim().split('=');
-						if (name === 'access_token') {
+					case "authentication":
+						if (msg.token != null)
+						{
+							var token = null;
+							const cookies = document.cookie.split(';');
+							for (let cookie of cookies) {
+								const [name, value] = cookie.trim().split('=');
+								if (name === 'access_token') {
 
-							token = value;
+									token = value;
+									break;
+								}
+							}
+							document.cookie = `access_token=${msg.token};SameSite=Strict;Secure;`;
+							if (!logged_in || msg.token != token)
+							{
+								logged_in = true;
+								onLoginWrapper();
+							}
+						}
+						break;
+					case "InvalidToken":
+						logged_in = false;
+						onLogoutWrapper();
+						break;
+					case "ViewProfile":
+						if (msg.name != null)
+							viewProfile(msg.name);
+						break;
+					case "ProfilePicture":
+						if (!msg.data || !msg.data.name)
+							break;
+						let pictureMatches = document.querySelectorAll(`[data-display-name="${msg.data.name}"]`);
+						if (msg.data.current)
+						{
+							let cachedProfilePicture = localStorage.getItem(msg.data.name)
+							if (!cachedProfilePicture)
+							{
+								console.log("Error could not get cached profile picture");
+								break;
+							}
+							let cachedJSON = JSON.parse(cachedProfilePicture);
+							for (let i = 0; i < pictureMatches.length; i++)
+							{
+								let match = pictureMatches[i];
+								match.src = cachedJSON.data;
+							}
 							break;
 						}
-					}
-					document.cookie = `access_token=${msg.token};SameSite=Strict;Secure;`;
-					if (!logged_in || msg.token != token)
-					{
-						logged_in = true;
-						onLoginWrapper();
-					}
-				}
-				if (msg.type === 'InvalidToken')
-				{
-					logged_in = false;
-					onLogoutWrapper();
-				}
-				if (msg.type == "ViewProfile" && msg.name != null)
-				{
-					viewProfile(msg.name);
+						else
+						{
+							let cachedData = {
+								data: msg.data.image,
+								timestamp: msg.data.timestamp
+							};
+							localStorage.setItem(msg.data.name, JSON.stringify(cachedData))
+							for (let i = 0; i < pictureMatches.length; i++)
+							{
+								let match = pictureMatches[i];
+								match.src = msg.data.image;
+							}
+						}
+						break;
 				}
 			}
 			onMessageWrapper(msg);
@@ -183,4 +257,8 @@ function connect()
 		ws.close();
 	};
 }
+document.getElementById('login-button').style.display = '';
+document.getElementById('profile-button').style.display = 'none';
+document.getElementById('logout-button').style.display = 'none';
+document.getElementById('signup-button').style.display = '';
 connect();

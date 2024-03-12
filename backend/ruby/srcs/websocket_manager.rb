@@ -218,6 +218,7 @@ class WebSocketManager
 					ws.send({type: "HelpResponse", message:"/w {user} {msg} : whisper to a user"}.to_json)
 					ws.send({type: "HelpResponse", message:"/invite {user} {game} : invite user to game"}.to_json)
 					ws.send({type: "HelpResponse", message:"/tournament {game} : propose a tournament"}.to_json)
+					ws.send({type: "HelpResponse", message:"/profile {display name} : view a profile"}.to_json)
 					return
 				when "tournament"
 					if split_msg.size < 2

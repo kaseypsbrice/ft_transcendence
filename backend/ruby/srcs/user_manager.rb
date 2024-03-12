@@ -45,9 +45,9 @@ class UserManager
 			add_user(user)
 			client.ws.send({type: "authentication", token: get_auth_token(user)}.to_json)
 		rescue User::UserNotFound => e
-			client.ws.send({"type": "LoginError", "message": "User not found"}.to_json);
+			client.ws.send({"type": "LoginError", "message": "Username or password incorrect"}.to_json);
 		rescue User::PasswordIncorrect => e
-			client.ws.send({"type": "LoginError", "message": "Password incorrect"}.to_json);
+			client.ws.send({"type": "LoginError", "message": "Username or password incorrect"}.to_json);
 		rescue User::Error => e
 			client.ws.send({"type": "LoginError", "message": "Internal"}.to_json);
 		end

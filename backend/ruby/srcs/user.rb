@@ -113,7 +113,7 @@ class User
 	end
 
 	def self.register(username, password, display_name, db)
-
+		puts "registering"
 		if password.size < 8
 			puts "Password too short"
 			raise PasswordTooShort
@@ -152,6 +152,7 @@ class User
 
 		return from_db_query(result, timestamp)
 		rescue PG::UniqueViolation => e
+			puts e.message
 			if e.message.include?("(username)=")
 				puts "Username taken"
 				raise UsernameTaken

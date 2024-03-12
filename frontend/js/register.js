@@ -1,11 +1,15 @@
 function onLogin()
 {
 	window.location.hash = "#home";
+	displayGlobalMessage("Successfully Logged In!");
 }
 
 function registerDisplayError(msg)
 {
-	console.log(msg);
+	console.log(msg)
+	let errorDiv = document.getElementById('register-error')
+	errorDiv.style.display = '';
+	errorDiv.textContent = msg;
 }
 
 window.onMessage = function(msg)
@@ -36,3 +40,5 @@ function submitForm(event)
 	}
 	ws.send(JSON.stringify({"type": "register", "data": {"username": username, "password": password, "display_name": display_name}}));
 }
+
+document.getElementById('register-error').style.display = 'none';

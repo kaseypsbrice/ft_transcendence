@@ -25,7 +25,7 @@ $(NAME): $(OBJS) $(CERTS)
 		@printf "$(GREEN)Executable created$(RESET)\n"
 
 $(OBJS): %.o: %.cpp
-		$(CC) -c -I $(INCLUDES) $< $(FLAGS) $(LIBS) -o $@
+		$(CC) -c -I $(INCLUDES) $< $(FLAGS) -o $@
 
 $(CERTS):
 		@openssl req -nodes -x509 -newkey rsa:4096 -keyout temp.key \

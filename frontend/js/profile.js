@@ -67,10 +67,17 @@ function clearPage()
 {
 	document.getElementById('profile-display-name').textContent = "";
 	document.getElementById('profile-username').textContent = "";
-	containers = document.querySelectorAll('.data-mh-tb-container')
+	setPictureDisplayName(document.getElementById('profile-picture'), "");
+	let containers = document.querySelectorAll('.data-mh-tb-container')
 	for (let i = 0; i < containers.length; i++)
 	{
 		let c = containers[i]
+		c.remove();
+	}
+	let friends = document.querySelectorAll('.wrap-friend-elements')
+	for (let i = 0; i < friends.length; i++)
+	{
+		let c = friends[i]
 		c.remove();
 	}
 }
@@ -129,36 +136,6 @@ window.onMessage = function(msg)
 {
 	switch(msg.type)
 	{
-		case "ProfilePicture":
-			if (!msg.data || !msg.data.name)
-				return;
-			const profileImg = document.getElementById('profile-picture');
-			if (msg.data.current)
-			{
-				let cachedProfilePicture = localStorage.getItem(msg.data.name)
-				if (!cachedProfilePicture)
-				{
-					console.log("Error could not get cached profile picture");
-					break;
-				}
-				let cachedJSON = JSON.parse(cachedProfilePicture);
-				profileImg.src = cachedJSON.data;
-				break;
-			}
-			else
-			{
-				//let blob = new Blob([msg.data.image]);
-				//let imageUrl = URL.createObjectURL(blob);
-				let cachedData = {
-					data: msg.data.image,
-					timestamp: msg.data.timestamp
-				};
-				localStorage.setItem(msg.data.name, JSON.stringify(cachedData))
-				profileImg.src = msg.data.image;
-				profileImg.style.width = '100px';
-				profileImg.style.height = '100px';
-			}
-			break;
 		case "Profile":
 			if (msg.data == null || msg.data.username == null || msg.data.matches == null ||
 			msg.data.display_name == null || msg.data.online == null || msg.data.you == null || 
@@ -264,6 +241,7 @@ window.onOpen = function()
 	console.log(current_profile)
 	sendWithToken(ws, {type:"get_profile", profile: current_profile});
 	let cachedData = localStorage.getItem(current_profile);
+	setPictureDisplayName(document.getElementById('profile-picture'), current_profile);
 	if (!cachedData)
 		sendWithToken(ws, {type: "get_profile_picture", display_name: current_profile, timestamp: "0"});
 	else

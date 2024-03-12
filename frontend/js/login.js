@@ -1,12 +1,15 @@
 
 function loginDisplayError(msg)
 {
-	console.log(msg);
+	let errorDiv = document.getElementById('login-error')
+	errorDiv.style.display = '';
+	errorDiv.textContent = msg;
 }
 
 window.onLogin = function()
 {
 	window.location.hash = "#home";
+	displayGlobalMessage("Successfully Logged In!");
 }
 
 window.onMessage = function(msg)
@@ -34,3 +37,5 @@ function submitForm(event)
 	}
 	ws.send(JSON.stringify({"type": "login", "data": {"username": username, "password": password}}));
 }
+
+document.getElementById('login-error').style.display = 'none';
