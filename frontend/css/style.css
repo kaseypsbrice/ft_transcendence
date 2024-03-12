@@ -1198,6 +1198,7 @@ p {
 }
 
 .tn-line-wrap-container {
+    margin-top: 30px;
     display: flex;
     justify-content: center;
     align-items: flex-end;
@@ -1220,11 +1221,11 @@ p {
 }
 
 .tn-line-1 {
-    left: calc(250px + 15%); /* or margin-left?*/
+    left: calc(440px + 15%); /* or margin-left?*/
 }
 
 .tn-line-2 {
-    left: calc(650px + 29.5%);
+    left: calc(800px + 29.5%);
 }
 
 .tn-player-rectangle-2 {
@@ -1251,40 +1252,40 @@ p {
 .tn-line-3 {
     width: 5px;
     height: 100px;
-    left: 292px;
+    left: 302px;
 }
 
 .tn-line-3-1 {
     width: 87px;
     height: 5px;
-    margin-left: 210px;
+    margin-left: 220px;
     margin-top: 100px;
 }
 
 .tn-line-3-2 {
     width: 5px;
     height: 52px;
-    margin-left: 210px;
+    margin-left: 220px;
     margin-top: 100px;
 }
 
 .tn-line-4 {
     width: 5px;
     height: 100px;
-    right: 375px;
+    right: 425px;
 }
 
 .tn-line-4-1 {
     width: 87px;
     height: 5px;
-    right: 293px;
+    right: 343px;
     margin-top: 100px;
 }
 
 .tn-line-4-2 {
     width: 5px;
     height: 52px;
-    right: 293px;
+    right: 343px;
     margin-top: 100px
 }
 
