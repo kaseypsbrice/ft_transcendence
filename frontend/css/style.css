@@ -827,6 +827,15 @@ p {
     margin-top: 85px;
 }
 
+.pf-friends-scroll {
+    z-index: 2;
+    position: absolute;
+    height: 97%;
+    width: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
 .friend {
     text-align: left;
     font-size: 20px;
