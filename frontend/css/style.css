@@ -1310,6 +1310,25 @@ p {
                 inset -2px -2px 5px #1f0b77;
 }
 
+.tn-player-pic {
+    border-radius: 50%;
+    background-color: grey;
+    margin-left: 15px;
+}
+
+.small {
+    margin-top: 8px;
+    width: 50px;
+    height: 50px;
+    bottom: 5px;
+}
+
+.big {
+    margin-top: 15px;
+    width: 80px;
+    height: 80px;
+}
+
 /* ============================================================= */
 /*===================== Pop-up Chat CSS ======================== */
 /* ============================================================= */
