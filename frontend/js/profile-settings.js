@@ -15,15 +15,17 @@ window.onLogin = function()
 	document.getElementById('profile-settings-error').style.display = 'none';
 	profileSettingsDisplayError("");
 	sendWithToken(ws, {type:"get_profile", profile: "my profile"});
-	let cachedData = localStorage.getItem("my profile");
 	setPictureDisplayName(document.getElementById('profile-settings-picture'), "my profile");
-	if (!cachedData)
+	getProfileData("my profile").then(function(cachedData) {
+	if (!cachedData) {
 		sendWithToken(ws, {type: "get_profile_picture", display_name: "my profile", timestamp: "0"});
-	else
-	{
-		let cachedJSON = JSON.parse(cachedData);
+	} else {
+		let cachedJSON = cachedData.profileData;
 		sendWithToken(ws, {type: "get_profile_picture", display_name: "my profile", timestamp: cachedJSON.timestamp});
 	}
+	}).catch(function(error) {
+		console.error(error);
+	});
 }
 
 window.onMessage = function(msg)
@@ -87,7 +89,7 @@ function submitProfileSettings(event)
 	
 	if (file)
 	{
-		if (file.size > 10 * 1024 * 1024)
+		if (file.size > 2 * 1024 * 1024)
 		{
 			profileSettingsDisplayError("File exceeds 10MB");
 			return;

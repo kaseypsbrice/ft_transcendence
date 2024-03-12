@@ -6,7 +6,6 @@ function onLogin()
 
 function registerDisplayError(msg)
 {
-	console.log(msg)
 	let errorDiv = document.getElementById('register-error')
 	errorDiv.style.display = '';
 	errorDiv.textContent = msg;

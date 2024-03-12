@@ -189,7 +189,6 @@ window.onMessage = function(msg)
 					console.log("invalid match", m);
 					continue;
 				}
-				console.log(m)
 				if (m.winner == msg.data.display_name)
 					insertMatchHistory(m.time.split(' ', 1)[0], `${m.game.charAt(0).toUpperCase() + m.game.slice(1)} ${m.info}`, m.loser, m.winner);
 				else
@@ -202,6 +201,11 @@ window.onMessage = function(msg)
 				newDiv.classList.add('wrap-friend-elements');
 				const newNameDiv = document.createElement('div');
 				newNameDiv.classList.add('friend');
+				newNameDiv.classList.add('clickable');
+				newNameDiv.style.cursor = 'pointer';
+				newNameDiv.addEventListener('click', function() {
+					viewProfile(friend.name);
+				});
 				const newStatusDiv = document.createElement('div');
 				newStatusDiv.innerHTML = '&#x2022;'
 				newStatusDiv.id = 'friend-status';
@@ -240,15 +244,17 @@ window.onOpen = function()
 	clearPage();
 	console.log(current_profile)
 	sendWithToken(ws, {type:"get_profile", profile: current_profile});
-	let cachedData = localStorage.getItem(current_profile);
 	setPictureDisplayName(document.getElementById('profile-picture'), current_profile);
-	if (!cachedData)
-		sendWithToken(ws, {type: "get_profile_picture", display_name: current_profile, timestamp: "0"});
-	else
-	{
-		let cachedJSON = JSON.parse(cachedData);
-		sendWithToken(ws, {type: "get_profile_picture", display_name: current_profile, timestamp: cachedJSON.timestamp});
-	}
+	getProfileData(current_profile).then(function(cachedData) {
+		if (!cachedData) {
+			sendWithToken(ws, {type: "get_profile_picture", display_name: current_profile, timestamp: "0"});
+		} else {
+			let cachedJSON = cachedData.profileData;
+			sendWithToken(ws, {type: "get_profile_picture", display_name: current_profile, timestamp: cachedJSON.timestamp});
+		}
+	}).catch(function(error) {
+		console.error(error);
+	});
 };
 
 if (ws.readyState == ws.OPEN)

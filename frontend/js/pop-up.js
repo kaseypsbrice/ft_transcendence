@@ -20,16 +20,11 @@ window.chatOnLogin = function () {
 	sendWithToken(ws, {type: "get_alerts"});
 };
 
-window.chatOnOpen = function () {
-	if (is_logged_in())
-		window.chatOnLogin();
-};
-
 let message_id = 0;
 const messageInput = document.getElementById('message-input');
 
 window.chatOnMessage = function(msg) {
-	console.log(msg)
+	//(msg)
 	switch (msg.type)
 	{
 		case "ChatMessage":
@@ -72,7 +67,7 @@ window.chatOnMessage = function(msg) {
 		case "ChatHistory":
 			if (msg["data"] != null)
 			{
-				for (i in msg.data)
+				for (let i = msg.data.length - 1; i >= 0; i--)
 				{
 					let you = false;
 					if (msg.data.you != null)

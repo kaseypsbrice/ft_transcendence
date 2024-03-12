@@ -128,7 +128,7 @@ class WebSocketManager
 
 			# create a new user object with credentials, this reads from the database: user.rb
 			@user_manager.register(client, msg_data["data"]["username"], msg_data["data"]["password"], msg_data["data"]["display_name"]);
-
+			return
 		when "login" # 						-------- USER LOGIN --------
 			if !msg_data.key?("data") || !msg_data["data"].key?("username") || !msg_data["data"].key?("password")
 				puts "Invalid login request"

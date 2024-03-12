@@ -123,7 +123,7 @@ window.addEventListener("hashchange", locationHandler);
 locationHandler();
 
 function onRouteChanged() {
-    console.log("Hash changed!");
+    //console.log("Hash changed!");
 }
 
 window.addEventListener("hashchange", onRouteChanged);

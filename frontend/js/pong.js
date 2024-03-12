@@ -399,12 +399,12 @@ window.onMessage = function(msg)
 			updateGame(msg.data);
 			break;
 		case "game_found":
-			console.log("game found");
+			//console.log("game found");
 			if (msg.data != null && msg.data.game == "pong" && msg.data.player_id != null)
 			{
 				player_id = msg.data.player_id;
 				state = "game";
-				console.log("player_id: ", player_id);
+				//console.log("player_id: ", player_id);
 				if (msg.data.opponent != null)
 					opponent = msg.data.opponent
 				else

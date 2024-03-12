@@ -13,7 +13,7 @@ window.chatOnLogin = function () {
 };
 
 window.chatOnMessage = function(msg) {
-	console.log(msg)
+	//console.log(msg)
 	switch (msg.type)
 	{
 		case "ChatMessage":
@@ -112,7 +112,7 @@ function sendMessage() {
 		type: "chat_message",
         content: document.getElementById('messageInput').value
     };
-    console.log('Sending message:', message);
+    //console.log('Sending message:', message);
     sendWithToken(ws, message);
     document.getElementById('messageInput').value = '';
 }
@@ -141,7 +141,7 @@ function displayUserMessage(display_name, msg, whisper = false)
 }
 
 function displayMessage(str, clickable = false, clickHandler = null) {
-	console.log('Displaying message:', str);
+	//console.log('Displaying message:', str);
 	const messageElement = document.createElement('div');
 	messageElement.classList.add('chat-message');
 	if (clickable) {
@@ -169,7 +169,7 @@ const messagesDiv = document.getElementById('messages'); // container where mess
 
 document.getElementById('sendButton').addEventListener('click', function(event) {
 	event.preventDefault(); // Prevent the default button click behavior
-	console.log("clicked");
+	//console.log("clicked");
 	sendMessage();
 });
 

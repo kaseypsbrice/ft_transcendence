@@ -17,6 +17,95 @@ function homeOnLogin() {}
 function homeOnLogout() {}
 
 
+let dbInit = window.indexedDB.open('transcendence_db', 1);
+
+// Handle upgrade event to create or modify object stores and indexes
+dbInit.onupgradeneeded = function(event) {
+	let db = event.target.result;
+
+	// Create or modify object stores and indexes
+	if (!db.objectStoreNames.contains('profiles')) {
+		let objectStore = db.createObjectStore('profiles', { keyPath: 'profileName' });
+		objectStore.createIndex('profileData', 'profileData', { unique: false });
+    }
+};
+
+dbInit.onsuccess = function(event) {
+	console.log("IndexedDB opened successfully");
+};
+
+dbInit.onerror = function(event) {
+	console.error("Error opening IndexedDB:", event.target.error);
+};
+
+let dbPromise = window.indexedDB.open('profile_data', 1);
+
+dbPromise.onupgradeneeded = function(event) {
+	let db = event.target.result;
+	let objectStore = db.createObjectStore('profiles', { keyPath: 'profileName' });
+	objectStore.createIndex('profileData', 'profileData', { unique: false });
+};
+
+dbPromise.onerror = function(event) {
+	console.error("Error opening IndexedDB database:", event.target.error);
+	dbPromise = window.indexedDB.open('profile_data', 1);
+};
+
+function saveProfileData(profileName, profileData) {
+	return new Promise(function(resolve, reject) {
+		let dbPromise = window.indexedDB.open('transcendence_db', 1);
+
+		dbPromise.onsuccess = function(event) {
+			let db = event.target.result;
+			let transaction = db.transaction(['profiles'], 'readwrite');
+			let objectStore = transaction.objectStore('profiles');
+			let request = objectStore.put({ profileName: profileName, profileData: profileData });
+
+			request.onsuccess = function(event) {
+				resolve();
+				db.close(); // Close the database connection after the operation
+			};
+
+			request.onerror = function(event) {
+				reject("Error saving profile data to IndexedDB");
+				db.close(); // Close the database connection after the operation
+			};
+		};
+
+		dbPromise.onerror = function(event) {
+			reject("Error opening IndexedDB:", event.target.error);
+		};
+	});
+}
+
+function getProfileData(profileName) {
+	return new Promise(function(resolve, reject) {
+		// Wrap the dbPromise call inside a new Promise
+		let dbPromise = window.indexedDB.open('transcendence_db', 1);
+
+		dbPromise.onsuccess = function(event) {
+			let db = event.target.result;
+			let transaction = db.transaction(['profiles'], 'readonly');
+			let objectStore = transaction.objectStore('profiles');
+			let request = objectStore.get(profileName);
+
+			request.onsuccess = function(event) {
+				resolve(event.target.result);
+				db.close(); // Close the database connection after the operation
+			};
+
+			request.onerror = function(event) {
+				reject("Error retrieving profile data from IndexedDB");
+				db.close(); // Close the database connection after the operation
+			};
+		};
+
+		dbPromise.onerror = function(event) {
+			reject("Error opening IndexedDB:", event.target.error);
+		};
+	});
+}
+
 function onOpenWrapper(){
 	onOpen();
 	chatOnOpen();
@@ -86,7 +175,7 @@ function hasAccessToken()
 
 function setPictureDisplayName(div, name)
 {
-	console.log(div, name);
+	//console.log(div, name);
 	div.setAttribute("data-display-name", name);
 }
 
@@ -155,7 +244,7 @@ function displayGlobalMessage(msg)
 
 function connect()
 {
-	window.ws = new WebSocket('wss://127.0.0.1:9001/ws');
+	window.ws = new WebSocket('wss://60.225.230.139:9001/ws');
 	ws.onopen = function(event) {
 		console.log("Connected to websocket server");
 		if (logged_in)
@@ -174,7 +263,6 @@ function connect()
 			console.log(msg);	
 			if (msg.type != null)
 			{
-				console.log(msg.type);
 				switch (msg.type)
 				{
 					case "authentication":
@@ -211,34 +299,32 @@ function connect()
 						if (!msg.data || !msg.data.name)
 							break;
 						let pictureMatches = document.querySelectorAll(`[data-display-name="${msg.data.name}"]`);
-						if (msg.data.current)
-						{
-							let cachedProfilePicture = localStorage.getItem(msg.data.name)
-							if (!cachedProfilePicture)
-							{
-								console.log("Error could not get cached profile picture");
-								break;
-							}
-							let cachedJSON = JSON.parse(cachedProfilePicture);
-							for (let i = 0; i < pictureMatches.length; i++)
-							{
-								let match = pictureMatches[i];
-								match.src = cachedJSON.data;
-							}
-							break;
-						}
-						else
-						{
-							let cachedData = {
+						if (msg.data.current) {
+							getProfileData(msg.data.name).then(function(cachedData) {
+								if (!cachedData) {
+									console.error("Error: Could not get cached profile picture");
+									return;
+								}
+								for (let i = 0; i < pictureMatches.length; i++) {
+									let match = pictureMatches[i];
+									match.src = cachedData.profileData.data;
+								}
+							}).catch(function(error) {
+								console.error("Error: " + error);
+							});
+						} else {
+							let data = {
 								data: msg.data.image,
 								timestamp: msg.data.timestamp
 							};
-							localStorage.setItem(msg.data.name, JSON.stringify(cachedData))
-							for (let i = 0; i < pictureMatches.length; i++)
-							{
-								let match = pictureMatches[i];
-								match.src = msg.data.image;
-							}
+							saveProfileData(msg.data.name, data).then(function() {
+								for (let i = 0; i < pictureMatches.length; i++) {
+									let match = pictureMatches[i];
+									match.src = msg.data.image;
+								}
+							}).catch(function(error) {
+								console.error("Error: " + error);
+							});
 						}
 						break;
 				}

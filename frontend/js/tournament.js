@@ -55,14 +55,16 @@ function setPlayers(msg)
 		console.log(player)
 		document.getElementById(`tn-player-${i + 1}`).textContent = player;
 		setPictureDisplayName(document.getElementById(`tn-player-pic-${i + 1}`), player);
-		let cachedData = localStorage.getItem(player);
-		if (!cachedData)
-			sendWithToken(ws, {type: "get_profile_picture", display_name: player, timestamp: "0"});
-		else
-		{
-			let cachedJSON = JSON.parse(cachedData);
-			sendWithToken(ws, {type: "get_profile_picture", display_name: player, timestamp: cachedJSON.timestamp});
-		}
+		getProfileData(player).then(function(cachedData) {
+			if (!cachedData) {
+				sendWithToken(ws, {type: "get_profile_picture", display_name: player, timestamp: "0"});
+			} else {
+				let cachedJSON = cachedData.profileData;
+				sendWithToken(ws, {type: "get_profile_picture", display_name: mplayer, timestamp: cachedJSON.timestamp});
+			}
+		}).catch(function(error) {
+			console.error(error);
+		});
 	}
 }
 
@@ -77,24 +79,28 @@ function setMatches(msg)
 		document.getElementById(`tn-player-${i * 2 + 2}`).textContent = match.player2;
 		setPictureDisplayName(document.getElementById(`tn-player-pic-${i * 2 + 1}`), match.player1);
 		setPictureDisplayName(document.getElementById(`tn-player-pic-${i * 2 + 2}`), match.player2);
-		let cachedData1 = localStorage.getItem(match.player1);
-		let cachedData2 = localStorage.getItem(match.player2);
 
-		if (!cachedData1)
-			sendWithToken(ws, {type: "get_profile_picture", display_name: match.player1, timestamp: "0"});
-		else
-		{
-			let cachedJSON = JSON.parse(cachedData1);
-			sendWithToken(ws, {type: "get_profile_picture", display_name: match.player1, timestamp: cachedJSON.timestamp});
-		}
+		getProfileData(match.player1).then(function(cachedData) {
+			if (!cachedData) {
+				sendWithToken(ws, {type: "get_profile_picture", display_name: match.player1, timestamp: "0"});
+			} else {
+				let cachedJSON = cachedData.profileData;
+				sendWithToken(ws, {type: "get_profile_picture", display_name: match.player1, timestamp: cachedJSON.timestamp});
+			}
+		}).catch(function(error) {
+			console.error(error);
+		});
 
-		if (!cachedData2)
-			sendWithToken(ws, {type: "get_profile_picture", display_name: match.player2, timestamp: "0"});
-		else
-		{
-			let cachedJSON = JSON.parse(cachedData2);
-			sendWithToken(ws, {type: "get_profile_picture", display_name: match.player2, timestamp: cachedJSON.timestamp});
-		}
+		getProfileData(match.player2).then(function(cachedData) {
+			if (!cachedData) {
+				sendWithToken(ws, {type: "get_profile_picture", display_name: match.player2, timestamp: "0"});
+			} else {
+				let cachedJSON = cachedData.profileData;
+				sendWithToken(ws, {type: "get_profile_picture", display_name: match.player2, timestamp: cachedJSON.timestamp});
+			}
+		}).catch(function(error) {
+			console.error(error);
+		});
 	}
 }
 

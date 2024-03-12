@@ -113,7 +113,7 @@ class User
 	end
 
 	def self.register(username, password, display_name, db)
-		puts "registering"
+
 		if password.size < 8
 			puts "Password too short"
 			raise PasswordTooShort
@@ -137,7 +137,8 @@ class User
 		encrypted_password = BCrypt::Password.create(password)
 		begin
 		result = db.exec_params(
-			'INSERT INTO users (username, password, display_name) VALUES ($1, $2, $3) RETURNING id',
+			'INSERT INTO users (username, password, display_name) VALUES ($1, $2, $3)
+			RETURNING *;',
 			[username, encrypted_password, display_name]
 		)
 		_result = db.exec_params(
@@ -379,7 +380,6 @@ class User
 
 	def get_chat_history(db)
 		begin
-			puts "blocked #{@blocked} #{@blocked.size}"
 			result = []
 			if @blocked.size > 0
 				result =  db.exec(
@@ -456,7 +456,6 @@ class User
 				[id, @id]
 			)
 			@blocked.push(id)
-			puts (@blocked)
 		rescue PG::Error => e
 			puts "An error occured while blocking user: #{e.message}"
 			raise DatabaseError
