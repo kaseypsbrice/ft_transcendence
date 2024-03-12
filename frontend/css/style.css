@@ -858,15 +858,24 @@ p {
 }
 
 /* For screens smaller than X px */
-@media screen and (max-width: 1920px) {
+/* @media screen and (max-width: 3840px) {
     .user-profile-wrap {
-        /* Alternative styling */
     }
-}
+} */
 
 /* For screens greater than X px */
-@media screen and (min-width: 1920px) {
+@media screen and (min-width: 2560px) {
     .user-profile-wrap {
+        display: grid;
+        grid-template-columns: auto auto auto;
+        grid-template-rows: auto auto auto;
+        gap: 0px 15px;
+        grid-template-areas: 
+            "profile-container profile-container friends-container"
+            "match-history-container match-history-container friends-container"
+            "stats-container stats-container friends-container";
+        width: 60%;
+        translate: 40%;
         /* Alternative styling */
     }
 }
