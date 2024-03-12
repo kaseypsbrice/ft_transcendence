@@ -67,6 +67,7 @@ function clearPage()
 {
 	document.getElementById('profile-display-name').textContent = "";
 	document.getElementById('profile-username').textContent = "";
+	document.getElementById('profile-settings-button').style.display = 'none'
 	//setPictureDisplayName(document.getElementById('profile-picture'), "");
 	let containers = document.querySelectorAll('.data-mh-tb-container')
 	for (let i = 0; i < containers.length; i++)
@@ -155,6 +156,7 @@ window.onMessage = function(msg)
 			{
 				blockButton.style.display = 'none';
 				friendButton.style.display = 'none';
+				document.getElementById('profile-settings-button').style.display = '';
 			}
 			else
 			{
