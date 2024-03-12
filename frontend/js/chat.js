@@ -130,6 +130,7 @@ function displayUserMessage(display_name, msg, whisper = false)
 		clickableSpan.textContent = display_name;
 	clickableSpan.classList.add('clickable');
 	clickableSpan.style.cursor = 'pointer';
+	clickableSpan.style.color = 'white';
 	clickableSpan.style.textDecoration = 'underline';
 	clickableSpan.addEventListener('click', function() {
 		viewProfile(display_name);
@@ -149,6 +150,7 @@ function displayMessage(str, clickable = false, clickHandler = null) {
 		clickableSpan.classList.add('clickable');
 		clickableSpan.textContent = str;
 		clickableSpan.style.cursor = 'pointer';
+		clickableSpan.style.color = 'white';
 		clickableSpan.style.textDecoration = 'underline';
 		clickableSpan.addEventListener('click', function() {
 			clickHandler();

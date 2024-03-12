@@ -81,6 +81,7 @@ nav a:hover {
     list-style-type: none;
     padding: 0;
     margin: 0;
+	    	scripts: ["./js/register.js"]
 }
 
 .games-dropdown-content ul li {
@@ -458,6 +459,13 @@ p {
     position: absolute;
     left: 10px;
     z-index: 3;
+}
+
+#profile-picture {
+	border: 1px solid grey;
+	width: 105px;
+	height: 105px;
+	border-radius: 50%;
 }
 
 .profile-display-name {
@@ -1173,6 +1181,35 @@ p {
     line-height: 65px;
     text-align: center;
     z-index: 0;
+    position: relative;
+}
+
+#tn-player-1 {
+    font-size: 18px;
+    background-color: none;
+    padding-left: 10px;
+    color: black;
+}
+
+#tn-player-2 {
+    font-size: 18px;
+    background-color: none;
+    padding-left: 10px;
+    color: black;
+}
+
+#tn-player-3 {
+    font-size: 18px;
+    background-color: none;
+    padding-left: 10px;
+    color: black;
+}
+
+#tn-player-4 {
+    font-size: 18px;
+    background-color: none;
+    padding-left: 10px;
+    color: black;
 }
 
 .tn-centre-wrap {
@@ -1226,6 +1263,16 @@ p {
 
 .tn-line-2 {
     left: calc(800px + 29.5%);
+}
+
+/* For screens smaller than X px */
+@media screen and (max-width: 3840px) {
+    .tn-line-1 {
+        left: 542px;
+    }
+    .tn-line-2 {
+        left: 1218px;
+    }
 }
 
 .tn-player-rectangle-2 {
@@ -1311,8 +1358,9 @@ p {
 }
 
 .tn-player-pic {
+	z-index: 3;
+	position: absolute;
     border-radius: 50%;
-    background-color: grey;
     margin-left: 15px;
 }
 
@@ -1327,6 +1375,21 @@ p {
     margin-top: 15px;
     width: 80px;
     height: 80px;
+}
+
+#tn-player-pic-1, #tn-player-pic-2, 
+#tn-player-pic-3, #tn-player-pic-4 {
+	border-radius: 50%;
+	width: 50px;
+	height: 50px;
+	border: 1px solid grey;
+}
+
+#tn-player-pic-5, #tn-player-pic-6 {
+	border-radius: 50%;
+	height: 80px;
+	width: 80px;
+	border: 1px solid grey;
 }
 
 /* ============================================================= */
