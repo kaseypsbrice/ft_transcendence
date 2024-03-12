@@ -270,6 +270,13 @@ p {
     transform: translateX(30%);
 }
 
+/* Adjusts the translation of the home table for bigger screens */
+@media screen and (min-width: 2560px) {
+    .home-wrapper {
+        transform: translateX(40%);
+    }
+}
+
 /* =========================== Sign Up & Login CSS =========================== */
 
 .signup-login-form {
