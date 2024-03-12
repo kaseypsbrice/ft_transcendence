@@ -60,7 +60,7 @@ function setPlayers(msg)
 				sendWithToken(ws, {type: "get_profile_picture", display_name: player, timestamp: "0"});
 			} else {
 				let cachedJSON = cachedData.profileData;
-				sendWithToken(ws, {type: "get_profile_picture", display_name: mplayer, timestamp: cachedJSON.timestamp});
+				sendWithToken(ws, {type: "get_profile_picture", display_name: player, timestamp: cachedJSON.timestamp});
 			}
 		}).catch(function(error) {
 			console.error(error);
