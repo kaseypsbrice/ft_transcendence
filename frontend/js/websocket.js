@@ -158,6 +158,10 @@ function connect()
 					logged_in = false;
 					onLogoutWrapper();
 				}
+				if (msg.type == "ViewProfile" && msg.name != null)
+				{
+					viewProfile(msg.name);
+				}
 			}
 			onMessageWrapper(msg);
 		} catch (e) {

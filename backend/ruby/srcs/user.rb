@@ -454,7 +454,8 @@ class User
 				WHERE id=$2;',
 				[id, @id]
 			)
-			blocked.push(id)
+			@blocked.push(id)
+			puts (@blocked)
 		rescue PG::Error => e
 			puts "An error occured while blocking user: #{e.message}"
 			raise DatabaseError
@@ -472,7 +473,7 @@ class User
 				WHERE id=$2;',
 				[id, @id]
 			)
-			blocked.delete(id)
+			@blocked.delete(id)
 		rescue PG::Error => e
 			puts "An error occured while unblocking user: #{e.message}"
 			raise DatabaseError
@@ -497,7 +498,7 @@ class User
 				WHERE id=$2;',
 				[id, @id]
 			)
-			friends.push(id)
+			@friends.push(id)
 		rescue PG::Error => e
 			puts "An error occured while friending user: #{e.message}"
 			raise DatabaseError
@@ -515,7 +516,7 @@ class User
 				WHERE id=$2;',
 				[id, @id]
 			)
-			friends.delete(id)
+			@friends.delete(id)
 		rescue PG::Error => e
 			puts "An error occured while unfriending user: #{e.message}"
 			raise DatabaseError

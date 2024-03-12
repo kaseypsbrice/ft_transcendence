@@ -241,7 +241,21 @@ class WebSocketManager
 						ws.send({type: "ChatMessageError", error:"GameNotFound", message: "Cannot create #{split_msg[1]} tournament, game not found"}.to_json)
 					end
 					return
+				when "profile"
+					if split_msg.size < 2
+						ws.send({type: "ChatMessageError", error:"ProfileFormatError", message: "No display name provided"}.to_json)
+						return
+					end
+					if @user_manager.get_user_info(split_msg[1]) != nil
+						ws.send({type: "ViewProfile", name: split_msg[1]}.to_json)
+					else
+						ws.send({type: "ChatMessageError", error:"ProfileNotFound", message: "Could not find user with display name #{split_msg[1]}"}.to_json)
+					end
+					return
+				else
+					ws.send({type: "ChatMessageError", error:"CommandNotFound", message: "Command \'#{split_msg[0]}\' not found: /help to see commands"}.to_json)
 				end
+				return
 			end
 
 			#TODO: check if client is in game and send to partner game websocket
@@ -294,9 +308,9 @@ class WebSocketManager
 			end
 			profile = nil
 			if msg_data["profile"] == "my profile"
-				profile = @user_manager.get_profile(user.display_name)
+				profile = @user_manager.get_profile(user.display_name, user)
 			else
-				profile = @user_manager.get_profile(msg_data["profile"])
+				profile = @user_manager.get_profile(msg_data["profile"], user)
 			end
 			if profile == nil
 				ws.send({type: "GetProfileError", message: "Could not find user #{msg_data["profile"]}"}.to_json)
@@ -308,7 +322,7 @@ class WebSocketManager
 			friends = []
 			profile[:friends].each do |friend|
 				new_friend = {
-					name: @user_manager.get_user_info(friend),
+					name: @user_manager.get_user_info(friend).display_name,
 					online: false
 				}
 				@connections.each_value do |c|
@@ -326,10 +340,12 @@ class WebSocketManager
 					break
 				end
 			end
+			puts "final profile"
+			puts profile
 			ws.send({type: "Profile", data: profile}.to_json)
 		when "block_user"
 			begin
-				b_user
+				b_user = nil
 				if msg_data["id"] != nil
 					b_user = @user_manager.get_user_info(msg_data["id"])
 					if b_user == nil
@@ -337,7 +353,7 @@ class WebSocketManager
 					elsif user.blocked?(b_user.id)
 						ws.send({type: "BlockReply", message: "User #{b_user.display_name} is already blocked"}.to_json)
 					else
-						user.block_user(b_user.id)
+						user.block_user(b_user.id, @db)
 						ws.send({type: "BlockReply", message: "User #{b_user.display_name} has been blocked"}.to_json)
 					end
 					return
@@ -348,7 +364,7 @@ class WebSocketManager
 					elsif user.blocked?(b_user.id)
 						ws.send({type: "BlockReply", message: "User #{b_user.display_name} is already blocked"}.to_json)
 					else
-						user.block_user(b_user.id)
+						user.block_user(b_user.id, @db)
 						ws.send({type: "BlockReply", message: "User #{b_user.display_name} has been blocked"}.to_json)
 					end
 					return
@@ -360,7 +376,7 @@ class WebSocketManager
 			end
 		when "unblock_user"
 			begin
-				b_user
+				b_user = nil
 				if msg_data["id"] != nil
 					b_user = @user_manager.get_user_info(msg_data["id"])
 					if b_user == nil
@@ -370,7 +386,7 @@ class WebSocketManager
 					if !user.blocked?(b_user.id)
 						ws.send({type: "UnblockReply", message: "User #{b_user.display_name} is not blocked"}.to_json)
 					else
-						user.block_user(b_user.id)
+						user.block_user(b_user.id, @db)
 						ws.send({type: "UnblockReply", message: "User #{b_user.display_name} has been blocked"}.to_json)
 					end
 					return
@@ -383,7 +399,7 @@ class WebSocketManager
 					if !user.blocked?(b_user.id)
 						ws.send({type: "UnblockReply", message: "User #{b_user.display_name} is not blocked"}.to_json)
 					else
-						user.unblock_user(b_user.id)
+						user.unblock_user(b_user.id, @db)
 						ws.send({type: "UnblockReply", message: "User #{b_user.display_name} has been unblocked"}.to_json)
 					end
 				else
@@ -394,7 +410,7 @@ class WebSocketManager
 			end
 		when "friend_user"
 			begin
-				f_user
+				f_user = nil
 				if msg_data["id"] != nil
 					f_user = @user_manager.get_user_info(msg_data["id"])
 					if f_user == nil
@@ -402,7 +418,7 @@ class WebSocketManager
 					elsif user.friend?(f_user.id)
 						ws.send({type: "FriendReply", message: "User #{f_user.display_name} is already your friend"}.to_json)
 					else
-						user.friend_user(f_user.id)
+						user.friend_user(f_user.id, @db)
 						ws.send({type: "FriendReply", message: "User #{f_user.display_name} is now your friend"}.to_json)
 					end
 					return
@@ -413,7 +429,7 @@ class WebSocketManager
 					elsif user.friend?(f_user.id)
 						ws.send({type: "FriendReply", message: "User #{f_user.display_name} is already your friend"}.to_json)
 					else
-						user.friend_user(f_user.id)
+						user.friend_user(f_user.id, @db)
 						ws.send({type: "FriendReply", message: "User #{f_user.display_name} is now your friend"}.to_json)
 					end
 					return
@@ -425,7 +441,7 @@ class WebSocketManager
 			end
 		when "unfriend_user"
 			begin
-				f_user
+				f_user = nil
 				if msg_data["id"] != nil
 					f_user = @user_manager.get_user_info(msg_data["id"])
 					if f_user == nil
@@ -435,7 +451,7 @@ class WebSocketManager
 					if !user.friend?(f_user.id)
 						ws.send({type: "UnfriendReply", message: "User #{f_user.display_name} is not your friend"}.to_json)
 					else
-						user.unfriend_user(f_user.id)
+						user.unfriend_user(f_user.id, @db)
 						ws.send({type: "UnfriendReply", message: "User #{f_user.display_name} is no longer your friend"}.to_json)
 					end
 					return
@@ -448,7 +464,7 @@ class WebSocketManager
 					if !user.friend?(f_user.id)
 						ws.send({type: "UnfriendReply", message: "User #{f_user.display_name} is not your friend"}.to_json)
 					else
-						user.unfriend_user(f_user.id)
+						user.unfriend_user(f_user.id, @db)
 						ws.send({type: "UnfriendReply", message: "User #{f_user.display_name} is no longer your friend"}.to_json)
 					end
 				else
@@ -535,12 +551,18 @@ class WebSocketManager
 					ws.send({type: "GetProfilePictureError", message: "No display_name or timestamp provided"}.to_json)
 					return
 				end
-				profile_user = @user_manager.get_user_info(msg_data["display_name"])
-				if !profile_user
-					ws.send({type: "GetProfilePictureError", message: "Cannot find user #{msg_data["display_name"]}"}.to_json)
-					return
+				if msg_data["display_name"] == "my profile"
+					picture = user.get_profile_picture(msg_data["timestamp"], @db);
+					picture[:name] = "my profile"
+					ws.send({type: "ProfilePicture", data: picture}.to_json)
+				else
+					profile_user = @user_manager.get_user_info(msg_data["display_name"])
+					if !profile_user
+						ws.send({type: "GetProfilePictureError", message: "Cannot find user #{msg_data["display_name"]}"}.to_json)
+						return
+					end
+					ws.send({type: "ProfilePicture", data: profile_user.get_profile_picture(msg_data["timestamp"], @db)}.to_json)
 				end
-				ws.send({type: "ProfilePicture", data: profile_user.get_profile_picture(msg_data["timestamp"], @db)}.to_json)
 				return
 			rescue User::Error
 				puts "Get profile picture error"

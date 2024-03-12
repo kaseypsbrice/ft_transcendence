@@ -69,6 +69,8 @@ class UserManager
 			client.ws.send({"type": "RegisterError", "message": "Username too long"}.to_json);
 		rescue User::DisplayNameTooLong => e
 			client.ws.send({"type": "RegisterError", "message": "Display name too long"}.to_json);
+		rescue User::DisplayNameInvalid => e
+			client.ws.send({"type": "RegisterError", "message": "Display name contains invalid characters"}.to_json);
 		rescue User::Error => e
 			client.ws.send({"type": "RegisterError", "message": "Internal"}.to_json);
 		end
@@ -221,7 +223,7 @@ class UserManager
 
 	end
 
-	def get_profile(display_name)
+	def get_profile(display_name, user_requesting)
 		begin
 			user = get_user_info(display_name)
 			if !user
@@ -240,8 +242,12 @@ class UserManager
 				snake_wins: user.snake_wins,
 				snake_losses: user.snake_losses,
 				pong_tournament_wins: user.pong_tournament_wins,
-				snake_tournament_wins: user.snake_tournament_wins
+				snake_tournament_wins: user.snake_tournament_wins,
+				is_blocked: user_requesting.blocked?(user.id),
+				is_friend: user_requesting.friend?(user.id)
 			}
+			puts "profile data"
+			puts profile_data
 			return profile_data
 		rescue User::Error
 			puts "failed to fetch match history for get_profile"

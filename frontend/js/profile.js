@@ -75,6 +75,46 @@ function clearPage()
 	}
 }
 
+function setUnfriend(friendButton)
+{
+	friendButton.style.display = '';
+	friendButton.textContent = "Remove Friend";
+	friendButton.onclick = function() {
+		sendWithToken(ws, {type: "unfriend_user", name: current_profile});
+		friendButton.style.display = 'none';
+	};
+}
+
+function setFriend(friendButton)
+{
+	friendButton.style.display = '';
+	friendButton.textContent = "Add Friend";
+	friendButton.onclick = function() {
+		sendWithToken(ws, {type: "friend_user", name: current_profile});
+		friendButton.style.display = 'none';
+	};
+}
+
+function setUnblock(blockButton)
+{
+	blockButton.style.display = '';
+	blockButton.textContent = "Unblock";
+	blockButton.onclick = function() {
+		sendWithToken(ws, {type: "unblock_user", name: current_profile});
+		blockButton.style.display = 'none';
+	};
+}
+
+function setBlock(blockButton)
+{
+	blockButton.style.display = '';
+	blockButton.textContent = "Block";
+	blockButton.onclick = function() {
+		sendWithToken(ws, {type: "block_user", name: current_profile});
+		blockButton.style.display = 'none';
+	};
+}
+
 window.onMessage = function(msg)
 {
 	switch(msg.type)
@@ -122,6 +162,24 @@ window.onMessage = function(msg)
 			clearPage();
 			document.getElementById('profile-display-name').textContent = `${msg.data.display_name}`;
 			document.getElementById('profile-username').textContent = `${msg.data.username}`;
+			let blockButton = document.getElementById('pf-block');
+			let friendButton = document.getElementById('pf-add-friend');
+			if (msg.data.you)
+			{
+				blockButton.style.display = 'none';
+				friendButton.style.display = 'none';
+			}
+			else
+			{
+				if (msg.data.is_friend)
+					setUnfriend(friendButton);
+				else
+					setFriend(friendButton);
+				if (msg.data.is_blocked)
+					setUnblock(blockButton);
+				else
+					setBlock(blockButton);
+			}
 			if (msg.data.online == true)
 			{
 				document.getElementById('profile-status').style.color = "green";
@@ -151,9 +209,38 @@ window.onMessage = function(msg)
 			for (let i = 0; i < msg.data.friends.length; i++)
 			{
 				let friend = msg.data.friends[i];
-				const name = document.createElement('div');
-				newDiv.classList.add('friend')
+				const newDiv = document.createElement('div');
+				newDiv.classList.add('wrap-friend-elements');
+				const newNameDiv = document.createElement('div');
+				newNameDiv.classList.add('friend');
+				const newStatusDiv = document.createElement('div');
+				newStatusDiv.innerHTML = '&#x2022;'
+				newStatusDiv.id = 'friend-status';
+				newNameDiv.textContent = friend.name;
+				if (friend.online)
+					newStatusDiv.style.color = 'green';
+				else
+					newStatusDiv.style.color = 'red';
+				newDiv.appendChild(newNameDiv);
+				newDiv.appendChild(newStatusDiv);
+				document.getElementById('pf-friends').appendChild(newDiv);
 			}
+			break;
+		case "BlockReply":
+		case "UnblockError":
+			setUnblock(document.getElementById('pf-block'));
+			break;
+		case "UnblockReply":
+		case "BlockError":
+			setBlock(document.getElementById('pf-block'));
+			break;
+		case "FriendReply":
+		case "UnfriendError":
+			setUnfriend(document.getElementById('pf-add-friend'));
+			break;
+		case "UnfriendReply":
+		case "FriendError":
+			setFriend(document.getElementById('pf-add-friend'));
 			break;
 	}
 }
