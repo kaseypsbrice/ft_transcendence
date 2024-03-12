@@ -1,3 +1,4 @@
+<div class="error" id="profile-settings-error"></div>
 <div class="settings-container">
     <div class="settings-header"></div>
     <div class="container-title">Account Settings</div>
@@ -13,12 +14,12 @@
                     var container = document.getElementById('settings-container-id') // replace with settings-username or settings-display-name;
                     var inputValue = container.querySelector('input').value; -->
                 <!-- Set them to the user's display name and username respectively. -->
-                <input type="text" id="settings-display-name" class="settings-input" placeholder="" value="Kasey Brice">
+                <input type="text" id="settings-display-name" class="settings-input" placeholder="">
             </div>
     
             <div class="settings-input-container">
                 <label for="settings-username">Username</label>
-                <input type="text" id="settings-username" class="settings-input" placeholder="" value="kaseypsbrice">
+                <input type="text" id="settings-username" class="settings-input" placeholder="">
             </div>
     
             <div class="settings-input-container">
@@ -36,12 +37,14 @@
                 <input type="password" id="settings-new-password-confirm" class="settings-input" placeholder="">
             </div>
     
-            <input type="submit" onclick="submitProfileSettings()" class="settings-btn" value="Save Settings">
-            <input type="submit" onclick="" class="settings-btn settings-cancel" value="Cancel">
+            <input type="submit" onclick="submitProfileSettings(event)" class="settings-btn" value="Save Settings">
+            <!--<input type="submit" onclick="" class="settings-btn settings-cancel" value="Cancel">-->
 
             <div class="settings-profile-container">
                 <label for="settings-profile-container">Profile Picture</label>
-                <div data-display-name="" class="settings-profile-pic"></div>
+                <div class="settings-profile-pic">
+					<img id="profile-settings-picture" data-display-name=""></img>
+				</div>
                 <input type="file" id="img-upload" name="img">
             </div>
         </form>

@@ -1,6 +1,8 @@
 function profileSettingsDisplayError(msg)
 {
-	console.log(msg)
+	let errorDiv = document.getElementById('profile-settings-error');
+	errorDiv.style.display = '';
+	errorDiv.textContent = msg;
 }
 
 window.onLogout = function()
@@ -10,7 +12,18 @@ window.onLogout = function()
 
 window.onLogin = function()
 {
+	document.getElementById('profile-settings-error').style.display = 'none';
 	profileSettingsDisplayError("");
+	sendWithToken(ws, {type:"get_profile", profile: "my profile"});
+	let cachedData = localStorage.getItem("my profile");
+	setPictureDisplayName(document.getElementById('profile-settings-picture'), "my profile");
+	if (!cachedData)
+		sendWithToken(ws, {type: "get_profile_picture", display_name: "my profile", timestamp: "0"});
+	else
+	{
+		let cachedJSON = JSON.parse(cachedData);
+		sendWithToken(ws, {type: "get_profile_picture", display_name: "my profile", timestamp: cachedJSON.timestamp});
+	}
 }
 
 window.onMessage = function(msg)
@@ -22,13 +35,24 @@ window.onMessage = function(msg)
 				profileSettingsDisplayError(msg.message);
 			break;
 		case "ChangeSettingsSuccess":
-			profileSettingsDisplayError("Settings have been updated!")
+			displayGlobalMessage("Settings have been updated!")
+			onLogin();
+			break;
+		case "Profile":
+			if (!msg.data || !msg.data.username || !msg.data.display_name || !msg.data.you)
+			{
+				console.log("Invalid profile");
+				break;
+			}
+			document.getElementById('settings-username').placeholder = msg.data.username;
+			document.getElementById('settings-display-name').placeholder = msg.data.display_name;
 			break;
 	}
 }
 
-function submitProfileSettings()
+function submitProfileSettings(event)
 {
+	event.preventDefault();
 	let password = document.getElementById('settings-password').value
 	let new_password = document.getElementById('settings-new-password').value
 	let new_password_confirm = document.getElementById('settings-new-password-confirm').value
@@ -96,7 +120,10 @@ function submitProfileSettings()
 	sendWithToken(ws, settings_send);
 }
 
-if (!is_logged_in())
-{
+if (is_logged_in())
+	onLogin();
+else
 	onLogout();
-}
+
+
+document.getElementById('profile-settings-error').style.display = 'none';

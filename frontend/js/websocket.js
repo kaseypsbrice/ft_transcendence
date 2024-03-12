@@ -20,6 +20,16 @@ function homeOnLogout() {}
 function onOpenWrapper(){
 	onOpen();
 	chatOnOpen();
+	if (hasAccessToken())
+	{
+		logged_in = true;
+		onLoginWrapper();
+	}
+	else
+	{
+		logged_in = false;
+		onLogoutWrapper();
+	}
 }
 function onCloseWrapper(){
 	onClose();
@@ -66,7 +76,7 @@ function hasAccessToken()
 			break;
 		}
 	}
-	if (token == null)
+	if (token == null || token.length < 50)
 	{
 		return false;
 	}
@@ -76,13 +86,8 @@ function hasAccessToken()
 
 function setPictureDisplayName(div, name)
 {
+	console.log(div, name);
 	div.setAttribute("data-display-name", name);
-}
-
-if (!hasAccessToken())
-{
-	logged_in = false;
-	onLogoutWrapper();
 }
 
 function sendWithToken(ws, data)
@@ -195,6 +200,7 @@ function connect()
 						break;
 					case "InvalidToken":
 						logged_in = false;
+						document.cookie = `access_token=null;SameSite=Strict;Secure;`;
 						onLogoutWrapper();
 						break;
 					case "ViewProfile":

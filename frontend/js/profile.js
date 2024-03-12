@@ -67,7 +67,7 @@ function clearPage()
 {
 	document.getElementById('profile-display-name').textContent = "";
 	document.getElementById('profile-username').textContent = "";
-	setPictureDisplayName(document.getElementById('profile-picture'), "");
+	//setPictureDisplayName(document.getElementById('profile-picture'), "");
 	let containers = document.querySelectorAll('.data-mh-tb-container')
 	for (let i = 0; i < containers.length; i++)
 	{
