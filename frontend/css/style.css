@@ -77,11 +77,11 @@ nav a:hover {
     background-color: #1a1a1d;
     z-index: 4;
 }
+
 .games-dropdown-content ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
-	    	scripts: ["./js/register.js"]
 }
 
 .games-dropdown-content ul li {
