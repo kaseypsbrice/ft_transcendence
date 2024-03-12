@@ -125,6 +125,7 @@ nav a:hover {
     text-align: center;
     line-height: 38px; /* Setting the line height to the height of the button to centre text */
     transition: background-color 0.3s ease-in;
+    cursor: pointer;
 }
 
 .navbar-button:hover {
@@ -267,6 +268,13 @@ p {
 /* Yes, this is dodgy. Politely ignore it for now. */
 .home-wrapper {
     transform: translateX(30%);
+}
+
+/* Adjusts the translation of the home table for bigger screens */
+@media screen and (min-width: 2560px) {
+    .home-wrapper {
+        transform: translateX(40%);
+    }
 }
 
 /* =========================== Sign Up & Login CSS =========================== */
@@ -526,7 +534,6 @@ p {
   .ic--round-settings:hover {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%236b6b6b' d='M19.5 12c0-.23-.01-.45-.03-.68l1.86-1.41c.4-.3.51-.86.26-1.3l-1.87-3.23a.987.987 0 0 0-1.25-.42l-2.15.91c-.37-.26-.76-.49-1.17-.68l-.29-2.31c-.06-.5-.49-.88-.99-.88h-3.73c-.51 0-.94.38-1 .88l-.29 2.31c-.41.19-.8.42-1.17.68l-2.15-.91c-.46-.2-1-.02-1.25.42L2.41 8.62c-.25.44-.14.99.26 1.3l1.86 1.41a7.343 7.343 0 0 0 0 1.35l-1.86 1.41c-.4.3-.51.86-.26 1.3l1.87 3.23c.25.44.79.62 1.25.42l2.15-.91c.37.26.76.49 1.17.68l.29 2.31c.06.5.49.88.99.88h3.73c.5 0 .93-.38.99-.88l.29-2.31c.41-.19.8-.42 1.17-.68l2.15.91c.46.2 1 .02 1.25-.42l1.87-3.23c.25-.44.14-.99-.26-1.3l-1.86-1.41c.03-.23.04-.45.04-.68m-7.46 3.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5s-1.57 3.5-3.5 3.5'/%3E%3C/svg%3E");
 }
-
 
   /* Match history div */
 
@@ -818,6 +825,15 @@ p {
     position: absolute;
     z-index: 4;
     margin-top: 85px;
+}
+
+.pf-friends-scroll {
+    z-index: 2;
+    position: absolute;
+    height: 97%;
+    width: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 .friend {
@@ -1464,3 +1480,55 @@ p {
     background-size: 100% 100%;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M3 16.74L7.76 12L3 7.26L7.26 3L12 7.76L16.74 3L21 7.26L16.24 12L21 16.74L16.74 21L12 16.24L7.26 21zm9-3.33l4.74 4.75l1.42-1.42L13.41 12l4.75-4.74l-1.42-1.42L12 10.59L7.26 5.84L5.84 7.26L10.59 12l-4.75 4.74l1.42 1.42z'/%3E%3C/svg%3E");
   }
+
+/* ============================================================= */
+/*===================== Pop-up Chat CSS ======================== */
+/* ============================================================= */
+
+.error {
+    font-size: 18px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    background-color: hsl(0, 58%, 54%);
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+    padding: 20px;
+    z-index: 7;
+    text-align: center;
+    color: white;
+    font-weight: 600;
+}
+
+.confirmation {
+    font-size: 18px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    background-color: hsl(130, 50%, 50%);
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+    padding: 20px;
+    z-index: 7;
+    text-align: center;
+    color: white;
+    font-weight: 600;
+}
+
+.animation {
+    opacity: 1;
+    animation: fadeOut 4s linear forwards;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    90% { opacity: 1;}
+    100% {
+        opacity: 0;
+        overflow: hidden;
+        display: none;
+        visibility: hidden;
+    }
+}
