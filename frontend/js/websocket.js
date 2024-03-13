@@ -244,7 +244,7 @@ function displayGlobalMessage(msg)
 
 function connect()
 {
-	window.ws = new WebSocket('wss://127.0.0.1:9001/ws');
+	window.ws = new WebSocket('wss://10.11.1.11:9001/ws');
 	ws.onopen = function(event) {
 		console.log("Connected to websocket server");
 		if (logged_in)
