@@ -178,6 +178,7 @@ function displayUserMessage(display_name, msg, whisper = false, you = false)
 	clickableSpan.addEventListener('click', function() {
 		displayNameClicked(display_name);
 	});
+	document.getElementById('msg-container').scrollTop = document.getElementById('msg-container').scrollHeight;
 	message_id += 1;
 }
 
@@ -199,6 +200,8 @@ function displayMessage(str, clickable = false, clickHandler = null) {
 	}
 	messageElement.appendChild(messageParagraph);
 	document.getElementById('msg-container').appendChild(messageElement);
+	document.getElementById('msg-container').scrollTop = document.getElementById('msg-container').scrollHeight;
+
 }
 
 document.getElementById('send-button').addEventListener('click', function(event) {
