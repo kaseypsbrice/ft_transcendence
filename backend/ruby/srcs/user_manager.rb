@@ -202,13 +202,13 @@ class UserManager
 	end
 
 	def get_user_from_display_name(display_name)
-                puts 'from display_name'
-                puts @users
+                #puts 'from display_name'
+                #puts @users
                 searched = @users.values.select { |value| value.display_name == display_name }
-                puts 'selected'
-                puts searched
-                puts 'return'
-                puts searched[0]
+                #puts 'selected'
+               # puts searched
+               # puts 'return'
+               # puts searched[0]
 		if searched.size > 0
                   return searched[0]
 		end

@@ -43,7 +43,7 @@ window.onMessage = function(msg)
 		case "Profile":
 			if (!msg.data || !msg.data.username || !msg.data.display_name || !msg.data.you)
 			{
-				console.log("Invalid profile");
+				//console.log("Invalid profile");
 				break;
 			}
 			document.getElementById('settings-username').placeholder = msg.data.username;
@@ -63,7 +63,7 @@ function submitProfileSettings(event)
 	var fileInput = document.getElementById('img-upload');
 
 	let settings_send = {type: "change_settings"}
-	console.log("clicked")
+	//console.log("clicked")
 	if (password.size == 0)
 	{
 		profileSettingsDisplayError("Please enter your current password");

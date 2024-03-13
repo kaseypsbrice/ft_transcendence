@@ -22,8 +22,8 @@ window.onMessage = function(msg)
 				break;
 			}
 			game = msg.data.game;
-			console.log("in game status")
-			console.log(msg.data.status)
+			//console.log("in game status")
+			//console.log(msg.data.status)
 			switch (msg.data.status)
 			{
 				case "NotFull":
@@ -47,12 +47,12 @@ function setPlayers(msg)
 {
 	clearPage();
 	document.getElementById('tn-title').textContent = `${msg.data.game.toUpperCase()} WAITING FOR PLAYERS...`;
-	console.log(msg.data.players)
+	//console.log(msg.data.players)
 	for (let i = 0; i < msg.data.players.length; i++)
 	{
-		console.log(i);
+
 		let player = msg.data.players[i];
-		console.log(player)
+		//console.log(player)
 		document.getElementById(`tn-player-${i + 1}`).textContent = player;
 		setPictureDisplayName(document.getElementById(`tn-player-pic-${i + 1}`), player);
 		getProfileData(player).then(function(cachedData) {

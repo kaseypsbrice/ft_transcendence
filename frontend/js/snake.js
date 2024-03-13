@@ -358,7 +358,7 @@ function updateLoggedOut()
 
 window.onMessage = function(msg) 
 {
-	console.log("snake on message")
+	//console.log("snake on message")
 	switch (msg.type)
 	{
 		case "state":
@@ -380,12 +380,12 @@ window.onMessage = function(msg)
 			updateGame(msg.data);
 			break;
 		case "game_found":
-			console.log("game found");
+			//console.log("game found");
 			if (msg.data != null && msg.data.game == "snake" && msg.data.player_id != null)
 			{
 				player_id = msg.data.player_id;
 				state = "game";
-				console.log("player_id: ", player_id);
+				//console.log("player_id: ", player_id);
 				if (msg.data.opponent != null)
 					opponent = msg.data.opponent
 				else
@@ -522,7 +522,7 @@ window.onLogin = function()
 
 window.onOpen = function()
 {
-	console.log("snake on open")
+	//console.log("snake on open")
 	state = "waiting_server"
 	sendWithToken(ws, {type:"get_game_status", game: "snake"});
 }

@@ -144,7 +144,7 @@ window.onMessage = function(msg)
 			msg.data.snake_losses == null || msg.data.pong_tournament_wins == null || 
 			msg.data.snake_tournament_wins == null)
 			{
-				console.log("invalid profile")
+				//console.log("invalid profile")
 				break;
 			}
 			clearPage();
@@ -188,7 +188,7 @@ window.onMessage = function(msg)
 				let m = msg.data.matches[i];
 				if (m.winner == null || m.loser == null || m.game == null || m.time == null || m.info == null)
 				{
-					console.log("invalid match", m);
+					//console.log("invalid match", m);
 					continue;
 				}
 				if (m.winner == msg.data.display_name)
@@ -244,7 +244,7 @@ window.onMessage = function(msg)
 window.onOpen = function()
 {
 	clearPage();
-	console.log(current_profile)
+	//console.log(current_profile)
 	sendWithToken(ws, {type:"get_profile", profile: current_profile});
 	setPictureDisplayName(document.getElementById('profile-picture'), current_profile);
 	getProfileData(current_profile).then(function(cachedData) {

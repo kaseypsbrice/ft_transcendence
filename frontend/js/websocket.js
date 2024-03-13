@@ -256,11 +256,11 @@ function connect()
 
 	ws.onmessage = function(event) {
 		try {
-			console.log("message received from server:");
+			//console.log("message received from server:");
 			if (event.data == null || typeof(event.data) != "string")
 				return
 			const msg = JSON.parse(event.data);
-			console.log(msg);	
+			//console.log(msg);	
 			if (msg.type != null)
 			{
 				switch (msg.type)

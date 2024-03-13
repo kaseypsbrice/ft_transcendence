@@ -463,7 +463,7 @@ class User
 				)
 				match["winner"] = winner_lookup[0]['display_name']
 				match["loser"] = loser_lookup[0]['display_name']
-				puts match
+				#puts match
 				ret.push(match)
 			end
 			return ret

@@ -143,7 +143,7 @@ function sendMessage() {
 		type: "chat_message",
 		content: messageInput.value
 	};
-	console.log('Sending message:', message);
+	//console.log('Sending message:', message);
 	sendWithToken(ws, message);
 	messageInput.value = '';
 }
@@ -206,7 +206,7 @@ function displayMessage(str, clickable = false, clickHandler = null) {
 
 document.getElementById('send-button').addEventListener('click', function(event) {
 	event.preventDefault(); // Prevent the default button click behavior
-	console.log("clicked");
+	//console.log("clicked");
 	sendMessage();
 });
 

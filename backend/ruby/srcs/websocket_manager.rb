@@ -29,7 +29,7 @@ class WebSocketManager
 	end
 
 	def handle_message(ws, msg)
-		puts "Received message: #{msg}"
+		#puts "Received message: #{msg}"
 		if @connections[ws] == nil
 			puts "Discarding message from disconnected client"
 			return
@@ -119,7 +119,7 @@ class WebSocketManager
 		when "get_match_history"
 			history = @user_manager.get_match_history(client, msg_data["token"])
 			ws.send({type: "MatchHistory", data: history}.to_json)
-			puts history
+			# history
 			return
 		when "register" # 				-------- USER REGISTRATION --------
 			if !msg_data.key?("data") || !msg_data["data"].key?("username") || !msg_data["data"].key?("password") || !msg_data["data"].key?("display_name")
@@ -200,7 +200,6 @@ class WebSocketManager
 						return
 					end
 					user_to = @user_manager.get_user_from_display_name(split_msg[1])
-                                        puts "user_to #{user_to}"
 					if (user_to == nil)
 						ws.send({type: "ChatMessageError", error:"UserNotFound", message: "User #{split_msg[1]} is not online"}.to_json)
 						return
@@ -347,8 +346,8 @@ class WebSocketManager
 			if @alert_manager.pending_friend(user, @user_manager.get_user_info(profile[:display_name]))
 				profile[:pending_friend] = true
 			end
-			puts "final profile"
-			puts profile
+			#puts "final profile"
+			#puts profile
 			ws.send({type: "Profile", data: profile}.to_json)
 		when "block_user"
 			begin
