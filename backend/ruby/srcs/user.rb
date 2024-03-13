@@ -206,6 +206,42 @@ class User
 		end
 	end
 
+	def add_game_loss(game db)
+		begin
+			@db.exec_params(
+			"UPDATE users
+			SET #{game}_losses = #{game}_losses + 1
+			WHERE id = $1",
+			[@id]
+		)
+		if game == "snake"
+			@snake_losses += 1
+		else
+			@pong_losses += 1
+		end
+		rescue PG::Error
+			return
+		end
+	end
+
+	def add_game_win(game db)
+		begin
+			@db.exec_params(
+			"UPDATE users
+			SET #{game}_wins = #{game}_wins + 1
+			WHERE id = $1",
+			[@id]
+		)
+		if game == "snake"
+			@snake_wins += 1
+		else
+			@pong_wins += 1
+		end
+		rescue PG::Error
+			return
+		end
+	end
+
 	def change_display_name(new_display_name, db)
 		if display_name.size >= MAX_DISPLAY_NAME
 			puts "Display name too long"
@@ -534,6 +570,11 @@ class User
 				WHERE id=$1",
 				[@id]
 			)
+			if game == "pong"
+				@pong_tournament_wins += 1
+			else
+				@snake_tournament_wins += 1
+			end
 		rescue PG::Error => e
 			puts "An error occured while adding tournament win #{game}: #{e.message}"
 		end
