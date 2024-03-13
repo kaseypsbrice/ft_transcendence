@@ -143,6 +143,11 @@ class UserManager
 	end
 
 	def new_user_from_id(client, id)
+          selected = @users.values.select { |user| user.id == id }
+          if selected.size > 0
+            client.user_id = selected[0].id
+            return
+          end
 		begin
 			puts "creating new user from id"
 			user = User.from_id(id, @db)
@@ -197,9 +202,15 @@ class UserManager
 	end
 
 	def get_user_from_display_name(display_name)
-		searched = @users.select { |key, value| value.display_name == display_name }
+                puts 'from display_name'
+                puts @users
+                searched = @users.values.select { |value| value.display_name == display_name }
+                puts 'selected'
+                puts searched
+                puts 'return'
+                puts searched[0]
 		if searched.size > 0
-			return @users[searched.values[0]]
+                  return searched[0]
 		end
 		return nil
 	end

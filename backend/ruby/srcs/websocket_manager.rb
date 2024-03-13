@@ -48,6 +48,7 @@ class WebSocketManager
 			&& msg_data["type"] != "get_leaderboard"
 			if !msg_data["token"] || !@user_manager.token_valid?(msg_data["token"])
 				ws.send({type: "InvalidToken"}.to_json)
+                                client.user_id = nil
 				return
 			else
 				if !client.user_id || !@user_manager.user?(client.user_id)
@@ -55,6 +56,7 @@ class WebSocketManager
 					if !client.user_id || !@user_manager.user?(client.user_id)
 						puts "ERROR: failed to create user from valid token"
 						ws.send({type: "InvalidToken"}.to_json)
+                                                client.user_id = nil
 						return
 					end
 				end
@@ -198,6 +200,7 @@ class WebSocketManager
 						return
 					end
 					user_to = @user_manager.get_user_from_display_name(split_msg[1])
+                                        puts "user_to #{user_to}"
 					if (user_to == nil)
 						ws.send({type: "ChatMessageError", error:"UserNotFound", message: "User #{split_msg[1]} is not online"}.to_json)
 						return
