@@ -6,6 +6,8 @@ services:
       context: backend/nginx
       dockerfile: Dockerfile
     container_name: nginx
+    networks:
+      - transcendence
     ports:
       - "9001:9001"
       - "9002:9002"
@@ -26,6 +28,8 @@ services:
       context: backend/ruby
       dockerfile: Dockerfile
     container_name: ruby
+    networks:
+      - transcendence
     ports:
       - "8080:8080"
       - "4567:4567"
@@ -48,6 +52,8 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_USER: postgres
       POSTGRES_DB: pong
+    networks:
+      - transcendence
     ports:
       - "5432:5432"
     volumes:
@@ -62,3 +68,7 @@ volumes:
       device: ./local/db
       o: bind
     name: db_data_volume
+
+networks:
+  transcendence:
+    driver: bridge
