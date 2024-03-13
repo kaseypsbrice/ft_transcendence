@@ -206,9 +206,9 @@ class User
 		end
 	end
 
-	def add_game_loss(game db)
+	def add_game_loss(game, db)
 		begin
-			@db.exec_params(
+			db.exec_params(
 			"UPDATE users
 			SET #{game}_losses = #{game}_losses + 1
 			WHERE id = $1",
@@ -224,9 +224,9 @@ class User
 		end
 	end
 
-	def add_game_win(game db)
+	def add_game_win(game, db)
 		begin
-			@db.exec_params(
+			db.exec_params(
 			"UPDATE users
 			SET #{game}_wins = #{game}_wins + 1
 			WHERE id = $1",
