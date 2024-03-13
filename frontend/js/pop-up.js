@@ -190,7 +190,7 @@ function displayMessage(str, clickable = false, clickHandler = null) {
 	if (clickable) {
 		messageParagraph.classList.add('clickable');
 		messageParagraph.style.cursor = 'pointer';
-        clickableSpan.style.color = 'white';
+        messageParagraph.style.color = 'white';
 		messageParagraph.style.textDecoration = 'underline';
 		messageParagraph.addEventListener('click', function() {
 			clickHandler();
