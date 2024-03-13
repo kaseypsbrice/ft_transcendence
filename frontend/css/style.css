@@ -1460,7 +1460,8 @@ p {
 .msg-container {
     padding: 12px 10px;
     height: 300px;
-	z-index: 100;
+    z-index: 100;
+    flex-direction: column-reverse /* Changed this ----------------------------------------- */
     /* margin: 10px 0; */
 }
 
