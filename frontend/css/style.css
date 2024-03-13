@@ -1445,8 +1445,6 @@ p {
 .chat-scroll-section {
     height: 353px;
 	overflow-y: scroll;
-	display: flex; /* Added to make the scroll bar go to the bottom when there's a new message */
-	flex-direction: column-reverse;
 }
 
 .chat-window-head {
@@ -1471,7 +1469,6 @@ p {
     padding: 12px 10px;
     height: 300px;
     z-index: 100;
-    flex-direction: column-reverse /* Changed this ----------------------------------------- */
     /* margin: 10px 0; */
 }
 
