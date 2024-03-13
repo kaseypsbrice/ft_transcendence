@@ -1027,6 +1027,14 @@ p {
     z-index: 5;
 }
 
+#profile-settings-picture {
+	width: 197px;
+    height: 197px;
+	border-radius: 50%;
+	border: 1px solid black;
+	z-index: 7;
+}
+
 .settings-profile-container {
     position: absolute;
     top:0;
@@ -1436,7 +1444,9 @@ p {
 
 .chat-scroll-section {
     height: 353px;
-    overflow-y: scroll;
+	overflow-y: scroll;
+	display: flex; /* Added to make the scroll bar go to the bottom when there's a new message */
+	flex-direction: column-reverse;
 }
 
 .chat-window-head {
@@ -1466,7 +1476,8 @@ p {
 }
 
 .msg {
-    margin-bottom: 5px;
+	/* margin-bottom: 5px; */
+	margin-top: 5px;
     padding: 10px 16px;
     border-radius: 10px;
     width: 80%;

@@ -13,8 +13,6 @@ COPY srcs/Gemfile /var/server/Gemfile
 
 RUN cd /var/server && bundle
 
-EXPOSE 8080
-EXPOSE 4567
 
 COPY entrypoint.sh /
 RUN chmod +x entrypoint.sh
