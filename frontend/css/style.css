@@ -1471,11 +1471,11 @@ p {
     padding: 12px 10px;
     height: 300px;
 	z-index: 100;
-    /* margin: 10px 0; */
 }
 
 .msg {
-    margin-bottom: 5px;
+	/* margin-bottom: 5px; */
+	margin-top: 5px;
     padding: 10px 16px;
     border-radius: 10px;
     width: 80%;
