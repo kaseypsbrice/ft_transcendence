@@ -127,19 +127,16 @@ class UserManager
 			'INSERT INTO matches (game, winner, loser, info) VALUES ($1, $2, $3, $4)',
 			[game, winner_id, loser_id, info]
 		)
-		@db.exec_params(
-			"UPDATE users
-			SET #{game}_wins = #{game}_wins + 1
-			WHERE id = $1",
-			[winner_id]
-		)
-		@db.exec_params(
-			"UPDATE users
-			SET #{game}_losses = #{game}_losses + 1
-			WHERE id = $1",
-			[loser_id]
-		)
-
+		winner = get_user(winner_id)
+		loser = get_user(loser_id)
+		if winner == nil
+			winner = get_user_info(winner_id.to_i)
+		end
+		if loser == nil
+			loser = get_user_info(loser_id.to_i)
+		end
+		winner.add_game_win(game, @db)
+		loser.add_game_loss(game, @db)
 		rescue PG::Error => e
 			puts "An error occured while saving match: #{e.message}"
 		end
